@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #882b00;
+  --primary-contrast: #ffffff;
+
+  --secondary: #a16207;
+  --secondary-contrast: #ffffff;
+
+  --accent: #d97706;
+
+  --bg: #fafaf9;    
+  --surface: #ffffff;  
+
+  --muted: #78716c;
+
+  --text: #292524;
+  --text-h: #1c1917;
+
+  --border: #e7e5e4;
+}
+
+/* 🌙 DARK MODE (terroso profundo) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #882b00;
+    --primary-contrast: #ffffff;
+
+    --secondary: #a16207;
+    --secondary-contrast: #ffffff;
+
+    --accent: #d97706;
+
+    --bg: #1d1919;
+    --surface: #292524;
+
+    --muted: #a8a29e;
+
+    --text: #e7e5e4;
+    --text-h: #fafaf9;
+
+    --border: #44403c;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
