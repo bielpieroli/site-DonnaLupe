@@ -67,14 +67,13 @@ export default function Header() {
                 variant="ghost"
                 className="h-9 w-9 rounded-lg"
                 onClick={() => setIsMenuOpen(v => !v)}
-                aria-expanded={isMenuOpen}
-                aria-controls="main-navigation"
+                tabIndex={-1}
                 aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
               >
                 {isMenuOpen ? <IoClose size={24} /> : <IoMenu size={24} />}
               </Button>
             )}
-
+            
             <Link to="/home" className="flex items-center gap-3 group transition ">
               <img src={BrandLogo} alt="Brand Logo" className="w-8 h-8 rounded-full transition group-hover:contrast-70" />
               <div className="hidden sm:block group-hover:scale-105 transition">
@@ -132,12 +131,10 @@ export default function Header() {
               aria-label="Navegação Principal"
               className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800 scrollbar-hide"
             >
-              {Tabs.map((tab, index) => (
+              {Tabs.map((tab) => (
                 <NavLink
                   key={tab.key}
                   to={tab.pageNavigate}
-                  // Define a ref apenas para o primeiro item para o auto-foco funcionar
-                  ref={index === 0 ? firstNavLinkRef : null}
                   onClick={() => setIsMenuOpen(false)}
                   className={({ isActive }) =>
                     `flex items-start gap-4 px-4 py-4 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-(--primary) ${
