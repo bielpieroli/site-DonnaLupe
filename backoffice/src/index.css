@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #882b00;
+  --primary-contrast: #ffffff;
+
+  --secondary: #a16207;
+  --secondary-contrast: #ffffff;
+
+  --accent: #d97706;
+
+  --bg: #fafaf9;
+  --surface: #ffffff;
+
+  --muted: #78716c;
+
+  --text: #292524;
+  --text-h: #1c1917;
+
+  --border: #e7e5e4;
+
+  --font-comfortaa: "Comfortaa", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-poppins: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #ad3700;
+    --primary-contrast: #ffffff;
+
+    --secondary: #a16207;
+    --secondary-contrast: #ffffff;
+
+    --accent: #d97706;
+
+    --bg: #1d1919;
+    --surface: #292524;
+
+    --muted: #a8a29e;
+
+    --text: #e7e5e4;
+    --text-h: #fafaf9;
+
+    --border: #44403c;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html,
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-poppins);
+  background:
+    radial-gradient(1200px 700px at 15% -10%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, color-mix(in oklab, var(--secondary) 10%, transparent), transparent 60%),
+    var(--bg);
+
+  background-attachment: fixed;
+  color: var(--text);
+}
+
+@font-face {
+  font-family: "Comfortaa";
+  src: url("./assets/fonts/Comfortaa/Comfortaa-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Comfortaa";
+  src: url("./assets/fonts/Comfortaa/Comfortaa-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Comfortaa";
+  src: url("./assets/fonts/Comfortaa/Comfortaa-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Comfortaa";
+  src: url("./assets/fonts/Comfortaa/Comfortaa-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("./assets/fonts/Poppins/Poppins-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("./assets/fonts/Poppins/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("./assets/fonts/Poppins/Poppins-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 35%, transparent);
+  color: var(--text-h);
+}
+
+.font-comfortaa {
+  font-family: var(--font-comfortaa);
+}
+
+.font-poppins {
+  font-family: var(--font-poppins);
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
