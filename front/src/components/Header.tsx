@@ -1,132 +1,89 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import { IoMenu } from "react-icons/io5";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { IoMenu, IoClose } from "react-icons/io5";
 import Logo from "@/assets/img/logo.png";
-import useWindowDimensions from "@/hooks/useWindowDimentions";
+import { tabs } from "@/constants/Tabs";
 
-type TabKey = "home" | "cart" | "shopping" | "about";
+export default function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const activeTab = tabs.find((t) => t.path === location.pathname)?.key || "home";
 
-export default function Header({
-  tabs,
-  active,
-  onChange,
-}: {
-  tabs: Array<{ key: TabKey; label: string }>;
-  active: TabKey;
-  onChange: (k: TabKey) => void;
-}) {
-  const btnRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({
-    home: null,
-    cart: null,
-    shopping: null,
-    about: null,
-  });
-
-  const navRef = useRef<HTMLElement | null>(null);
-  const { width } = useWindowDimensions();
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useLayoutEffect(() => { 
-    const el = btnRefs.current[active];
-    const navEl = navRef.current;
-    if (el && navEl) {
-      const elRect = el.getBoundingClientRect();
-      const navRect = navEl.getBoundingClientRect();
-      setIndicator({ left: elRect.left - navRect.left, width: elRect.width });
-    }
-  }, [active, tabs]);
-
-  const isMobile = width < 768;
-
-  const headerColor = "bg-(--primary) border-(--border)";
+  // Lógica de distribuição para Desktop
+  const leftTabs = tabs.filter((_, i) => (i + 1) % 2 !== 0);
+  const rightTabs = tabs.filter((_, i) => (i + 1) % 2 === 0);
 
   return (
-    <header className={`sticky top-0 z-50 border-b ${headerColor} transition-all duration-300 ease-in-out`}>
-      <div className="mx-auto flex w-full items-center justify-between px-4 py-3 md:px-6 md:py-4">
-        <div className="flex items-center gap-2">
-          <img src={Logo} alt="Logo da Marca" className="h-6 w-auto md:h-8" />
-          <h1 className="text-lg font-display text-(--primary-contrast) md:text-xl">Site de Vendas</h1>
+    <header className="sticky top-0 z-50 w-full bg-primary-contrast shadow-sm">
+      <div className="container mx-auto px-4 h-20 flex items-center justify-between relative w-[70%]">
+        
+        {/* MOBILE: Botão Menu */}
+        <button 
+          className="xl:hidden text-primary text-3xl"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <IoClose /> : <IoMenu />}
+        </button>
+
+        {/* (Ímpares) */}
+        <nav className="hidden xl:flex flex-1 justify-start pr-20 gap-8">
+          {leftTabs.map((tab) => (
+            <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
+          ))}
+        </nav>
+
+        {/* LOGO CENTRAL */}
+        <div className="absolute left-1/2 -translate-x-1/2 z-20 top-3/4 -translate-y-1/2">
+          <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-primary-contrast shadow-lg flex items-center justify-center">
+            <img src={Logo} alt="Logo" className="w-3/4 h-3/4 object-contain" />
+          </div>
         </div>
-        {isMobile ? (
-          <>
-            <button
-              className="md:hidden text-(--primary-contrast) text-2xl"
-              onClick={() => setIsMenuOpen((prev) => !prev)}
-              aria-label="Toggle menu"
-            >
-              <IoMenu />
-            </button>
-            {isMenuOpen && (
-              <nav
-                ref={navRef}
-                className="absolute top-full left-0 w-full bg-(--surface) flex flex-col items-center gap-1 p-4 transition-transform duration-300 ease-in-out"
+
+        {/* (Pares) */}
+        <nav className="hidden xl:flex flex-1 justify-end pl-20 gap-8">
+          {rightTabs.map((tab) => (
+            <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
+          ))}
+        </nav>
+
+        
+
+        {/* MENU MOBILE DROP DOWN */}
+        {isOpen && (
+          <div className="fixed top-20 left-0 w-screen bg-primary-contrast border-b border-border flex flex-col p-4 gap-4 xl:hidden shadow-xl animate-in slide-in-from-top">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.key}
+                to={tab.path}
+                onClick={() => setIsOpen(false)}
+                className={`text-lg font-bold ${activeTab === tab.key ? "text-primary" : "text-text"}`}
               >
-                { !isMobile && (
-                  <span
-                    aria-hidden
-                    className="absolute bottom-0 h-0.5 bg-(--primary-contrast) transition-all duration-300 ease-out"
-                    style={{ left: indicator.left, width: indicator.width }}
-                  />
-                )}
-                {tabs.map((tab) => {
-                  const isActive = active === tab.key;
-                  return (
-                    <button
-                      key={tab.key}
-                      ref={(el) => {
-                        btnRefs.current[tab.key] = el;
-                      }}
-                      type="button"
-                      onClick={() => {
-                        onChange(tab.key);
-                        setIsMenuOpen(false);
-                      }}
-                      className={`relative px-3 py-1 text-xs font-bold transition-all duration-200 transform md:px-4 md:py-2 md:text-sm ${
-                        isActive
-                          ? "text-(--primary-contrast) scale-110"
-                          : "text-(--primary-contrast) opacity-70 hover:opacity-90 hover:scale-110"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </nav>
-            )}
-          </>
-        ) : (
-          <nav
-            ref={navRef}
-            className="relative flex items-center gap-2 p-1"
-          >
-            <span
-              aria-hidden
-              className="absolute bottom-0 h-0.5 bg-(--primary-contrast) transition-all duration-300 ease-out"
-              style={{ left: indicator.left, width: indicator.width }}
-            />
-            {tabs.map((tab) => {
-              const isActive = active === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  ref={(el) => {
-                    btnRefs.current[tab.key] = el;
-                  }}
-                  type="button"
-                  onClick={() => onChange(tab.key)}
-                  className={`relative px-3 py-1 text-xs font-bold transition-all duration-200 transform md:px-4 md:py-2 md:text-sm ${
-                    isActive
-                      ? "text-(--primary-contrast) scale-110"
-                      : "text-(--primary-contrast) opacity-70 hover:opacity-90 hover:scale-110"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
+                {tab.label}
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </header>
+  );
+}
+
+function NavLink({ tab, isActive }: { tab: any; isActive: boolean }) {
+  return (
+    <Link
+      to={tab.path}
+      className={`relative text-lg font-bold tracking-widest transition-all ${
+        isActive ? "text-primary scale-105" : "text-text hover:text-primary hover:scale-105"
+      }`}
+    >
+      {tab.label}
+      {isActive && (
+        <span 
+        className={`absolute -bottom-2 left-0 h-1 bg-primary transition-all duration-300 rounded-full ${
+          isActive ? "w-full opacity-100" : "w-0 opacity-0"
+        }`}
+      />
+      )}
+    </Link>
   );
 }

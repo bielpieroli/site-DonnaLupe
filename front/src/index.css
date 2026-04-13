@@ -5,8 +5,19 @@
   --font-display: "Playfair Display", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-subtitle: "Caveat", ui-sans-serif, system-ui, sans-serif;
-}
 
+  --color-primary: var(--primary);
+  --color-primary-contrast: var(--primary-contrast);
+  --color-secondary: var(--secondary);
+  --color-secondary-contrast: var(--secondary-contrast);
+  --color-accent: var(--accent);
+  --color-background: var(--bg);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-text: var(--text);
+  --color-text-h: var(--text-h);
+  --color-border: var(--border);
+}
 
 
 :root {
@@ -31,7 +42,7 @@
 }
 
 /* 🌙 DARK MODE (terroso profundo) */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --primary: #B1112A;
     --primary-contrast: #FFF7EE;
@@ -51,7 +62,7 @@
 
     --border: #44403c;
   }
-}
+} */
 
 body {
   margin: 0;
