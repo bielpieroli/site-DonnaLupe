@@ -1,41 +1,19 @@
-import { useState } from 'react';
-import cookieCaramelo from '../../assets/img/cookie-caramelo.jpg';
-import cookieChocoChunk from '../../assets/img/cookie-choco-chunk.jpg';
-import cookieDoubleChoc from '../../assets/img/cookie-double-choc.jpg';
-import cookieLimao from '../../assets/img/cookie-limao.jpg';
-import cookieMatcha from '../../assets/img/cookie-matcha.jpg';
-import cookieMorango from '../../assets/img/cookie-morango.jpg';
-import ProductDetailCard, { type CookieDetail } from '../../components/ProductDetailCard';
-import cookiesData from '../../mocks/cookies.json';
-
-type CookieMock = Omit<CookieDetail, 'img'> & { imageFile: string };
-
-const cookieImages: Record<string, string> = {
-  'cookie-caramelo.jpg': cookieCaramelo,
-  'cookie-choco-chunk.jpg': cookieChocoChunk,
-  'cookie-double-choc.jpg': cookieDoubleChoc,
-  'cookie-limao.jpg': cookieLimao,
-  'cookie-matcha.jpg': cookieMatcha,
-  'cookie-morango.jpg': cookieMorango,
-};
-
-const PRODUCTS = (cookiesData as CookieMock[]).map((cookie) => ({
-  ...cookie,
-  img: cookieImages[cookie.imageFile] ?? cookieChocoChunk,
-}));
+import { useState } from 'react'
+import ProductDetailCard, { type CookieDetail } from '../../components/ProductDetailCard'
+import { PRODUCTS } from '../../data/products'
 
 function Shopping() {
-  const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
+  const [quantity, setQuantity] = useState(1)
 
   const openDetails = (product: CookieDetail) => {
-    setSelectedProduct(product);
-    setQuantity(1);
-  };
+    setSelectedProduct(product)
+    setQuantity(1)
+  }
 
   const closeDetails = () => {
-    setSelectedProduct(null);
-  };
+    setSelectedProduct(null)
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -128,7 +106,7 @@ function Shopping() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default Shopping;
+export default Shopping
