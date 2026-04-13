@@ -151,7 +151,7 @@ export default function CoffeePage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-12 lg:grid-cols-[2fr_1fr]">
           <div>
-            <p className="font-serif text-3xl italic text-primary">escolha os itens</p>
+            <p className="font-subtitle text-3xl font-bold italic text-primary">escolha os itens</p>
             <h2 className="mt-2 font-serif text-5xl font-bold leading-tight md:text-6xl">
               Catálogo do <span className="italic text-secondary">Coffee</span>
             </h2>
@@ -261,7 +261,7 @@ export default function CoffeePage() {
           </div>
 
           <aside className="h-fit rounded-4xl border border-border/20 bg-surface p-6 shadow-sm lg:sticky lg:top-24">
-            <p className="font-serif text-2xl italic text-primary">seu pedido</p>
+            <p className="font-subtitle text-3xl font-bold italic text-primary">seu pedido</p>
             <h3 className="mt-2 font-serif text-4xl font-bold">Carrinho</h3>
 
             {cartItems.length ? (

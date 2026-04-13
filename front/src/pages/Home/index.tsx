@@ -58,7 +58,7 @@ const testimonials: Testimonial[] = [
 function Home() {
   return (
     <main className="bg-[#f7f2ef] text-[#3d0d12]">
-      <section className="bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
+      <section className="bg-linear-to-r from-[#7a0013] to-[#cf0f3f]">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-15 py-0 md:grid-cols-2 md:py-0">
           <div className="text-white">
             <h1 className="max-w-xl font-display text-5xl font-extrabold leading-tight md:text-7xl">
