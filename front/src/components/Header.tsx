@@ -52,14 +52,14 @@ export default function Header() {
 
         {/* MENU MOBILE DROP DOWN */}
         {isOpen && (
-          <div className="fixed top-20 left-0 w-full bg-primary-contrast flex flex-col p-4 2xl:hidden shadow-xl animate-in slide-in-from-top duration-3000">
+          <div className="fixed top-20 left-0 w-full bg-primary-contrast flex flex-col p-4 2xl:hidden shadow-xl animate-in slide-in-from-top">
             {tabs.map((tab, index) => (
-              <div className={` p-4 ${index % 2 === 0 ? "bg-secondary-contrast/20" : "bg-primary-contrast/50"}`} key={tab.key}>
+              <div className={` p-4 rounded-lg ${index % 2 === 0 ? "bg-secondary-contrast/5" : "bg-primary-contrast/50"}`} key={tab.key}>
               <Link
                 key={tab.key}
                 to={tab.path}
                 onClick={() => setIsOpen(false)}
-                className={`text-lg pl-5 font-bold ${activeTab === tab.key ?  "text-primary" : "text-text"}`}
+                className={`text-lg font-bold w-full block ${activeTab === tab.key ?  "text-primary" : "text-text"}`}
               >
                 {tab.label}
               </Link>
