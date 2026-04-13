@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Footer from '../../components/Footer'
 import { PRODUCTS } from '../../data/products'
 
-import HeroCookieImg from '@/assets/img/cookie-double-choc.jpg'
+import HomeCookieImg from '@/assets/img/cookie-home.png'
 import cookieMorangoIMG from '@/assets/img/cookie-morango.jpg'
 import cookieMatchaIMG from '@/assets/img/cookie-matcha.jpg'
 import cookieChocoChunkIMG from '@/assets/img/cookie-choco-chunk.jpg'
@@ -59,7 +59,7 @@ function Home() {
   return (
     <main className="bg-[#f7f2ef] text-[#3d0d12]">
       <section className="bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-15 py-0 md:grid-cols-2 md:py-0">
           <div className="text-white">
             <h1 className="max-w-xl font-display text-5xl font-extrabold leading-tight md:text-7xl">
               Cookies que fazem sorrir
@@ -79,13 +79,12 @@ function Home() {
           </div>
 
           <div className="relative flex justify-center">
-            <div className="relative h-[320px] w-[320px] overflow-hidden rounded-full bg-[#ffb26b] shadow-2xl md:h-[420px] md:w-[420px]">
-              <img
-                src={HeroCookieImg}
-                alt="Cookie"
-                className="h-full w-full object-cover"
-              />
-            </div>
+            <img
+              src={HomeCookieImg}
+              alt="Cookie"
+              className="h-full w-full object-cover"
+            />
+            
           </div>
         </div>
       </section>
