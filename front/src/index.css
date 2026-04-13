@@ -29,7 +29,7 @@
 
   --accent: #d97706;
 
-  --bg: #fafaf9;    
+  --bg: #FAF6F2;    
   --surface: #ffffff;  
 
   --muted: #FFF7EE;
@@ -69,4 +69,14 @@ body {
   color: var(--text);
   background-color: var(--bg);
   font-family: var(--font-body);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

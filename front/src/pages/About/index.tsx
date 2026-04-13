@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
 import cookieChocoChunk from '../../assets/img/cookie-choco-chunk.jpg'
+import Footer from '../../components/Footer'
+
 
 function About() {
   return (
-    <main className="bg-[#f7f2ef] text-[#3d0d12]">
-      <section className="bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
+    <main className="bg-[var(--bg)] text-[#3d0d12]">
+      <section className="h-screen bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
+        <div className="mx-auto grid h-full max-w-7xl items-center gap-10 px-6 md:grid-cols-2">
           <div className="text-white">
-            <p className="font-subtitle text-2xl font-bold italic text-[#ffd3dc]">
+            <p className="font-subtitle text-3xl font-bold italic text-[var(--primary-contrast)]">
               Conheça nossa história
             </p>
 
@@ -23,18 +25,18 @@ function About() {
 
             <Link
               to="/shopping"
-              className="mt-8 inline-block rounded-full bg-[#ff365f] px-8 py-3 font-semibold text-white transition hover:scale-105"
+              className="mt-8 inline-block rounded-full bg-[var(--primary)] px-8 py-3 font-semibold text-white transition hover:scale-105"
             >
               Conhecer cardápio
             </Link>
           </div>
 
-          <div className="relative flex justify-center">
-            <div className="overflow-hidden rounded-[2rem] shadow-2xl">
+          <div className="relative flex h-full items-center justify-center">
+            <div className="max-h-[75vh] overflow-hidden rounded-[2rem] shadow-2xl">
               <img
                 src={cookieChocoChunk}
                 alt="Cookie Choco Chunk"
-                className="h-[500px] w-full max-w-md object-cover"
+                className="h-full w-full max-w-md object-cover"
               />
             </div>
           </div>
@@ -44,7 +46,7 @@ function About() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-12 md:grid-cols-2">
           <div>
-            <p className="font-subtitle text-3xl font-bold italic text-[#e63961]">
+            <p className="font-subtitle text-3xl font-bold italic text-[var(--primary)]">
               Nossa essência
             </p>
 
@@ -67,7 +69,7 @@ function About() {
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[var(--primary)]">
                 +10 anos
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -76,7 +78,7 @@ function About() {
             </div>
 
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[var(--primary)]">
                 Ingredientes reais
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -85,7 +87,7 @@ function About() {
             </div>
 
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[var(--primary)]">
                 Atendimento especial
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -94,7 +96,7 @@ function About() {
             </div>
 
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[var(--primary)]">
                 Receitas exclusivas
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -105,9 +107,9 @@ function About() {
         </div>
       </section>
 
-      <section className="bg-[#fff7f8]">
+      <section className="bg-[var(--primary-contrast)]">
         <div className="mx-auto max-w-7xl px-6 py-20 text-center">
-          <p className="font-subtitle text-3xl font-bold italic text-[#e63961]">
+          <p className="font-subtitle text-3xl font-bold italic text-[var(--primary)]">
             nossos valores
           </p>
 
@@ -149,7 +151,7 @@ function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-24 text-center">
+      <section className="mx-auto max-w-6xl px-6 py-24 text-center bg-[radial-gradient(circle_at_center,_rgba(215,38,77,0.06),_transparent_60%)]">
         <h2 className="font-display text-5xl font-extrabold leading-tight md:text-7xl">
           Pronto para conhecer <br />
           nossos <span className="italic text-[#d7264d]">sabores?</span>
@@ -162,20 +164,23 @@ function About() {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             to="/shopping"
-            className="rounded-full bg-[#ff365f] px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
+            className="rounded-full bg-[var(--primary)] px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
           >
             Ver cardápio 🍪
           </Link>
 
           <Link
             to="/cart"
-            className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-[#7a0013] transition hover:bg-[#fff4f6]"
+            className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-[var(--primary)] transition hover:scale-105"
           >
             Fazer pedido 📋
           </Link>
         </div>
       </section>
+            <Footer />
+
     </main>
+    
   )
 }
 
