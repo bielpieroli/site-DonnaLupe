@@ -56,17 +56,17 @@ export default function Products() {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10 space-y-6">
       {/* Header card situando a página em que está */}
-      <Card className="relative overflow-hidden border-(--border) bg-[linear-gradient(140deg,color-mix(in_oklab,var(--surface)_85%,white_15%),color-mix(in_oklab,var(--secondary)_18%,var(--surface)))]">
-        <div className="pointer-events-none absolute top-0 right-0 h-72 w-72 rounded-full bg-[color-mix(in_oklab,var(--accent)_12%,transparent)] blur-3xl" />
+      <Card className="relative overflow-hidden border-border bg-panel-gradient">
+        <div className="pointer-events-none absolute top-0 right-0 h-72 w-72 rounded-full bg-accent-orb blur-3xl" />
         <div className="pb-4 p-6">
           <div className="flex items-center gap-2 mb-2">
-            <ShoppingCart className="h-4 w-4 text-(--primary)" />
-            <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-(--text)/70">Produtos</p>
+            <ShoppingCart className="h-4 w-4 text-primary" />
+            <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-text/70">Produtos</p>
           </div>
-          <h1 className="text-2xl font-semibold text-(--text-h) md:text-3xl">
+          <h1 className="font-display text-2xl font-semibold text-text-h md:text-3xl">
             Gerenciamento de Produtos
           </h1>
-          <p className="mt-1 text-(--muted)">
+          <p className="mt-1 text-muted">
             Cadastre, busque, edite e remova produtos da loja de doces.
           </p>
         </div>
@@ -86,7 +86,7 @@ export default function Products() {
       </Card>
 
       {/* Tabela de Produtos */}
-      <div className="rounded-xl border border-(--border) bg-(--surface) p-5">
+      <div className="rounded-xl border border-border bg-surface p-5">
         <CrudTable
           data={data}
           fields={fields}

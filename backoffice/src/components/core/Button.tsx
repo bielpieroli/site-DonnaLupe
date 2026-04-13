@@ -10,9 +10,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClassMap: Record<Variant, string> = {
-  primary: "bg-[var(--primary)] text-[var(--primary-contrast)] hover:brightness-110",
-  secondary: "bg-[var(--secondary)] text-[var(--secondary-contrast)] hover:brightness-110",
-  ghost: "bg-transparent text-[var(--text)] hover:bg-[color-mix(in_oklab,var(--primary)_12%,transparent)]",
+  primary: "bg-primary text-primary-contrast hover:brightness-110",
+  secondary: "bg-secondary text-secondary-contrast hover:brightness-110",
+  ghost: "bg-transparent text-text hover:bg-primary/10",
   danger: "bg-red-700 text-white hover:bg-red-600",
 };
 
