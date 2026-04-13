@@ -110,7 +110,7 @@ export default function CoffeePage() {
     
     const messageTemplate = [
       "Olá! Olhando o site, eu me encantei pelo serviço para eventos e gostaria de solicitar um orçamento.",
-      "", // Linha vazia vira uma quebra de linha extra no join
+      "", 
       "Estou prevendo que os seguintes itens seriam ideais para o meu evento:",
       ...lines,
       "",
@@ -127,11 +127,11 @@ export default function CoffeePage() {
   const whatsappHref = `https://wa.me/${destino}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <main className="bg-[#f7f2ef] text-[#3d0d12]">
-      <section className="bg-linear-to-r from-[#7a0013] to-[#cf0f3f]">
+    <main className="bg-background text-text">
+      <section className="bg-secondary">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
           <div className="text-white">
-            <p className="font-serif text-2xl italic text-[#ffd3dc]">Coffee Break para eventos</p>
+            <p className="font-serif text-2xl italic text-primary-contrast/90">Coffee Break para eventos</p>
             <h1 className="mt-4 max-w-xl font-serif text-5xl font-bold leading-tight md:text-7xl">
               Monte o seu Coffee Break
             </h1>
@@ -151,9 +151,9 @@ export default function CoffeePage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-12 lg:grid-cols-[2fr_1fr]">
           <div>
-            <p className="font-serif text-3xl italic text-[#e63961]">escolha os itens</p>
+            <p className="font-serif text-3xl italic text-primary">escolha os itens</p>
             <h2 className="mt-2 font-serif text-5xl font-bold leading-tight md:text-6xl">
-              Catálogo do <span className="italic text-[#d7264d]">Coffee</span>
+              Catálogo do <span className="italic text-secondary">Coffee</span>
             </h2>
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -161,24 +161,24 @@ export default function CoffeePage() {
                 const quantity = quantities[item.id] ?? 0;
 
                 return (
-                  <article key={item.id} className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-[#eadfda] h-full">
+                  <article key={item.id} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/20 bg-surface shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md">
                     <img src={item.image} alt={item.name} className="h-44 w-full object-cover" />
                     <div className="p-5 flex flex-col flex-1">
-                            <h3 className="font-serif text-2xl font-bold text-[#54202a]">{item.name}</h3>
-                            <p className="mt-2 text-sm leading-6 text-[#6d5b59]">{item.description}</p>
+                            <h3 className="font-serif text-2xl font-bold text-text-h">{item.name}</h3>
+                            <p className="mt-2 text-sm leading-6 text-text/80">{item.description}</p>
 
                       <div className="mt-5" />
 
                             <div className="mt-auto">
                               {item.sizes && (
                                 <div className="mb-3 flex items-center gap-2">
-                                  <label className="text-sm text-[#6d5b59]">Tamanho:</label>
+                                  <label className="text-sm text-text/70">Tamanho:</label>
                                   <select
                                     value={selectedSizes[item.id] ?? item.sizes[1]}
                                     onChange={(e) =>
                                       setSelectedSizes((prev) => ({ ...prev, [item.id]: e.target.value }))
                                     }
-                                    className="rounded-md border px-2 py-1 text-sm"
+                                    className="rounded-md border border-border/30 bg-surface px-2 py-1 text-sm text-text-h outline-none transition hover:border-primary/60 focus:border-primary"
                                   >
                                     {item.sizes.map((s) => {
                                       const count = item.sizeCounts ? item.sizeCounts[s] : undefined;
@@ -198,20 +198,20 @@ export default function CoffeePage() {
                           <button
                             type="button"
                             onClick={() => decrease(item.id)}
-                            className="h-9 w-9 rounded-full border border-[#d8c7c0] bg-white text-xl font-bold text-[#7a0013] hover:brightness-95 hover:scale-105 transition-transform"
+                            className="h-9 w-9 rounded-full border border-border/30 bg-surface text-xl font-bold text-secondary hover:scale-105 hover:bg-muted transition-transform"
                           >
                             -
                           </button>
-                          <span className="min-w-6 text-center font-bold text-[#7a0013]">{quantity}</span>
+                          <span className="min-w-6 text-center font-bold text-secondary">{quantity}</span>
                           <button
                             type="button"
                             onClick={() => increase(item.id)}
-                            className="h-9 w-9 rounded-full bg-[#ff365f] text-xl font-bold text-white hover:brightness-95 hover:scale-105 transition-transform"
+                            className="h-9 w-9 rounded-full bg-primary text-xl font-bold text-primary-contrast hover:scale-105 hover:brightness-95 transition-transform"
                           >
                             +
                           </button>
                                 </div>
-                                <span className="text-sm text-[#5a4a49]">Qtd. selecionada</span>
+                                <span className="text-sm text-text/70">Qtd. selecionada</span>
                               </div>
 
                               <div className="mt-3 flex justify-end">
@@ -247,7 +247,7 @@ export default function CoffeePage() {
 
                                     setQuantities((prev) => ({ ...prev, [item.id]: 0 }));
                                   }}
-                                  className="rounded-full bg-[#ff365f] px-4 py-2 text-sm font-bold text-white hover:brightness-95 hover:scale-105 transition-transform"
+                                  className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-contrast hover:scale-105 hover:brightness-95 transition-transform"
                                 >
                                   Adicionar
                                 </button>
@@ -260,8 +260,8 @@ export default function CoffeePage() {
             </div>
           </div>
 
-          <aside className="lg:sticky lg:top-24 h-fit rounded-4xl bg-white border border-[#eadfda] p-6 shadow-sm">
-            <p className="font-serif text-2xl italic text-[#e63961]">seu pedido</p>
+          <aside className="h-fit rounded-4xl border border-border/20 bg-surface p-6 shadow-sm lg:sticky lg:top-24">
+            <p className="font-serif text-2xl italic text-primary">seu pedido</p>
             <h3 className="mt-2 font-serif text-4xl font-bold">Carrinho</h3>
 
             {cartItems.length ? (
@@ -270,26 +270,27 @@ export default function CoffeePage() {
                   const unitsPerBox = item.sizeCounts && item.selectedSize ? item.sizeCounts[item.selectedSize] ?? 0 : undefined;
                   const totalUnits = unitsPerBox ? unitsPerBox * item.quantity : item.quantity;
                   return (
-                    <li key={item.key} className="rounded-xl bg-[#fff7f8] p-4">
+                    <li key={item.key} className="rounded-xl bg-muted p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-semibold text-[#54202a]">{item.name}</p>
-                          <p className="text-sm text-[#6d5b59]">
+                          <p className="font-semibold text-text-h">{item.name}</p>
+                          <p className="text-sm text-text/80">
                             {item.quantity} {item.unit}{item.quantity > 1 && item.unit !== 'unidade' ? 's' : ''}
                             {item.selectedSize && <span className="ml-2">— {item.selectedSize}</span>}
                           </p>
                           {unitsPerBox && (
-                            <p className="mt-1 text-xs text-[#6d5b59]">{unitsPerBox} unidades por caixa — total {totalUnits} unidades</p>
+                            <p className="mt-1 text-xs text-text/70">{unitsPerBox} unidades por caixa — total {totalUnits} unidades</p>
                           )}
                         </div>
+                        { /* Botão de WhatsApp, só habilitado se houver itens no carrinho */ }
                         <div className="ml-4 flex flex-col items-end gap-2">
                           <button
                             type="button"
                             onClick={() => setCartItems((prev) => prev.filter((_, i) => i !== index))}
-                            className="text-sm text-[#7a0013] hover:underline rounded-full hover:bg-[#feeaea] p-1"
+                            className="rounded-[5px] p-2 text-sm text-secondary transition hover:bg-primary/10"
                             aria-label={`Remover ${item.name}`}
                           >
-                            ×
+                            x
                           </button>
                         </div>
                       </div>
@@ -298,9 +299,9 @@ export default function CoffeePage() {
                 })}
               </ul>
             ) : (
-              <p className="mt-6 text-[#6d5b59]">Adicione itens para montar seu coffee break.</p>
+              <p className="mt-6 text-text/70">Adicione itens para montar seu coffee break.</p>
             )}
-
+            { /* Botão de WhatsApp, só habilitado se houver itens no carrinho */ }
             <div className="mt-6">
               <a
                 href={cartItems.length ? whatsappHref : undefined}
@@ -310,7 +311,7 @@ export default function CoffeePage() {
                 className={`mt-1 block w-full rounded-full px-6 py-4 text-center font-bold transition ${
                   cartItems.length
                     ? "bg-[#25D366] text-white hover:brightness-95"
-                    : "bg-[#d8c7c0] text-white pointer-events-none"
+                    : "bg-border/30 text-primary-contrast pointer-events-none"
                 }`}
               >
                 Enviar pedido no WhatsApp

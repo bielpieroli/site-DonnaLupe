@@ -37,8 +37,8 @@ export default function Header() {
 
           {/* LOGO CENTRAL */}
           <div className="absolute left-1/2 -translate-x-1/2 z-20 top-3/4 -translate-y-1/2">
-            <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-primary-contrast shadow-lg flex items-center justify-center">
-              <img src={Logo} alt="Logo" className="w-3/4 h-3/4 object-contain" />
+            <div className="w-30 h-30 lg:w-40 lg:h-40 rounded-full bg-primary-contrast shadow-lg flex items-center justify-center">
+              <img src={Logo} alt="Logo" className="w-5/6 h-full object-contain" />
             </div>
           </div>
 
