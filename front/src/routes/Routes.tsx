@@ -6,6 +6,7 @@ import CartPage from "@/pages/Cart";
 import ProfilePage from "@/pages/Profile";
 import ShoppingPage from "@/pages/Shopping";
 import AboutPage from "@/pages/About";
+import CoffeePage from "@/pages/Coffee";
 
 // criação do router
 export const router = createBrowserRouter([
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
       {
         path: "/profile",
         element: <ProfilePage />,
+      },
+      {
+        path: "/coffee",
+        element: <CoffeePage />,
       }
     ],
   },
