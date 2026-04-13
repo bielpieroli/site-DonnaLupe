@@ -10,8 +10,8 @@ export default function Header() {
   const activeTab = tabs.find((t) => t.path === location.pathname)?.key || "home";
 
   // Lógica de distribuição para Desktop
-  const leftTabs = tabs.filter((_, i) => (i + 1) % 2 !== 0);
-  const rightTabs = tabs.filter((_, i) => (i + 1) % 2 === 0);
+  const leftTabs = tabs.filter((_, i) => i < tabs.length - 2);
+  const rightTabs = tabs.filter((_, i) => i >= tabs.length - 2);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-primary-contrast shadow-sm">
@@ -19,14 +19,14 @@ export default function Header() {
         
         {/* MOBILE: Botão Menu */}
         <button 
-          className="xl:hidden text-primary text-3xl"
+          className="2xl:hidden text-primary text-3xl"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <IoClose /> : <IoMenu />}
         </button>
 
         {/* (Ímpares) */}
-        <nav className="hidden xl:flex flex-1 justify-start pr-20 gap-8">
+        <nav className="hidden 2xl:flex flex-1 justify-start pr-20 gap-8">
           {leftTabs.map((tab) => (
             <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
           ))}
@@ -40,7 +40,7 @@ export default function Header() {
         </div>
 
         {/* (Pares) */}
-        <nav className="hidden xl:flex flex-1 justify-end pl-20 gap-8">
+        <nav className="hidden 2xl:flex flex-1 justify-end pl-20 gap-8">
           {rightTabs.map((tab) => (
             <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
           ))}
@@ -50,7 +50,7 @@ export default function Header() {
 
         {/* MENU MOBILE DROP DOWN */}
         {isOpen && (
-          <div className="fixed top-20 left-0 w-screen bg-primary-contrast border-b border-border flex flex-col p-4 gap-4 xl:hidden shadow-xl animate-in slide-in-from-top">
+          <div className="fixed top-20 left-0 w-screen bg-primary-contrast border-b border-border flex flex-col p-4 gap-4 2xl:hidden shadow-xl animate-in slide-in-from-top">
             {tabs.map((tab) => (
               <Link
                 key={tab.key}
