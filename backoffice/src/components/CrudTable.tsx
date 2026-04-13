@@ -138,17 +138,17 @@ export function CrudTable({
   const SortIcon = ({ field }: { field: string }) => {
     if (sortField !== field) return <ChevronsUpDown className="inline ml-1 w-3.5 h-3.5 opacity-30" />;
     return sortOrder === "asc"
-      ? <ChevronUp className="inline ml-1 w-3.5 h-3.5 text-(--primary)" />
-      : <ChevronDown className="inline ml-1 w-3.5 h-3.5 text-(--primary)" />;
+      ? <ChevronUp className="inline ml-1 w-3.5 h-3.5 text-primary" />
+      : <ChevronDown className="inline ml-1 w-3.5 h-3.5 text-primary" />;
   };
 
   const renderCell = (item: CrudItemType, field: CrudField) => {
     const val = String((item as Record<string, unknown>)[field.value] ?? "—");
     if (field.type === "badge" && field.badgeVariants) {
-      const cls = field.badgeVariants[val] ?? "bg-[var(--surface)] text-(--text)";
+      const cls = field.badgeVariants[val] ?? "bg-surface text-text";
       return <Badge className={`text-xs font-medium px-2 py-0.5 ${cls}`}>{val}</Badge>;
     }
-    return <span className="text-(--text)">{val}</span>;
+    return <span className="text-text">{val}</span>;
   };
 
   const startItem = filteredAll.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
@@ -177,7 +177,7 @@ export function CrudTable({
             ))}
           </Select>
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--muted) pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
             <Input
               placeholder={`Filtrar por ${fields.find(f => f.value === filterField)?.label ?? "campo"}…`}
               value={filter}
@@ -187,7 +187,7 @@ export function CrudTable({
             {filter && (
               <button
                 onClick={() => handleFilterChange("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-(--muted) hover:text-(--text)"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -208,7 +208,7 @@ export function CrudTable({
       {/* Paginação */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
         {/* Info + Quantidade por página */}
-        <div className="flex items-center gap-3 text-xs text-(--muted)">
+        <div className="flex items-center gap-3 text-xs text-muted">
           <span>
             {filteredAll.length === 0
               ? "Nenhum registro"
@@ -239,7 +239,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(1)}
               disabled={safePage === 1}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Primeira página"
             >
               <ChevronsLeft className="w-4 h-4" />
@@ -249,7 +249,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Página anterior"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -257,7 +257,7 @@ export function CrudTable({
 
             {getPageNumbers().map((p, i) =>
               p === "..." ? (
-                <span key={`ellipsis-${i}`} className="w-8 select-none text-center text-sm text-(--muted)">
+                <span key={`ellipsis-${i}`} className="w-8 select-none text-center text-sm text-muted">
                   ···
                 </span>
               ) : (
@@ -268,8 +268,8 @@ export function CrudTable({
                   onClick={() => setPage(p as number)}
                   className={`h-8 w-8 p-0 rounded-lg text-sm transition-all ${
                     safePage === p
-                      ? "bg-(--primary) text-(--primary-contrast) font-semibold"
-                      : "text-(--muted)"
+                      ? "bg-primary text-primary-contrast font-semibold"
+                      : "text-muted"
                   }`}
                 >
                   {p}
@@ -282,7 +282,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Próxima página"
             >
               <ChevronRight className="w-4 h-4" />
@@ -292,7 +292,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(totalPages)}
               disabled={safePage === totalPages}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Última página"
             >
               <ChevronsRight className="w-4 h-4" />
@@ -302,33 +302,33 @@ export function CrudTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-(--border)">
+      <div className="overflow-hidden rounded-xl border border-border">
         <div className="overflow-x-auto">
           <table className="w-full min-w-215 border-collapse">
             <thead>
-              <tr className="bg-[color-mix(in_oklab,var(--secondary)_20%,var(--surface))]">
+              <tr className="bg-surface/95">
               {fields.map(f => (
                 <th
                   key={f.value}
-                  className="cursor-pointer select-none border-b border-(--border) px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted)"
+                  className="cursor-pointer select-none border-b border-border px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted"
                   onClick={() => handleSort(f.value)}
                 >
                   {f.label}
                   <SortIcon field={f.value} />
                 </th>
               ))}
-              <th className="w-24 border-b border-(--border) px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted)">Ações</th>
+              <th className="w-24 border-b border-border px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">Ações</th>
               </tr>
             </thead>
             <tbody>
             {paginated.length === 0 ? (
               <tr>
-                <td colSpan={fields.length + 1} className="py-12 text-center text-(--muted)">
+                <td colSpan={fields.length + 1} className="py-12 text-center text-muted">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="w-8 h-8 opacity-30" />
                     <p>Nenhum resultado encontrado</p>
                     {filter && (
-                      <button onClick={() => handleFilterChange("")} className="text-sm text-(--primary)">
+                      <button onClick={() => handleFilterChange("")} className="text-sm text-primary">
                         Limpar filtro
                       </button>
                     )}
@@ -340,21 +340,21 @@ export function CrudTable({
                 <tr
                   key={item.id}
                   className={`transition-colors ${
-                    i % 2 === 0 ? "bg-transparent" : "bg-[color-mix(in_oklab,var(--surface)_84%,var(--secondary)_16%)]"
+                    i % 2 === 0 ? "bg-transparent" : "bg-secondary/10"
                   }`}
                 >
                   {fields.map(f => (
-                    <td key={f.value} className="border-b border-(--border) px-4 py-3">
+                    <td key={f.value} className="border-b border-border px-4 py-3">
                       {renderCell(item, f)}
                     </td>
                   ))}
-                  <td className="border-b border-(--border) px-4 py-3">
+                  <td className="border-b border-border px-4 py-3">
                     <div className="flex gap-1.5">
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => openEdit(item)}
-                        className="h-10 w-10 rounded-lg p-0 text-(--muted)"
+                        className="h-10 w-10 rounded-lg p-0 text-muted"
                         title="Editar"
                       >
                         <Pencil className="w-4 h-4" />
@@ -363,7 +363,7 @@ export function CrudTable({
                         size="sm"
                         variant="ghost"
                         onClick={() => openDelete(item)}
-                        className="h-10 w-10 rounded-lg p-0 text-(--muted)"
+                        className="h-10 w-10 rounded-lg p-0 text-muted"
                         title="Excluir"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -385,7 +385,7 @@ export function CrudTable({
           <div className="space-y-4 py-2">
             {fields.map(f => (
               <div key={f.value} className="space-y-1.5">
-                <label htmlFor={`create-${f.value}`} className="text-sm text-(--muted) mr-2">{f.label}</label>
+                <label htmlFor={`create-${f.value}`} className="text-sm text-muted mr-2">{f.label}</label>
                 {f.type === "badge" && f.badgeVariants ? (
                   <Select value={formData[f.value] ?? ""} onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}>
                     <option value="">Selecionar {f.label}</option>
@@ -421,7 +421,7 @@ export function CrudTable({
           <div className="space-y-4 py-2">
             {fields.map(f => (
               <div key={f.value} className="space-y-1.5">
-                <label className="text-sm text-(--muted) mr-2">{f.label}</label>
+                <label className="text-sm text-muted mr-2">{f.label}</label>
                 {f.type === "badge" && f.badgeVariants ? (
                   <Select value={formData[f.value] ?? ""} onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}>
                       {Object.keys(f.badgeVariants).map(v => (
@@ -452,9 +452,9 @@ export function CrudTable({
 
       {/* Delete Dialog */}
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Confirmar exclusão" widthClassName="max-w-sm">
-          <p className="py-2 text-sm text-(--muted)">
+          <p className="py-2 text-sm text-muted">
             Tem certeza que deseja excluir{" "}
-            <span className="font-medium text-(--text-h)">"{selectedItem?.name}"</span>? Esta ação não pode ser desfeita.
+            <span className="font-medium text-text-h">"{selectedItem?.name}"</span>? Esta ação não pode ser desfeita.
           </p>
           <div className="mt-5 flex flex-wrap justify-end gap-2">
             <Button variant="ghost" onClick={() => setDeleteOpen(false)}>Cancelar</Button>
