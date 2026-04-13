@@ -1,14 +1,17 @@
+import { Link } from 'react-router-dom'
+import cookieChocoChunk from '../../assets/img/cookie-choco-chunk.jpg'
+
 function About() {
   return (
     <main className="bg-[#f7f2ef] text-[#3d0d12]">
       <section className="bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
           <div className="text-white">
-            <p className="font-serif text-2xl italic text-[#ffd3dc]">
+            <p className="font-subtitle text-2xl font-bold italic text-[#ffd3dc]">
               Conheça nossa história
             </p>
 
-            <h1 className="mt-4 max-w-xl font-serif text-5xl font-bold leading-tight md:text-7xl">
+            <h1 className="mt-4 max-w-xl font-display text-5xl font-extrabold leading-tight md:text-7xl">
               Feitos com amor desde a primeira fornada
             </h1>
 
@@ -18,16 +21,19 @@ function About() {
               transforma qualquer dia.
             </p>
 
-            <button className="mt-8 rounded-full bg-[#ff365f] px-8 py-3 font-semibold text-white transition hover:scale-105">
+            <Link
+              to="/shopping"
+              className="mt-8 inline-block rounded-full bg-[#ff365f] px-8 py-3 font-semibold text-white transition hover:scale-105"
+            >
               Conhecer cardápio
-            </button>
+            </Link>
           </div>
 
           <div className="relative flex justify-center">
             <div className="overflow-hidden rounded-[2rem] shadow-2xl">
               <img
-                src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=1000&q=80"
-                alt="Equipe preparando cookies"
+                src={cookieChocoChunk}
+                alt="Cookie Choco Chunk"
                 className="h-[500px] w-full max-w-md object-cover"
               />
             </div>
@@ -38,11 +44,11 @@ function About() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-12 md:grid-cols-2">
           <div>
-            <p className="font-serif text-3xl italic text-[#e63961]">
+            <p className="font-subtitle text-3xl font-bold italic text-[#e63961]">
               Nossa essência
             </p>
 
-            <h2 className="mt-3 font-serif text-5xl font-bold leading-tight">
+            <h2 className="mt-3 font-display text-5xl font-extrabold leading-tight">
               Uma marca feita para adoçar momentos
             </h2>
 
@@ -61,7 +67,7 @@ function About() {
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-serif text-3xl font-bold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
                 +10 anos
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -70,7 +76,7 @@ function About() {
             </div>
 
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-serif text-3xl font-bold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
                 Ingredientes reais
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -79,7 +85,7 @@ function About() {
             </div>
 
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-serif text-3xl font-bold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
                 Atendimento especial
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -88,7 +94,7 @@ function About() {
             </div>
 
             <div className="rounded-[2rem] bg-white p-8 shadow-sm">
-              <h3 className="font-serif text-3xl font-bold text-[#7a0013]">
+              <h3 className="font-display text-3xl font-extrabold text-[#7a0013]">
                 Receitas exclusivas
               </h3>
               <p className="mt-3 text-[#5a4a49]">
@@ -101,18 +107,18 @@ function About() {
 
       <section className="bg-[#fff7f8]">
         <div className="mx-auto max-w-7xl px-6 py-20 text-center">
-          <p className="font-serif text-3xl italic text-[#e63961]">
+          <p className="font-subtitle text-3xl font-bold italic text-[#e63961]">
             nossos valores
           </p>
 
-          <h2 className="mt-2 font-serif text-5xl font-bold md:text-6xl">
+          <h2 className="mt-2 font-display text-5xl font-extrabold md:text-6xl">
             O que faz a Donna Lupe especial
           </h2>
 
           <div className="mt-14 grid gap-8 md:grid-cols-3">
             <article className="rounded-[2rem] bg-white p-8 shadow-sm">
               <div className="text-5xl">💛</div>
-              <h3 className="mt-6 font-serif text-3xl font-bold">
+              <h3 className="mt-6 font-display text-3xl font-extrabold">
                 Feito com amor
               </h3>
               <p className="mt-4 leading-7 text-[#5a4a49]">
@@ -122,7 +128,7 @@ function About() {
 
             <article className="rounded-[2rem] bg-white p-8 shadow-sm">
               <div className="text-5xl">🍪</div>
-              <h3 className="mt-6 font-serif text-3xl font-bold">
+              <h3 className="mt-6 font-display text-3xl font-extrabold">
                 Qualidade em cada detalhe
               </h3>
               <p className="mt-4 leading-7 text-[#5a4a49]">
@@ -132,7 +138,7 @@ function About() {
 
             <article className="rounded-[2rem] bg-white p-8 shadow-sm">
               <div className="text-5xl">✨</div>
-              <h3 className="mt-6 font-serif text-3xl font-bold">
+              <h3 className="mt-6 font-display text-3xl font-extrabold">
                 Experiência inesquecível
               </h3>
               <p className="mt-4 leading-7 text-[#5a4a49]">
@@ -144,7 +150,7 @@ function About() {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-24 text-center">
-        <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
+        <h2 className="font-display text-5xl font-extrabold leading-tight md:text-7xl">
           Pronto para conhecer <br />
           nossos <span className="italic text-[#d7264d]">sabores?</span>
         </h2>
@@ -154,13 +160,19 @@ function About() {
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <button className="rounded-full bg-[#ff365f] px-8 py-4 font-bold text-white shadow-md transition hover:scale-105">
+          <Link
+            to="/shopping"
+            className="rounded-full bg-[#ff365f] px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
+          >
             Ver cardápio 🍪
-          </button>
+          </Link>
 
-          <button className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-[#7a0013] transition hover:bg-[#fff4f6]">
+          <Link
+            to="/cart"
+            className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-[#7a0013] transition hover:bg-[#fff4f6]"
+          >
             Fazer pedido 📋
-          </button>
+          </Link>
         </div>
       </section>
     </main>
