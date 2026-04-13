@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '../../components/Footer'
 import { PRODUCTS } from '../../data/products'
@@ -56,41 +57,56 @@ const testimonials: Testimonial[] = [
 ]
 
 function Home() {
+  const sliderRef = useRef<HTMLDivElement>(null)
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (sliderRef.current) {
+      const scrollAmount = 320
+      sliderRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      })
+    }
+  }
+
   return (
     <main className="bg-[#f7f2ef] text-[#3d0d12]">
-      <section className="bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-15 py-0 md:grid-cols-2 md:py-0">
-          <div className="text-white">
-            <h1 className="max-w-xl font-display text-5xl font-extrabold leading-tight md:text-7xl">
+      <section className="h-screen bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
+        <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 md:grid-cols-2 md:px-36">
+          <div className="text-[var(--primary-contrast)]">
+            <p className="font-subtitle text-3xl font-bold italic text-[var(--primary-contrast)]">
+              Cookies & Coffee Break
+            </p>
+            <h1 className="max-w-xl font-display text-4xl font-extrabold leading-tight sm:text-5xl md:text-7xl lg:text-8xl">
               Cookies que fazem sorrir
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/90">
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/90 sm:text-xl md:text-2xl">
               Feitos à mão com ingredientes de verdade, muito amor e uma pitada de magia.
               Cada mordida é um abraço quentinho.
             </p>
 
             <Link
               to="/shopping"
-              className="mt-8 inline-block rounded-full bg-[#ff365f] px-8 py-3 font-semibold text-white transition hover:scale-105"
+              className="mt-8 inline-block rounded-full bg-[var(--primary)] px-8 py-3 font-semibold text-white transition hover:scale-105"
             >
               Ver cookies
             </Link>
           </div>
 
-          <div className="relative flex justify-center">
+          <div className="relative flex items-center justify-center h-full">
             <img
               src={HomeCookieImg}
               alt="Cookie"
-              className="h-full w-full object-cover"
+              className="max-w-full max-h-full object-contain"
             />
             
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20 text-center">
-        <p className="font-subtitle text-3xl font-bold italic text-[#e63961]">Os mais amados!</p>
+      <section className="mx-auto max-w-7xl px-6 py-20 text-center ">
+        <p className="font-subtitle text-3xl font-bold italic text-[var(--primary)]">Os mais amados!</p>
         <h2 className="mt-2 font-display text-5xl font-extrabold md:text-6xl">
           Nossos favoritos
         </h2>
@@ -112,7 +128,7 @@ function Home() {
 
                 <Link
                   to="/shopping"
-                  className="mt-5 inline-block rounded-full bg-[#ff365f] px-5 py-2 text-sm font-semibold text-white"
+                  className="mt-5 inline-block rounded-full bg-[var(--primary)] px-5 py-2 text-sm font-semibold text-white"
                 >
                   Quero Esse!
                 </Link>
@@ -122,7 +138,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20">
+      <section className="mx-auto max-w-7xl px-6 py-20 bg-[var(--primary-contrast)]">
         <div className="grid items-end gap-6 md:grid-cols-2">
           <div>
             <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
@@ -135,8 +151,8 @@ function Home() {
           </p>
         </div>
 
-        <div className="mt-12 overflow-x-auto pb-4">
-          <div className="flex w-max gap-6">
+        <div ref={sliderRef} className="mt-12 overflow-x-auto px-4 scrollbar-hide">
+          <div className="flex w-max gap-6 scroll-smooth">
             {PRODUCTS.map((item) => (
               <article
                 key={item.id}
@@ -150,14 +166,14 @@ function Home() {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
 
-                <div className="absolute right-5 top-5 rounded-full bg-[#ff365f] px-4 py-3 text-sm font-bold text-white shadow-lg">
+                <div className="absolute right-5 top-5 rounded-full bg-[var(--primary)] px-4 py-3 text-sm font-bold text-white shadow-lg">
                   {item.price}
                 </div>
 
                 <div className="absolute bottom-0 p-6 text-white">
                   <h3 className="font-serif text-4xl font-bold">{item.name}</h3>
 
-                  <p className="font-subtitle mt-1 text-lg font-bold italic text-white/90">
+                  <p className="font-subtitle mt-1 text-lg font-bold italic text-[var(--primary-contrast)]">
                     {item.category}
                   </p>
 
@@ -177,18 +193,35 @@ function Home() {
           </div>
         </div>
 
-        <p className="mt-10 text-center font-serif text-2xl italic text-[#e63961]">
+        <div className="mt-8 flex justify-center gap-4">
+          <button
+            onClick={() => scroll('left')}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primary)]/10 text-[var(--primary)] transition hover:bg-[var(--primary)] hover:text-white"
+            aria-label="Scroll left"
+          >
+            ←
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primary)]/10 text-[var(--primary)] transition hover:bg-[var(--primary)] hover:text-white"
+            aria-label="Scroll right"
+          >
+            →
+          </button>
+        </div>
+
+        <p className="mt-10 text-center font-subtitle  font-bold text-2xl  text-[var(--primary)]">
           Monte sua caixinha com os sabores que quiser!
         </p>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 text-center">
-        <p className="font-serif text-[28px] italic text-[#e63961]">
+        <p className="font-subtitle text-[28px] font-bold text-[var(--primary)]">
           o que tão falando por ai...
         </p>
 
         <h2 className="mt-2 font-serif text-5xl font-bold md:text-6xl">
-          Declarações de <span className="italic text-[#d7264d]">Amor</span>
+          Declarações de <span className="italic text-[var(--primary)]">Amor</span>
         </h2>
 
         <div className="mt-12 flex flex-wrap justify-center gap-6">
@@ -199,7 +232,7 @@ function Home() {
             return (
               <article
                 key={index}
-                className={`${item.bg} ${rotations[index]} min-h-[220px] rounded-[28px] px-5 py-6 text-left shadow-lg`}
+                className={`${item.bg} ${rotations[index]} min-h-[220px] rounded-[28px] px-5 py-6 text-left shadow-lg hover:scale-105 transition-transform`}
               >
                 <div className="text-[16px] text-yellow-400">★★★★★</div>
 
@@ -224,11 +257,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="bg-[radial-gradient(circle_at_center,_rgba(215,38,77,0.06),_transparent_60%)]">
+      <section className=" bg-[radial-gradient(circle_at_center,_rgba(215,38,77,0.06),_transparent_60%)]">
         <div className="mx-auto max-w-6xl px-6 py-24 text-center">
           <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
             Tá esperando o que <br />
-            pra <span className="italic text-[#d7264d]">experimentar?</span>
+            pra <span className="italic text-[var(--primary)]">experimentar?</span>
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-8 text-[#5a4a49]">
@@ -238,14 +271,14 @@ function Home() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               to="/cart"
-              className="rounded-full bg-[#ff365f] px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
+              className="rounded-full bg-[var(--primary)] px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
             >
               Fazer meu pedido 🍪
             </Link>
 
             <Link
               to="/shopping"
-              className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-[#7a0013] transition hover:bg-[#fff4f6]"
+              className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-[var(--primary)] transition hover:scale-105"
             >
               Ver cardápio 📋
             </Link>
