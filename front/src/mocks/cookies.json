@@ -1,0 +1,116 @@
+[
+  {
+    "id": 1,
+    "name": "Choco Chunk",
+    "subtitle": "classico irresistivel",
+    "category": "Classico",
+    "description": "Chocolate belga ao leite, crocante por fora, derretido por dentro.",
+    "price": "R$ 12,00",
+    "weight": "120g",
+    "ingredients": [
+      "Farinha de trigo",
+      "Manteiga",
+      "Chocolate belga",
+      "Acucar mascavo",
+      "Ovos"
+    ],
+    "allergens": "Contem: Gluten, Leite, Ovos",
+    "badge": "Queridinho",
+    "imageFile": "cookie-choco-chunk.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Double Chocolate",
+    "subtitle": "intenso e marcante",
+    "category": "Intenso",
+    "description": "Massa de cacau 70% com gotas meio amargas para um sabor marcante.",
+    "price": "R$ 14,00",
+    "weight": "125g",
+    "ingredients": [
+      "Farinha de trigo",
+      "Manteiga",
+      "Cacau 70%",
+      "Chocolate meio amargo",
+      "Ovos"
+    ],
+    "allergens": "Contem: Gluten, Leite, Ovos",
+    "badge": "Mais pedido",
+    "imageFile": "cookie-double-choc.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Caramelo",
+    "subtitle": "cremoso por dentro",
+    "category": "Cremoso",
+    "description": "Cookie dourado com recheio de caramelo amanteigado e toque de flor de sal.",
+    "price": "R$ 13,50",
+    "weight": "120g",
+    "ingredients": [
+      "Farinha de trigo",
+      "Manteiga",
+      "Caramelo artesanal",
+      "Flor de sal",
+      "Ovos"
+    ],
+    "allergens": "Contem: Gluten, Leite, Ovos",
+    "badge": "Novo",
+    "imageFile": "cookie-caramelo.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Morango",
+    "subtitle": "com amor",
+    "category": "Frutado",
+    "description": "Massa macia com pedacos de morango e cobertura leve de chocolate branco.",
+    "price": "R$ 13,00",
+    "weight": "120g",
+    "ingredients": [
+      "Farinha de trigo",
+      "Manteiga",
+      "Chocolate branco",
+      "Morango liofilizado",
+      "Ovos"
+    ],
+    "allergens": "Contem: Gluten, Leite, Ovos",
+    "badge": "Queridinho",
+    "imageFile": "cookie-morango.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Limao",
+    "subtitle": "fresco e leve",
+    "category": "Citrico",
+    "description": "Receita refrescante com raspas de limao e textura crocante por fora.",
+    "price": "R$ 12,50",
+    "weight": "115g",
+    "ingredients": [
+      "Farinha de trigo",
+      "Manteiga",
+      "Raspas de limao",
+      "Chocolate branco",
+      "Ovos"
+    ],
+    "allergens": "Contem: Gluten, Leite, Ovos",
+    "badge": "Edicao limitada",
+    "imageFile": "cookie-limao.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Matcha",
+    "subtitle": "premium",
+    "category": "Especial",
+    "description": "Cookie premium com matcha japones e notas suaves de baunilha.",
+    "price": "R$ 15,00",
+    "weight": "120g",
+    "ingredients": [
+      "Farinha de trigo",
+      "Manteiga",
+      "Matcha japones",
+      "Baunilha",
+      "Ovos"
+    ],
+    "allergens": "Contem: Gluten, Leite, Ovos",
+    "badge": "Chef's choice",
+    "imageFile": "cookie-matcha.jpg"
+  }
+]
