@@ -67,7 +67,7 @@ const serviceItems: CoffeeItem[] = [
   },
   {
     id: "bolo",
-    name: "Bolo Caseiro Inteiro",
+    name: "Bolo Caseiro",
     description: "Bolos do dia, prontos para fatias ou inteiros.",
     unit: "bolo",
     sizes: ["P", "M", "G"],
@@ -98,22 +98,29 @@ export default function CoffeePage() {
 
     const lines = cartItems.map((item) => {
       const sizePart = item.selectedSize ? ` (${item.selectedSize})` : "";
+
       const boxCountPart =
         item.unit === "caixa" && item.sizeCounts && item.selectedSize
           ? ` - ${item.sizeCounts[item.selectedSize] ?? "-"} unidades por caixa`
           : "";
-
-      return `- ${item.quantity} ${item.unit}${item.quantity > 1 ? "s" : ""}${sizePart} ${item.name}${boxCountPart}`;
+      
+      return `- ${item.quantity} ${item.unit}${item.quantity > 1 ? "s" : ""}${sizePart} ${item.name}${boxCountPart}`.trim();
     });
 
-    return [
+    
+    const messageTemplate = [
       "Olá! Olhando o site, eu me encantei pelo serviço para eventos e gostaria de solicitar um orçamento.",
-      "",
-      "Estou prevendo que os seguintes itens, nessas quantidades e tamanhos, seriam ideais para o meu evento:",
+      "", // Linha vazia vira uma quebra de linha extra no join
+      "Estou prevendo que os seguintes itens seriam ideais para o meu evento:",
       ...lines,
       "",
       "Queria receber o orçamento desses itens, por favor.",
-    ].join("\n");
+    ];
+
+    return messageTemplate
+      .join("\n")
+      .replace(/\u00A0/g, " ") // Troca de espaços não quebráveis por espaços normais
+      .replace(/[^\x00-\x7F\u00C0-\u00FF\s-]/g, ""); // Remove caracteres de controle estranhos
   }, [cartItems]);
 
   const destino = DonnaLupeInfo.TELEFONE.replace(/\D/g, ""); // Remove caracteres não numéricos
