@@ -5,6 +5,7 @@ import LoginPage from "@/pages/Login";
 import BackofficeUsers from "@/pages/UserBackoffice";
 import RequireAuth from "@/lib/RequireAuth";
 import ProductsPage from "@/pages/Products";
+import PermissionsPage from "@/pages/PermissionsBackoffice";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ export const router = createBrowserRouter([
           {
             path: "/backoffice-users",
             element: <BackofficeUsers />,
+          },
+          {
+            path: "/backoffice-permissions",
+            element: <PermissionsPage />,
           },
         ],
       },

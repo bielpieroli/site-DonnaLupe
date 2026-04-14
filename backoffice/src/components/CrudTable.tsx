@@ -13,8 +13,9 @@ import {
 export interface CrudField {
   value: string;
   label: string;
-  type?: "text" | "badge" | "date" | "number";
+  type?: "text" | "badge" | "date" | "number" | "multivalue";
   badgeVariants?: Record<string, string>;
+  multiValueOptions?: string[];
 }
 
 export interface CrudTableProps {
@@ -38,6 +39,8 @@ export function CrudTable({
   entityLabel = "item",
   defaultPageSize = 10,
 }: CrudTableProps) {
+  type FormValue = string | string[];
+
   const [filter, setFilter] = useState("");
   const [filterField, setFilterField] = useState(fields[0]?.value ?? "name");
   const [sortField, setSortField] = useState(fields[0]?.value ?? "name");
@@ -49,7 +52,32 @@ export function CrudTable({
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CrudItemType | null>(null);
-  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<Record<string, FormValue>>({});
+
+  const normalizeToStringArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.map((v) => String(v));
+    if (typeof value === "string") {
+      return value
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean);
+    }
+    return [];
+  };
+
+  const formatForCompare = (value: unknown): string => {
+    if (Array.isArray(value)) return value.map((v) => String(v)).join(", ");
+    return String(value ?? "");
+  };
+
+  const toggleMultiValue = (fieldValue: string, option: string) => {
+    setFormData((prev) => {
+      const current = normalizeToStringArray(prev[fieldValue]);
+      const exists = current.includes(option);
+      const next = exists ? current.filter((v) => v !== option) : [...current, option];
+      return { ...prev, [fieldValue]: next };
+    });
+  };
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -76,7 +104,7 @@ export function CrudTable({
     let result = [...data];
     if (filter.trim()) {
       result = result.filter(item => {
-        const val = String((item as Record<string, unknown>)[filterField] ?? "").toLowerCase();
+        const val = formatForCompare((item as Record<string, unknown>)[filterField]).toLowerCase();
         return val.includes(filter.toLowerCase());
       });
     }
@@ -101,7 +129,7 @@ export function CrudTable({
       }
 
       // fallback string
-      return String(aVal).localeCompare(String(bVal), "pt-BR", { numeric: true }) * direction;
+      return formatForCompare(aVal).localeCompare(formatForCompare(bVal), "pt-BR", { numeric: true }) * direction;
     });
 
   return result;
@@ -117,8 +145,11 @@ export function CrudTable({
 
   const openEdit = (item: CrudItemType) => {
     setSelectedItem(item);
-    const fd: Record<string, string> = {};
-    fields.forEach(f => { fd[f.value] = String((item as Record<string, unknown>)[f.value] ?? ""); });
+    const fd: Record<string, FormValue> = {};
+    fields.forEach((f) => {
+      const raw = (item as Record<string, unknown>)[f.value];
+      fd[f.value] = f.type === "multivalue" ? normalizeToStringArray(raw) : String(raw ?? "");
+    });
     setFormData(fd);
     setEditOpen(true);
   };
@@ -129,8 +160,10 @@ export function CrudTable({
   };
 
   const openCreate = () => {
-    const fd: Record<string, string> = {};
-    fields.forEach(f => { fd[f.value] = ""; });
+    const fd: Record<string, FormValue> = {};
+    fields.forEach((f) => {
+      fd[f.value] = f.type === "multivalue" ? [] : "";
+    });
     setFormData(fd);
     setCreateOpen(true);
   };
@@ -143,7 +176,23 @@ export function CrudTable({
   };
 
   const renderCell = (item: CrudItemType, field: CrudField) => {
-    const val = String((item as Record<string, unknown>)[field.value] ?? "—");
+    const raw = (item as Record<string, unknown>)[field.value];
+    const val = String(raw ?? "—");
+
+    if (field.type === "multivalue") {
+      const values = normalizeToStringArray(raw);
+      if (!values.length) return <span className="text-muted">—</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {values.map((entry) => (
+            <Badge key={`${field.value}-${entry}`} className="px-2 py-0.5 text-xs font-medium bg-secondary-contrast/30 text-text">
+              {entry}
+            </Badge>
+          ))}
+        </div>
+      );
+    }
+
     if (field.type === "badge" && field.badgeVariants) {
       const cls = field.badgeVariants[val] ?? "bg-surface text-text";
       return <Badge className={`text-xs font-medium px-2 py-0.5 ${cls}`}>{val}</Badge>;
@@ -200,7 +249,7 @@ export function CrudTable({
             className="shrink-0"
           >
             <Plus className="w-4 h-4" />
-            Novo {entityLabel}
+            Novo(a) {entityLabel}
           </Button>
         )}
       </div>
@@ -393,10 +442,46 @@ export function CrudTable({
                         <option key={v} value={v}>{v}</option>
                       ))}
                   </Select>
+                ) : f.type === "multivalue" ? (
+                  <div className="rounded-xl border border-border p-2.5">
+                    {f.multiValueOptions && f.multiValueOptions.length > 0 ? (
+                      <div className="grid gap-2 max-h-40 overflow-y-auto pr-1">
+                        {f.multiValueOptions.map((option) => {
+                          const selected = normalizeToStringArray(formData[f.value]).includes(option);
+                          return (
+                            <label key={option} className="flex items-center gap-2 text-sm text-text">
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                onChange={() => toggleMultiValue(f.value, option)}
+                                className="h-4 w-4 rounded border-border"
+                              />
+                              {option}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Input
+                        id={`create-${f.value}`}
+                        value={normalizeToStringArray(formData[f.value]).join(", ")}
+                        onChange={(e) =>
+                          setFormData((d) => ({
+                            ...d,
+                            [f.value]: e.target.value
+                              .split(",")
+                              .map((v) => v.trim())
+                              .filter(Boolean),
+                          }))
+                        }
+                        placeholder="Separe por vírgula"
+                      />
+                    )}
+                  </div>
                 ) : (
                   <Input
                     id={`create-${f.value}`}
-                    value={formData[f.value] ?? ""}
+                    value={String(formData[f.value] ?? "")}
                     onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
                   />
                 )}
@@ -428,9 +513,44 @@ export function CrudTable({
                         <option key={v} value={v}>{v}</option>
                       ))}
                   </Select>
+                ) : f.type === "multivalue" ? (
+                  <div className="rounded-xl border border-border p-2.5">
+                    {f.multiValueOptions && f.multiValueOptions.length > 0 ? (
+                      <div className="grid gap-2 max-h-40 overflow-y-auto pr-1">
+                        {f.multiValueOptions.map((option) => {
+                          const selected = normalizeToStringArray(formData[f.value]).includes(option);
+                          return (
+                            <label key={option} className="flex items-center gap-2 text-sm text-text">
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                onChange={() => toggleMultiValue(f.value, option)}
+                                className="h-4 w-4 rounded border-border"
+                              />
+                              {option}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Input
+                        value={normalizeToStringArray(formData[f.value]).join(", ")}
+                        onChange={(e) =>
+                          setFormData((d) => ({
+                            ...d,
+                            [f.value]: e.target.value
+                              .split(",")
+                              .map((v) => v.trim())
+                              .filter(Boolean),
+                          }))
+                        }
+                        placeholder="Separe por vírgula"
+                      />
+                    )}
+                  </div>
                 ) : (
                   <Input
-                    value={formData[f.value] ?? ""}
+                    value={String(formData[f.value] ?? "")}
                     onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
                   />
                 )}
