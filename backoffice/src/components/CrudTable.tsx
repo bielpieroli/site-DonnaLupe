@@ -7,7 +7,7 @@ import Badge from "@/components/core/Badge";
 import { useState, useMemo } from "react";
 import {
   ChevronDown, ChevronUp, ChevronsUpDown, Search, Plus, Pencil, Trash2, X,
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Check,
 } from "lucide-react";
 
 export interface CrudField {
@@ -443,7 +443,7 @@ export function CrudTable({
                       ))}
                   </Select>
                 ) : f.type === "multivalue" ? (
-                  <div className="rounded-xl border border-border p-2.5">
+                  <div className="rounded-xl p-2.5">
                     {f.multiValueOptions && f.multiValueOptions.length > 0 ? (
                       <div className="grid gap-2 max-h-40 overflow-y-auto pr-1">
                         {f.multiValueOptions.map((option) => {
@@ -454,9 +454,12 @@ export function CrudTable({
                                 type="checkbox"
                                 checked={selected}
                                 onChange={() => toggleMultiValue(f.value, option)}
-                                className="h-4 w-4 rounded border-border"
+                                className="peer sr-only"
                               />
-                              {option}
+                              <span className="flex h-5 w-5 items-center justify-center rounded-md border border-primary bg-surface transition-all duration-150 peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40">
+                                <Check className="h-3.5 w-3.5 text-primary-contrast opacity-0 transition-opacity duration-150 peer-checked:opacity-100" />
+                              </span>
+                              <span>{option}</span>
                             </label>
                           );
                         })}
@@ -514,7 +517,7 @@ export function CrudTable({
                       ))}
                   </Select>
                 ) : f.type === "multivalue" ? (
-                  <div className="rounded-xl border border-border p-2.5">
+                  <div className="rounded-xl p-2.5">
                     {f.multiValueOptions && f.multiValueOptions.length > 0 ? (
                       <div className="grid gap-2 max-h-40 overflow-y-auto pr-1">
                         {f.multiValueOptions.map((option) => {
@@ -525,9 +528,12 @@ export function CrudTable({
                                 type="checkbox"
                                 checked={selected}
                                 onChange={() => toggleMultiValue(f.value, option)}
-                                className="h-4 w-4 rounded border-border"
+                                className="peer sr-only"
                               />
-                              {option}
+                              <span className="flex h-5 w-5 items-center justify-center rounded-md border border-primary bg-surface transition-all duration-150 peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40">
+                                <Check className="h-3.5 w-3.5 text-primary-contrast opacity-0 transition-opacity duration-150 peer-checked:opacity-100" />
+                              </span>
+                              <span>{option}</span>
                             </label>
                           );
                         })}

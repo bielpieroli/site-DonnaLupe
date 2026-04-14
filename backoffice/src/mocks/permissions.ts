@@ -4,7 +4,6 @@ export interface MockPermissionItem extends CrudItemType {
   recurso: string;
   usuariosLeitura: string[];
   usuariosLeituraEscrita: string[];
-  descricao: string;
 }
 
 export const MOCK_PERMISSIONS: MockPermissionItem[] = [
@@ -14,7 +13,6 @@ export const MOCK_PERMISSIONS: MockPermissionItem[] = [
     recurso: "Produtos",
     usuariosLeitura: ["Igor Ferreira", "Olivia Souza"],
     usuariosLeituraEscrita: ["Ana Beatriz Santos", "Carlos Eduardo Lima", "Juliana Ramos"],
-    descricao: "Permite consultar catalogo, criar, editar e remover produtos.",
   },
   {
     id: "2",
@@ -22,7 +20,6 @@ export const MOCK_PERMISSIONS: MockPermissionItem[] = [
     recurso: "Pedidos",
     usuariosLeitura: ["Pedro Henrique Nunes", "Olivia Souza"],
     usuariosLeituraEscrita: ["Carlos Eduardo Lima", "Fernanda Oliveira", "Helena Martins"],
-    descricao: "Permite acompanhar pedidos e alterar status quando houver escrita.",
   },
   {
     id: "3",
@@ -30,7 +27,6 @@ export const MOCK_PERMISSIONS: MockPermissionItem[] = [
     recurso: "Usuarios",
     usuariosLeitura: ["Lucas Almeida"],
     usuariosLeituraEscrita: ["Ana Beatriz Santos"],
-    descricao: "Permite visualizar e administrar usuarios do backoffice.",
   },
   {
     id: "4",
@@ -38,7 +34,6 @@ export const MOCK_PERMISSIONS: MockPermissionItem[] = [
     recurso: "Financeiro",
     usuariosLeitura: ["Marina Pereira"],
     usuariosLeituraEscrita: ["Gabriel Costa"],
-    descricao: "Permite visualizar dados financeiros e editar quando RW.",
   },
   {
     id: "5",
@@ -46,6 +41,5 @@ export const MOCK_PERMISSIONS: MockPermissionItem[] = [
     recurso: "Relatorios",
     usuariosLeitura: ["Igor Ferreira", "Olivia Souza"],
     usuariosLeituraEscrita: ["Gabriel Costa"],
-    descricao: "Permite consultar relatorios e gerenciar versoes quando RW.",
   },
 ];

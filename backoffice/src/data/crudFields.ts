@@ -76,5 +76,4 @@ export const PERMISSION_FIELDS: CrudField[] = [
     type: "multivalue",
     multiValueOptions: MOCK_USER_NAMES,
   },
-  { value: "descricao", label: "Descricao", type: "text" },
 ];
