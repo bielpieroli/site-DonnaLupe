@@ -66,13 +66,13 @@ export const PERMISSION_FIELDS: CrudField[] = [
   },
   {
     value: "usuariosLeitura",
-    label: "Usuários com leitura (R)",
+    label: "Acesso apenas leitura",
     type: "multivalue",
     multiValueOptions: MOCK_USER_NAMES,
   },
   {
     value: "usuariosLeituraEscrita",
-    label: "Usuários com leitura/escrita (RW)",
+    label: "Acesso de leitura e escrita",
     type: "multivalue",
     multiValueOptions: MOCK_USER_NAMES,
   },
