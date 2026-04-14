@@ -28,9 +28,9 @@ function ProductDetailCard({
   onClose,
 }: ProductDetailCardProps) {
   return (
-    <div className="w-full overflow-hidden rounded-[1.5rem] bg-[#f4f1ed] shadow-[0_20px_80px_rgba(30,16,10,0.45)] sm:rounded-[2rem] md:max-w-[980px]">
+    <div className="w-full overflow-hidden rounded-3xl bg-[#f4f1ed] shadow-[0_20px_80px_rgba(30,16,10,0.45)] sm:rounded-4xl md:max-w-245">
       <div className="grid grid-cols-1 items-start md:grid-cols-[0.95fr_1fr]">
-        <div className="relative h-56 self-start sm:h-72 md:h-[520px]">
+        <div className="relative h-56 self-start sm:h-72 md:h-130">
           <img
             src={product.img}
             alt={product.name}
@@ -45,7 +45,7 @@ function ProductDetailCard({
           </span>
         </div>
 
-        <div className="relative flex flex-col gap-5 px-4 py-4 sm:px-6 sm:py-5 md:max-h-[520px] md:overflow-y-auto md:gap-8 md:px-8 md:py-7">
+        <div className="relative flex flex-col gap-5 px-4 py-4 sm:px-6 sm:py-5 md:max-h-130 md:overflow-y-auto md:gap-8 md:px-8 md:py-7">
           <button
             type="button"
             onClick={onClose}
@@ -56,15 +56,15 @@ function ProductDetailCard({
           </button>
 
           <div className="pt-8 sm:pt-10 md:pt-0">
-            <p className="font-subtitle text-lg text-[var(--secondary)] sm:text-xl md:text-2xl">
+            <p className="font-subtitle text-lg text-secondary sm:text-xl md:text-2xl">
               {product.subtitle}
             </p>
 
-            <h2 className="font-display text-3xl font-extrabold leading-tight text-[var(--text-h)] sm:text-4xl md:text-5xl">
+            <h2 className="font-display text-3xl font-extrabold leading-tight text-text-h sm:text-4xl md:text-5xl">
               {product.name}
             </h2>
 
-            <p className="mt-2 text-base font-bold leading-none text-[var(--primary)] sm:text-lg">
+            <p className="mt-2 text-base font-bold leading-none text-primary sm:text-lg">
               {product.price}
             </p>
           </div>
@@ -76,7 +76,7 @@ function ProductDetailCard({
 
             <p className="text-sm text-[#6a5b52] sm:text-base">
               Peso:{' '}
-              <span className="font-bold text-[var(--text-h)]">
+              <span className="font-bold text-text-h">
                 {product.weight}
               </span>
             </p>
@@ -100,7 +100,7 @@ function ProductDetailCard({
           </div>
 
           <div
-            className="rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed text-[var(--primary)] sm:rounded-full"
+            className="rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed text-primary sm:rounded-full"
             style={{ backgroundColor: 'rgba(211, 22, 53, 0.12)' }}
           >
             {product.allergens}
@@ -117,7 +117,7 @@ function ProductDetailCard({
                 -
               </button>
 
-              <span className="w-10 text-center text-sm font-bold text-[var(--text-h)] sm:text-base">
+              <span className="w-10 text-center text-sm font-bold text-text-h sm:text-base">
                 {quantity}
               </span>
 
@@ -131,7 +131,7 @@ function ProductDetailCard({
               </button>
             </div>
 
-            <button className="w-full rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-[var(--primary-contrast)] transition-colors hover:bg-[var(--secondary)] sm:w-auto sm:px-7">
+            <button className="w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-contrast transition-colors hover:bg-secondary sm:w-auto sm:px-7">
               Adicionar {product.price}
             </button>
           </div>

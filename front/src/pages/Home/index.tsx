@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import Footer from '../../components/Footer'
-import { PRODUCTS } from '../../data/products'
+import Footer from '@/components/Footer'
+import { PRODUCTS } from '@/data/products'
 
 import HomeCookieImg from '@/assets/img/cookie-home.png'
 import cookieMorangoIMG from '@/assets/img/cookie-morango.jpg'
@@ -56,7 +56,7 @@ const testimonials: Testimonial[] = [
   },
 ]
 
-function Home() {
+export default function Home() {
   const sliderRef = useRef<HTMLDivElement>(null)
 
   const scroll = (direction: 'left' | 'right') => {
@@ -71,42 +71,41 @@ function Home() {
 
   return (
     <main className="bg-[#f7f2ef] text-[#3d0d12]">
-      <section className="h-screen bg-gradient-to-r from-[#7a0013] to-[#cf0f3f]">
-        <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 md:grid-cols-2 md:px-36">
-          <div className="text-[var(--primary-contrast)]">
-            <p className="font-subtitle text-3xl font-bold italic text-[var(--primary-contrast)]">
+      <section className="h-screen bg-linear-to-r from-[#7a0013] to-[#cf0f3f]">
+        <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 max-w-7xl justify-center mx-auto">
+          <div className="text-primary-contrast">
+            <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
               Cookies & Coffee Break
             </p>
-            <h1 className="max-w-xl font-display text-4xl font-extrabold leading-tight sm:text-5xl md:text-7xl lg:text-8xl">
+            <h1 className="w-full font-display text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight">
               Cookies que fazem sorrir
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/90 sm:text-xl md:text-2xl">
+            <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
               Feitos à mão com ingredientes de verdade, muito amor e uma pitada de magia.
               Cada mordida é um abraço quentinho.
             </p>
 
             <Link
               to="/shopping"
-              className="mt-8 inline-block rounded-full bg-[var(--primary)] px-8 py-3 font-semibold text-white transition hover:scale-105"
+              className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-semibold text-white transition hover:scale-105"
             >
               Ver cookies
             </Link>
           </div>
 
-          <div className="relative flex items-center justify-center h-full">
+          <div className="relative flex items-center justify-center h-auto md:h-full py-6 md:py-0">
             <img
               src={HomeCookieImg}
               alt="Cookie"
-              className="max-w-full max-h-full object-contain"
+              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-10 sm:-translate-y-6 lg:translate-y-0"
             />
-            
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 text-center ">
-        <p className="font-subtitle text-3xl font-bold italic text-[var(--primary)]">Os mais amados!</p>
+        <p className="font-subtitle text-3xl font-bold italic text-primary">Os mais amados!</p>
         <h2 className="mt-2 font-display text-5xl font-extrabold md:text-6xl">
           Nossos favoritos
         </h2>
@@ -128,7 +127,7 @@ function Home() {
 
                 <Link
                   to="/shopping"
-                  className="mt-5 inline-block rounded-full bg-[var(--primary)] px-5 py-2 text-sm font-semibold text-white"
+                  className="mt-5 inline-block rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white"
                 >
                   Quero Esse!
                 </Link>
@@ -138,7 +137,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20 bg-[var(--primary-contrast)]">
+      <section className="mx-auto max-w-7xl px-6 py-20 bg-primary-contrast">
         <div className="grid items-end gap-6 md:grid-cols-2">
           <div>
             <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
@@ -156,7 +155,7 @@ function Home() {
             {PRODUCTS.map((item) => (
               <article
                 key={item.id}
-                className="group relative min-h-[500px] w-[290px] shrink-0 overflow-hidden rounded-[2rem]"
+                className="group relative min-h-125 w-72.5 shrink-0 overflow-hidden rounded-4xl"
               >
                 <img
                   src={item.img}
@@ -164,16 +163,16 @@ function Home() {
                   className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-black/10" />
 
-                <div className="absolute right-5 top-5 rounded-full bg-[var(--primary)] px-4 py-3 text-sm font-bold text-white shadow-lg">
+                <div className="absolute right-5 top-5 rounded-full bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg">
                   {item.price}
                 </div>
 
                 <div className="absolute bottom-0 p-6 text-white">
                   <h3 className="font-serif text-4xl font-bold">{item.name}</h3>
 
-                  <p className="font-subtitle mt-1 text-lg font-bold italic text-[var(--primary-contrast)]">
+                  <p className="font-subtitle mt-1 text-lg font-bold italic text-primary-contrast">
                     {item.category}
                   </p>
 
@@ -196,32 +195,32 @@ function Home() {
         <div className="mt-8 flex justify-center gap-4">
           <button
             onClick={() => scroll('left')}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primary)]/10 text-[var(--primary)] transition hover:bg-[var(--primary)] hover:text-white"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary hover:text-white"
             aria-label="Scroll left"
           >
             ←
           </button>
           <button
             onClick={() => scroll('right')}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primary)]/10 text-[var(--primary)] transition hover:bg-[var(--primary)] hover:text-white"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary hover:text-white"
             aria-label="Scroll right"
           >
             →
           </button>
         </div>
 
-        <p className="mt-10 text-center font-subtitle  font-bold text-2xl  text-[var(--primary)]">
+        <p className="mt-10 text-center font-subtitle  font-bold text-2xl  text-primary">
           Monte sua caixinha com os sabores que quiser!
         </p>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 text-center">
-        <p className="font-subtitle text-[28px] font-bold text-[var(--primary)]">
+        <p className="font-subtitle text-[28px] font-bold text-primary">
           o que tão falando por ai...
         </p>
 
         <h2 className="mt-2 font-serif text-5xl font-bold md:text-6xl">
-          Declarações de <span className="italic text-[var(--primary)]">Amor</span>
+          Declarações de <span className="italic text-primary">Amor</span>
         </h2>
 
         <div className="mt-12 flex flex-wrap justify-center gap-6">
@@ -232,11 +231,11 @@ function Home() {
             return (
               <article
                 key={index}
-                className={`${item.bg} ${rotations[index]} min-h-[220px] rounded-[28px] px-5 py-6 text-left shadow-lg hover:scale-105 transition-transform`}
+                className={`${item.bg} ${rotations[index]} min-h-55 rounded-[28px] px-5 py-6 text-left shadow-lg hover:scale-105 transition-transform`}
               >
                 <div className="text-[16px] text-yellow-400">★★★★★</div>
 
-                <p className="mt-5 max-w-[220px] text-[14px] leading-7 text-[#4e3e3d]">
+                <p className="mt-5 max-w-55 text-[14px] leading-7 text-[#4e3e3d]">
                   {item.text}
                 </p>
 
@@ -257,11 +256,11 @@ function Home() {
         </div>
       </section>
 
-      <section className=" bg-[radial-gradient(circle_at_center,_rgba(215,38,77,0.06),_transparent_60%)]">
+      <section className=" bg-[radial-gradient(circle_at_center,rgba(215,38,77,0.06),transparent_60%)]">
         <div className="mx-auto max-w-6xl px-6 py-24 text-center">
           <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
             Tá esperando o que <br />
-            pra <span className="italic text-[var(--primary)]">experimentar?</span>
+            pra <span className="italic text-primary">experimentar?</span>
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-8 text-[#5a4a49]">
@@ -271,14 +270,14 @@ function Home() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               to="/cart"
-              className="rounded-full bg-[var(--primary)] px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
+              className="rounded-full bg-primary px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
             >
               Fazer meu pedido 🍪
             </Link>
 
             <Link
               to="/shopping"
-              className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-[var(--primary)] transition hover:scale-105"
+              className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-primary transition hover:scale-105"
             >
               Ver cardápio 📋
             </Link>

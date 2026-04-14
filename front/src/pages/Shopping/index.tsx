@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import ProductDetailCard, { type CookieDetail } from '../../components/ProductDetailCard'
-import { PRODUCTS } from '../../data/products'
+import ProductDetailCard, { type CookieDetail } from '@/components/ProductDetailCard'
+import { PRODUCTS } from '@/data/products'
+import Footer from '@/components/Footer'
 
 function Shopping() {
   const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
@@ -16,22 +17,23 @@ function Shopping() {
   }
 
   return (
+    <>
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8 max-w-6xl sm:mb-10 lg:mb-12 px-46">
-        <p className="font-subtitle text-lg font-bold text-[var(--primary)] sm:text-xl lg:text-2xl">
+      <header className="mb-8 max-w-7xl sm:mb-10 lg:mb-12 px-4 sm:px-6 lg:px-8">
+        <p className="font-subtitle text-lg font-bold text-primary sm:text-xl lg:text-2xl">
           Monte seu pedido!
         </p>
 
-        <h1 className="mb-2 font-display text-4xl font-extrabold leading-tight text-[var(--text-h)] sm:text-5xl lg:text-6xl">
-          Nosso <span className="text-[var(--primary)]">Catálogo</span>
+        <h1 className="mb-2 font-display text-4xl font-extrabold leading-tight text-text-h sm:text-5xl lg:text-6xl">
+          Nosso <span className="text-primary">Catálogo</span>
         </h1>
 
-        <p className="text-sm text-[var(--muted)] sm:text-base lg:text-lg">
+        <p className="text-sm text-muted sm:text-base lg:text-lg">
           Explore nossa seleção de produtos exclusivos.
         </p>
       </header>
 
-      <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 px-46">
+      <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 px-4 sm:px-6 lg:px-8">
         {PRODUCTS.map((product) => (
           <article
             key={product.id}
@@ -50,28 +52,28 @@ function Shopping() {
               </span>
             </div>
 
-            <div className="flex min-h-[260px] flex-col px-4 py-4 sm:px-5">
+            <div className="flex min-h-65 flex-col px-4 py-4 sm:px-5">
               <div className="mb-2 flex items-start justify-between gap-3">
-                <h2 className="min-w-0 flex-1 overflow-hidden font-display text-xl font-extrabold leading-tight text-[var(--text-h)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-2xl">
+                <h2 className="min-w-0 flex-1 overflow-hidden font-display text-xl font-extrabold leading-tight text-text-h [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-2xl">
                   {product.name}
                 </h2>
 
-                <p className="shrink-0 whitespace-nowrap pt-1 text-right text-lg font-extrabold leading-tight text-[var(--primary)] sm:text-[1.4rem]">
+                <p className="shrink-0 whitespace-nowrap pt-1 text-right text-lg font-extrabold leading-tight text-primary sm:text-[1.4rem]">
                   {product.price}
                 </p>
               </div>
 
-              <p className="font-subtitle mb-2 text-base font-bold italic leading-none text-[var(--secondary)] sm:text-lg">
+              <p className="font-subtitle mb-2 text-base font-bold italic leading-none text-secondary sm:text-lg">
                 {product.category}
               </p>
 
-              <p className="mb-4 text-sm leading-snug text-[var(--text)] sm:text-[15px]">
+              <p className="mb-4 text-sm leading-snug text-text sm:text-[15px]">
                 {product.description}
               </p>
 
               <button
                 type="button"
-                className="mt-auto w-full rounded-full bg-[var(--primary)] py-2.5 text-sm font-bold text-[var(--primary-contrast)] transition-colors hover:bg-[var(--secondary)] sm:text-base lg:text-lg"
+                className="mt-auto w-full rounded-full bg-primary py-2.5 text-sm font-bold text-primary-contrast transition-colors hover:bg-secondary sm:text-base lg:text-lg"
                 onClick={(e) => {
                   e.stopPropagation();
                   openDetails(product);
@@ -106,6 +108,8 @@ function Shopping() {
         </div>
       )}
     </div>
+    <Footer />
+    </>
   )
 }
 
