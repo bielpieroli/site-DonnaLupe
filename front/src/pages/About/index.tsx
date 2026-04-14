@@ -7,17 +7,16 @@ function About() {
   return (
     <main className="bg-bg text-[#3d0d12]">
       <section className="h-screen bg-linear-to-r from-[#7a0013] to-[#cf0f3f]">
-        <div className="mx-auto grid h-full max-w-7xl items-center gap-10 px-6 md:grid-cols-2">
-          <div className="text-white">
-            <p className="font-subtitle text-3xl font-bold italic text-primary-contrast">
-              Conheça nossa história
+        <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 max-w-7xl justify-center mx-auto">
+          <div className="text-primary-contrast">
+            <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
+              Cookies & Coffee Break
             </p>
-
-            <h1 className="mt-4 max-w-xl font-display text-5xl font-extrabold leading-tight md:text-7xl">
+            <h1 className="w-full font-display text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight">
               Feitos com amor desde a primeira fornada
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/90">
+            <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
               Mais do que cookies, criamos momentos especiais. Cada receita é feita
               com ingredientes selecionados, carinho e aquele gostinho de casa que
               transforma qualquer dia.
@@ -31,14 +30,12 @@ function About() {
             </Link>
           </div>
 
-          <div className="relative flex h-full items-center justify-center">
-            <div className="max-h-[75vh] overflow-hidden rounded-4xl shadow-2xl">
+          <div className="relative flex items-center justify-center h-auto md:h-full py-6 md:py-0">
               <img
                 src={cookieChocoChunk}
                 alt="Cookie Choco Chunk"
-                className="h-full w-full max-w-md object-cover"
+                className="w-full max-w-xs sm:max-w-sm lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-15 lg:translate-y-0 shadow-2xl rounded-4xl overflow-hidden"
               />
-            </div>
           </div>
         </div>
       </section>
