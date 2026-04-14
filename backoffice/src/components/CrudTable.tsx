@@ -13,8 +13,9 @@ import {
 export interface CrudField {
   value: string;
   label: string;
-  type?: "text" | "badge" | "date" | "number" | "multivalue";
+  type?: "text" | "textarea" | "select" | "badge" | "date" | "number" | "multivalue";
   badgeVariants?: Record<string, string>;
+  options?: string[];
   multiValueOptions?: string[];
 }
 
@@ -193,12 +194,14 @@ export function CrudTable({
       );
     }
 
-    if (field.type === "badge" && field.badgeVariants) {
+    if ((field.type === "badge" || field.type === "select") && field.badgeVariants) {
       const cls = field.badgeVariants[val] ?? "bg-surface text-text";
       return <Badge className={`text-xs font-medium px-2 py-0.5 ${cls}`}>{val}</Badge>;
     }
     return <span className="text-text">{val}</span>;
   };
+
+  const getFieldOptions = (field: CrudField) => field.options ?? Object.keys(field.badgeVariants ?? {});
 
   const startItem = filteredAll.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const endItem = Math.min(safePage * pageSize, filteredAll.length);
@@ -430,17 +433,22 @@ export function CrudTable({
 
 
       {/* Create Dialog */}
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={`Novo ${entityLabel}`} widthClassName="max-w-md">
-          <div className="space-y-4 py-2">
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={`Novo ${entityLabel}`} widthClassName="max-w-2xl">
+          <div className="grid gap-4 py-2 sm:grid-cols-2">
             {fields.map(f => (
-              <div key={f.value} className="space-y-1.5">
+              <div key={f.value} className={`space-y-1.5 ${f.type === "textarea" ? "sm:col-span-2" : ""}`}>
                 <label htmlFor={`create-${f.value}`} className="text-sm text-muted mr-2">{f.label}</label>
-                {f.type === "badge" && f.badgeVariants ? (
-                  <Select value={formData[f.value] ?? ""} onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}>
+                {f.type === "badge" || f.type === "select" ? (
+                  <Select
+                    id={`create-${f.value}`}
+                    value={formData[f.value] ?? ""}
+                    onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}
+                    className="w-full"
+                  >
                     <option value="">Selecionar {f.label}</option>
-                      {Object.keys(f.badgeVariants).map(v => (
-                        <option key={v} value={v}>{v}</option>
-                      ))}
+                    {getFieldOptions(f).map(v => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
                   </Select>
                 ) : f.type === "multivalue" ? (
                   <div className="rounded-xl p-2.5">
@@ -482,11 +490,21 @@ export function CrudTable({
                     )}
                   </div>
                 ) : (
-                  <Input
-                    id={`create-${f.value}`}
-                    value={String(formData[f.value] ?? "")}
-                    onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
-                  />
+                  f.type === "textarea" ? (
+                    <textarea
+                      id={`create-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                      rows={5}
+                      className="min-h-28 w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  ) : (
+                    <Input
+                      id={`create-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                    />
+                  )
                 )}
               </div>
             ))}
@@ -505,16 +523,22 @@ export function CrudTable({
       </Modal>
 
       {/* Edit Dialog */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title={`Editar ${entityLabel}`} widthClassName="max-w-md">
-          <div className="space-y-4 py-2">
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title={`Editar ${entityLabel}`} widthClassName="max-w-2xl">
+          <div className="grid gap-4 py-2 sm:grid-cols-2">
             {fields.map(f => (
-              <div key={f.value} className="space-y-1.5">
-                <label className="text-sm text-muted mr-2">{f.label}</label>
-                {f.type === "badge" && f.badgeVariants ? (
-                  <Select value={formData[f.value] ?? ""} onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}>
-                      {Object.keys(f.badgeVariants).map(v => (
-                        <option key={v} value={v}>{v}</option>
-                      ))}
+              <div key={f.value} className={`space-y-1.5 ${f.type === "textarea" ? "sm:col-span-2" : ""}`}>
+                <label htmlFor={`edit-${f.value}`} className="text-sm text-muted mr-2">{f.label}</label>
+                {f.type === "badge" || f.type === "select" ? (
+                  <Select
+                    id={`edit-${f.value}`}
+                    value={formData[f.value] ?? ""}
+                    onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}
+                    className="w-full"
+                  >
+                    <option value="">Selecionar {f.label}</option>
+                    {getFieldOptions(f).map(v => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
                   </Select>
                 ) : f.type === "multivalue" ? (
                   <div className="rounded-xl p-2.5">
@@ -555,10 +579,21 @@ export function CrudTable({
                     )}
                   </div>
                 ) : (
-                  <Input
-                    value={String(formData[f.value] ?? "")}
-                    onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
-                  />
+                  f.type === "textarea" ? (
+                    <textarea
+                      id={`edit-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                      rows={5}
+                      className="min-h-28 w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  ) : (
+                    <Input
+                      id={`edit-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                    />
+                  )
                 )}
               </div>
             ))}

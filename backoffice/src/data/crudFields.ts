@@ -77,3 +77,51 @@ export const PERMISSION_FIELDS: CrudField[] = [
     multiValueOptions: MOCK_USER_NAMES,
   },
 ];
+
+export const LANDING_FIELDS: CrudField[] = [
+  {
+    value: "secao",
+    label: "Seção",
+    type: "text",
+  },
+  {
+    value: "titulo",
+    label: "Título",
+    type: "text",
+  },
+  {
+    value: "subtitulo",
+    label: "Subtítulo",
+    type: "text",
+  },
+  {
+    value: "descricao",
+    label: "Descrição",
+    type: "textarea",
+  },
+  {
+    value: "imagem",
+    label: "Imagem",
+    type: "text",
+  },
+  {
+    value: "botaoTexto",
+    label: "Texto do Botão",
+    type: "text",
+  },
+  {
+    value: "botaoLink",
+    label: "Link do Botão",
+    type: "text",
+  },
+  {
+    value: "status",
+    label: "Status",
+    type: "select",
+    options: ["Ativo", "Inativo"],
+    badgeVariants: {
+      Ativo: "bg-[#059669] border border-[#047857]",
+      Inativo: "bg-[#ef4444] border border-[#dc2626]",
+    },
+  },
+];
