@@ -98,6 +98,26 @@ body {
   color: var(--text-h);
 }
 
+.bg-panel-gradient {
+  background-image: var(--panel-gradient);
+}
+
+.bg-home-banner {
+  background-image: var(--home-banner);
+}
+
+.bg-login-hero {
+  background-image: var(--login-hero);
+}
+
+.bg-accent-orb {
+  background-color: var(--accent-orb);
+}
+
+.bg-primary-orb {
+  background-color: var(--primary-orb);
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
