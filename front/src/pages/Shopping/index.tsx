@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ProductDetailCard, { type CookieDetail } from '@/components/ProductDetailCard'
 import { PRODUCTS } from '@/data/products'
+import Footer from '@/components/Footer'
 
 function Shopping() {
   const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
@@ -16,6 +17,7 @@ function Shopping() {
   }
 
   return (
+    <>
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8 max-w-6xl sm:mb-10 lg:mb-12 px-46">
         <p className="font-subtitle text-lg font-bold text-primary sm:text-xl lg:text-2xl">
@@ -106,6 +108,8 @@ function Shopping() {
         </div>
       )}
     </div>
+    <Footer />
+    </>
   )
 }
 

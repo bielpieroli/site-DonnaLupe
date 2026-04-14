@@ -174,8 +174,7 @@ function About() {
           </Link>
         </div>
       </section>
-            <Footer />
-
+      <Footer />
     </main>
     
   )
