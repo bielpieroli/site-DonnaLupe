@@ -50,7 +50,7 @@ function Shopping() {
               </span>
             </div>
 
-            <div className="flex min-h-[260px] flex-col px-4 py-4 sm:px-5">
+            <div className="flex min-h-65 flex-col px-4 py-4 sm:px-5">
               <div className="mb-2 flex items-start justify-between gap-3">
                 <h2 className="min-w-0 flex-1 overflow-hidden font-display text-xl font-extrabold leading-tight text-text-h [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-2xl">
                   {product.name}
