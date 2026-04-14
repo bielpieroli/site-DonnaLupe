@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import Footer from '../../components/Footer'
-import { PRODUCTS } from '../../data/products'
+import Footer from '@/components/Footer'
+import { PRODUCTS } from '@/data/products'
 
 import HomeCookieImg from '@/assets/img/cookie-home.png'
 import cookieMorangoIMG from '@/assets/img/cookie-morango.jpg'
