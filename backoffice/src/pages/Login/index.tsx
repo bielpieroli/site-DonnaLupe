@@ -30,7 +30,11 @@ export default function LoginPage() {
       return;
     }
 
-    login(email, password);
+    const msg = login(email, password);
+    if (msg) {
+      setErrorMessage(msg);
+      return;
+    }
     navigate(destination, { replace: true });
   };
 

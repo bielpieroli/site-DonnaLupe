@@ -118,26 +118,6 @@ body {
   background-color: var(--primary-orb);
 }
 
-.font-comfortaa {
-  font-family: var(--font-comfortaa);
-}
-
-.font-poppins {
-  font-family: var(--font-poppins);
-}
-
-.font-display {
-  font-family: var(--font-display);
-}
-
-.font-body {
-  font-family: var(--font-body);
-}
-
-.font-subtitle {
-  font-family: var(--font-subtitle);
-}
-
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;

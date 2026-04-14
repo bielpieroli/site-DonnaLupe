@@ -1,50 +1,16 @@
-import { CrudTable, type CrudField } from "@/components/CrudTable";
+import { CrudTable } from "@/components/CrudTable";
 import type { CrudItemType } from "@/types/CrudItem";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
 import { ArrowLeft, UserCog } from "lucide-react";
-
-interface UserItem extends CrudItemType {
-  email: string;
-  cargo: string;
-  departamento: string;
-}
-
-const sampleUsers: UserItem[] = [
-  { id:"1", name: "Ana Beatriz Santos", email: "ana@gmail.com", cargo: "Analista", departamento: "Vendas"},
-  { id:"2", name: "Carlos Eduardo Lima", email: "carlos@gmail.com", cargo: "Gerente", departamento: "Marketing" },
-  { id:"3", name: "Fernanda Oliveira", email: "fernanda@gmail.com", cargo: "Supervisora", departamento: "Financeiro" },
-  { id:"4", name: "Gabriel Costa", email: "gabriel@gmail.com", cargo: "Coordenador", departamento: "TI" },
-  { id:"5", name: "Helena Martins", email: "helena@gmail.com", cargo: "Assistente", departamento: "Eventos" },
-  { id:"6", name: "Igor Ferreira", email: "igor@gmail.com", cargo: "Consultor", departamento: "Comunicação" },
-  { id: "7", name: "Juliana Ramos", email: "juliana@gmail.com", cargo: "Analista", departamento: "Vendas" },
-  { id: "8", name: "Lucas Almeida", email: "lucas@gmail.com", cargo: "Gerente", departamento: "Marketing" },
-  { id: "9", name: "Marina Pereira", email: "marina@gmail.com", cargo: "Supervisora", departamento: "Financeiro" },
-  { id: "10", name: "Nicolas Barbosa", email: "nicolas@gmail.com", cargo: "Coordenador", departamento: "TI" },
-  { id: "11", name: "Olívia Souza", email: "olivia@gmail.com", cargo: "Assistente", departamento: "Eventos" },
-  { id: "12", name: "Pedro Henrique Nunes", email: "pedro@gmail.com", cargo: "Consultor", departamento: "Comunicação" },
-];
-
-const fields: CrudField[] = [
-  { value: "name", label: "Nome", type: "text" },
-  { value: "email", label: "E-mail", type: "text" },
-  { value: "cargo", label: "Cargo", type: "text" },
-  { value: "departamento", label: "Departamento", type: "badge", badgeVariants: {
-    "TI": "bg-[#2563eb] border border-[#1e40af]",
-    "Eventos": "bg-[#b2501f] border border-[#923f19]",
-    "Marketing": "bg-[#c0266a] border border-[#9f1239]",
-    "Financeiro": "bg-[#b45309] border border-[#92400e]",
-    "Diretoria": "bg-[#dc2626] border border-[#991b1b]",
-    "Comunicação": "bg-[#f97316] border border-[#c2410c]",
-    "Operações": "bg-[#9a3412] border border-[#7c2a0d]",
-  }},
-];
+import { MOCK_USERS } from "@/mocks/users";
+import { USER_FIELDS } from "@/data/crudFields";
 
 export default function UsersCRUD() {
   const navigate = useNavigate();
-  const [data, setData] = useState<CrudItemType[]>(sampleUsers);
+  const [data, setData] = useState<CrudItemType[]>(MOCK_USERS);
 
   // TODO: Integrar com backend para persistência real dos dados no BD
   const handleEdit = (item: CrudItemType) => {
@@ -65,10 +31,10 @@ export default function UsersCRUD() {
             <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-text/70">Usuários</p>
           </div>
           <h1 className="font-display text-2xl font-semibold text-text-h md:text-3xl">
-            Gestão de Usuários para Acesso ao Backoffice da DonnaLupe
+            Cadastro de Usuários do Backoffice
           </h1>
           <p className="mt-1 text-muted">
-            Cadastre e busque usuários do Backoffice, acesse e edite informações, mantenha controle sobre quem possui acesso ao painel Backoffice da Loja de Doces DonnaLupe.
+            Cadastre e mantenha os usuários do backoffice. A atribuição de acesso R e RW por recurso é feita na seção de permissões.
           </p>
         </div>
         <div className="px-6 pb-6">
@@ -91,7 +57,7 @@ export default function UsersCRUD() {
       <div className="rounded-xl border border-border bg-surface p-5">
         <CrudTable
           data={data}
-          fields={fields}
+          fields={USER_FIELDS}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onCreate={handleCreate}
