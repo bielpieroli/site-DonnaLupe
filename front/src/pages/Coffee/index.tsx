@@ -128,10 +128,10 @@ export default function CoffeePage() {
 
   return (
     <main className="bg-background text-text">
-      <section className="bg-secondary">
+      <section className="h-screen bg-linear-to-r from-[#7a0013] to-[#cf0f3f]">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
           <div className="text-white">
-            <p className="font-serif text-2xl italic text-primary-contrast/90">Coffee Break para eventos</p>
+            <p className="font-subtitle text-3xl font-bold italic text-primary-contrast">Coffee Break para eventos</p>
             <h1 className="mt-4 max-w-xl font-serif text-5xl font-bold leading-tight md:text-7xl">
               Monte o seu Coffee Break
             </h1>

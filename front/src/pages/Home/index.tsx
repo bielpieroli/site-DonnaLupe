@@ -72,16 +72,16 @@ export default function Home() {
   return (
     <main className="bg-[#f7f2ef] text-[#3d0d12]">
       <section className="h-screen bg-linear-to-r from-[#7a0013] to-[#cf0f3f]">
-        <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 md:grid-cols-2 md:px-36">
+        <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 max-w-7xl justify-center mx-auto">
           <div className="text-primary-contrast">
-            <p className="font-subtitle text-3xl font-bold italic text-primary-contrast">
+            <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
               Cookies & Coffee Break
             </p>
-            <h1 className="max-w-xl font-display text-4xl font-extrabold leading-tight sm:text-5xl md:text-7xl lg:text-8xl">
+            <h1 className="w-full font-display text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight">
               Cookies que fazem sorrir
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/90 sm:text-xl md:text-2xl">
+            <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
               Feitos à mão com ingredientes de verdade, muito amor e uma pitada de magia.
               Cada mordida é um abraço quentinho.
             </p>
@@ -94,13 +94,12 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="relative flex items-center justify-center h-full">
+          <div className="relative flex items-center justify-center h-auto md:h-full py-6 md:py-0">
             <img
               src={HomeCookieImg}
               alt="Cookie"
-              className="max-w-full max-h-full object-contain"
+              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-10 sm:-translate-y-6 lg:translate-y-0"
             />
-            
           </div>
         </div>
       </section>
