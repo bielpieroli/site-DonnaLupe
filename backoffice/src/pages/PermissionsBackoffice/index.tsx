@@ -1,4 +1,4 @@
-import { CrudTable, type CrudField } from "@/components/CrudTable";
+import { CrudTable } from "@/components/CrudTable";
 import type { CrudItemType } from "@/types/CrudItem";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,37 +6,7 @@ import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { MOCK_PERMISSIONS } from "@/mocks/permissions";
-import { MOCK_USER_NAMES } from "@/mocks/users";
-
-const fields: CrudField[] = [
-  { value: "name", label: "Permissao", type: "text" },
-  {
-    value: "recurso",
-    label: "Recurso",
-    type: "badge",
-    badgeVariants: {
-      Produtos: "bg-[#1d4ed8] border border-[#1e40af]",
-      Pedidos: "bg-[#c2410c] border border-[#9a3412]",
-      Usuarios: "bg-[#7c3aed] border border-[#6d28d9]",
-      Relatorios: "bg-[#475569] border border-[#334155]",
-      Financeiro: "bg-[#b45309] border border-[#92400e]",
-      Atendimento: "bg-[#15803d] border border-[#166534]",
-    },
-  },
-  {
-    value: "usuariosLeitura",
-    label: "Usuários com leitura (R)",
-    type: "multivalue",
-    multiValueOptions: MOCK_USER_NAMES,
-  },
-  {
-    value: "usuariosLeituraEscrita",
-    label: "Usuários com leitura/escrita (RW)",
-    type: "multivalue",
-    multiValueOptions: MOCK_USER_NAMES,
-  },
-  { value: "descricao", label: "Descricao", type: "text" },
-];
+import { PERMISSION_FIELDS } from "@/data/crudFields";
 
 export default function PermissionsCRUD() {
   const navigate = useNavigate();
@@ -86,7 +56,7 @@ export default function PermissionsCRUD() {
       <div className="rounded-xl border border-border bg-surface p-5">
         <CrudTable
           data={data}
-          fields={fields}
+          fields={PERMISSION_FIELDS}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onCreate={handleCreate}

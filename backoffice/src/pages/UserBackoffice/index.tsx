@@ -1,4 +1,4 @@
-import { CrudTable, type CrudField } from "@/components/CrudTable";
+import { CrudTable } from "@/components/CrudTable";
 import type { CrudItemType } from "@/types/CrudItem";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,11 +6,7 @@ import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
 import { ArrowLeft, UserCog } from "lucide-react";
 import { MOCK_USERS } from "@/mocks/users";
-
-const fields: CrudField[] = [
-  { value: "name", label: "Nome", type: "text" },
-  { value: "email", label: "E-mail", type: "text" },
-];
+import { USER_FIELDS } from "@/data/crudFields";
 
 export default function UsersCRUD() {
   const navigate = useNavigate();
@@ -61,7 +57,7 @@ export default function UsersCRUD() {
       <div className="rounded-xl border border-border bg-surface p-5">
         <CrudTable
           data={data}
-          fields={fields}
+          fields={USER_FIELDS}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onCreate={handleCreate}

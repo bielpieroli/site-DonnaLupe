@@ -1,51 +1,16 @@
-import { CrudTable, type CrudField } from "@/components/CrudTable";
+import { CrudTable } from "@/components/CrudTable";
 import type { CrudItemType } from "@/types/CrudItem";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
-
-interface ProductItem extends CrudItemType {
-  categoria: string;
-  preco: number;
-  estoque: number;
-  sabor?: string;
-  status: string;
-}
-
-const sampleProducts: ProductItem[] = [
-  { id: "1", name: "Balas Sortidas", categoria: "Balas", preco: 5.50, estoque: 120, sabor: "Frutas", status: "Disponível" },
-  { id: "2", name: "Chocolate Meio Amargo 100g", categoria: "Chocolates", preco: 5.90, estoque: 40, sabor: "Meio Amargo", status: "Disponível" },
-  { id: "3", name: "Brigadeiro Gourmet (un)", categoria: "Doces", preco: 3.50, estoque: 200, sabor: "Chocolate", status: "Disponível" },
-  { id: "4", name: "Pipoca Doce Caramelizada", categoria: "Snacks", preco: 6.00, estoque: 30, sabor: "Caramelo", status: "Em promoção" },
-  { id: "5", name: "Biscoito Recheado Morango", categoria: "Biscoitos", preco: 5.21, estoque: 0, sabor: "Morango", status: "Esgotado" },
-  { id: "6", name: "Goma de Mascar (pacote)", categoria: "Balas", preco: 5.20, estoque: 300, sabor: "Menta", status: "Disponível" },
-  { id: "7", name: "Bombom Sortido 6un", categoria: "Chocolates", preco: 12.00, estoque: 25, sabor: "Sortido", status: "Disponível" },
-];
-
-const fields: CrudField[] = [
-  { value: "name", label: "Produto", type: "text" },
-  { value: "categoria", label: "Categoria", type: "badge", badgeVariants: {
-    "Balas": "bg-[#cc6b2f] border border-[#b25b28]",
-    "Chocolates": "bg-[#7f56c9] border border-[#6a3fb8]",
-    "Biscoitos": "bg-[#d28f2a] border border-[#b37222]",
-    "Doces": "bg-[#c44b78] border border-[#9c375f]",
-    "Snacks": "bg-[#2fa678] border border-[#248760]",
-  }},
-  { value: "preco", label: "Preço", type: "text" },
-  { value: "estoque", label: "Estoque", type: "text" },
-  { value: "sabor", label: "Sabor", type: "text" },
-  { value: "status", label: "Status", type: "badge", badgeVariants: {
-    "Disponível": "bg-[#059669] border border-[#047857]",
-    "Esgotado": "bg-[#ef4444] border border-[#dc2626]",
-    "Em promoção": "bg-[#f59e0b] border border-[#d97706]",
-  }},
-];
+import { MOCK_PRODUCTS } from "@/mocks/products";
+import { PRODUCT_FIELDS } from "@/data/crudFields";
 
 export default function Products() {
   const navigate = useNavigate();
-  const [data, setData] = useState<CrudItemType[]>(sampleProducts);
+  const [data, setData] = useState<CrudItemType[]>(MOCK_PRODUCTS);
 
   const handleEdit = (item: CrudItemType) => {
     setData(prev => prev.map(i => i.id === item.id ? item : i));
@@ -67,7 +32,7 @@ export default function Products() {
             Gerenciamento de Produtos
           </h1>
           <p className="mt-1 text-muted">
-            Cadastre, busque, edite e remova produtos da loja de doces.
+            Cadastre, busque, edite e remova produtos de venda individual e de coffee.
           </p>
         </div>
         <div className="px-6 pb-6">
@@ -89,7 +54,7 @@ export default function Products() {
       <div className="rounded-xl border border-border bg-surface p-5">
         <CrudTable
           data={data}
-          fields={fields}
+          fields={PRODUCT_FIELDS}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onCreate={handleCreate}
