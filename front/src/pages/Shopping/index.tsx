@@ -19,7 +19,7 @@ function Shopping() {
   return (
     <>
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8 max-w-6xl sm:mb-10 lg:mb-12 px-46">
+      <header className="mb-8 max-w-7xl sm:mb-10 lg:mb-12 px-4 sm:px-6 lg:px-8">
         <p className="font-subtitle text-lg font-bold text-primary sm:text-xl lg:text-2xl">
           Monte seu pedido!
         </p>
@@ -33,7 +33,7 @@ function Shopping() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 px-46">
+      <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 px-4 sm:px-6 lg:px-8">
         {PRODUCTS.map((product) => (
           <article
             key={product.id}
