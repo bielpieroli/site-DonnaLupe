@@ -106,7 +106,7 @@ export const MOCK_PRODUCTS: MockProductItem[] = [
     tipo: "Coffee",
     categoria: "Bolos",
     preco: 35,
-    estoque: 6,
+    estoque: 0,
     sabor: "Do dia",
     status: "Esgotado",
   },
