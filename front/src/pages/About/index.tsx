@@ -16,7 +16,7 @@ function About() {
               Feitos com amor desde a primeira fornada
             </h1>
 
-            <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
+            <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-justify text-white/90">
               Mais do que cookies, criamos momentos especiais. Cada receita é feita
               com ingredientes selecionados, carinho e aquele gostinho de casa que
               transforma qualquer dia.
@@ -41,7 +41,7 @@ function About() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20">
-        <div className="grid gap-12 md:grid-cols-2">
+        <div className="grid gap-12 lg:grid-cols-2">
           <div>
             <p className="font-subtitle text-3xl font-bold italic text-primary">
               Nossa essência
@@ -51,13 +51,13 @@ function About() {
               Uma marca feita para adoçar momentos
             </h2>
 
-            <p className="mt-6 text-lg leading-8 text-[#5a4a49]">
+            <p className="mt-6 text-lg leading-8 text-justify text-[#5a4a49]">
               Somos uma empresa dedicada a oferecer os melhores produtos e serviços
               para nossos clientes. Com anos de experiência no mercado, buscamos
               garantir qualidade, sabor e uma experiência memorável em cada pedido.
             </p>
 
-            <p className="mt-4 text-lg leading-8 text-[#5a4a49]">
+            <p className="mt-4 text-lg leading-8 text-justify text-[#5a4a49]">
               Nossa equipe é formada por pessoas apaixonadas pelo que fazem,
               comprometidas em criar receitas artesanais, inovadoras e feitas com
               ingredientes de verdade.
@@ -65,7 +65,7 @@ function About() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-4xl bg-white p-8 shadow-sm">
+            <div className="rounded-4xl bg-white py-5 px-10 shadow-sm">
               <h3 className="font-display text-3xl font-extrabold text-primary">
                 +10 anos
               </h3>
@@ -74,7 +74,7 @@ function About() {
               </p>
             </div>
 
-            <div className="rounded-4xl bg-white p-8 shadow-sm">
+            <div className="rounded-4xl bg-white py-5 px-10 shadow-sm">
               <h3 className="font-display text-3xl font-extrabold text-primary">
                 Ingredientes reais
               </h3>
@@ -83,7 +83,7 @@ function About() {
               </p>
             </div>
 
-            <div className="rounded-4xl bg-white p-8 shadow-sm">
+            <div className="rounded-4xl bg-white py-5 px-10 shadow-sm">
               <h3 className="font-display text-3xl font-extrabold text-primary">
                 Atendimento especial
               </h3>
@@ -92,7 +92,7 @@ function About() {
               </p>
             </div>
 
-            <div className="rounded-4xl bg-white p-8 shadow-sm">
+            <div className="rounded-4xl bg-white py-5 px-10 shadow-sm">
               <h3 className="font-display text-3xl font-extrabold text-primary">
                 Receitas exclusivas
               </h3>
@@ -114,8 +114,8 @@ function About() {
             O que faz a Donna Lupe especial
           </h2>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            <article className="rounded-4xl bg-white p-8 shadow-sm">
+          <div className="mt-14 grid gap-8 lg:grid-cols-3 max-w-md lg:max-w-full mx-auto">
+            <article className="rounded-4xl bg-white py-5 px-10 shadow-sm">
               <div className="text-5xl">💛</div>
               <h3 className="mt-6 font-display text-3xl font-extrabold">
                 Feito com amor
@@ -125,7 +125,7 @@ function About() {
               </p>
             </article>
 
-            <article className="rounded-4xl bg-white p-8 shadow-sm">
+            <article className="rounded-4xl bg-white py-5 px-10 shadow-sm">
               <div className="text-5xl">🍪</div>
               <h3 className="mt-6 font-display text-3xl font-extrabold">
                 Qualidade em cada detalhe
@@ -135,7 +135,7 @@ function About() {
               </p>
             </article>
 
-            <article className="rounded-4xl bg-white p-8 shadow-sm">
+            <article className="rounded-4xl bg-white py-5 px-10 shadow-sm">
               <div className="text-5xl">✨</div>
               <h3 className="mt-6 font-display text-3xl font-extrabold">
                 Experiência inesquecível

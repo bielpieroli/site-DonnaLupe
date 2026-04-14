@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from 'react-router-dom'
 import CoffeeImage from "@/assets/img/Coffee/coffebreak.jpg";
 import cookiesImg from "@/assets/img/Coffee/Products/cookies.jpg";
 import browniesImg from "@/assets/img/Coffee/Products/brownies.jpg";
@@ -141,13 +142,21 @@ export default function CoffeePage() {
             <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
               Escolha os produtos no catálogo do coffee e envie seu pedido para a gente pelo WhatsApp para um orçamento especial. Simples, prático e delicioso!
             </p>
+
+            <Link
+              to="/shopping"
+              className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-semibold text-white transition hover:scale-105"
+            >
+              Conhecer os produtos
+            </Link>
+
           </div>
 
+            
+
           <div className="relative flex items-center justify-center h-auto md:h-full py-6 md:py-0">
-            <div className="overflow-hidden rounded-[60px] max-h-[75vh]">
-              <img src={CoffeeImage} alt="Mesa de coffee break" className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-10 sm:-translate-y-6 lg:translate-y-0" />
+              <img src={CoffeeImage} alt="Mesa de coffee break" className="w-full max-w-xs sm:max-w-sm lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-15 lg:translate-y-0 shadow-2xl rounded-4xl overflow-hidden" />
             </div>
-          </div>
         </div>
       </section>
 
@@ -158,6 +167,7 @@ export default function CoffeePage() {
             <h2 className="mt-2 font-serif text-5xl font-bold leading-tight md:text-6xl">
               Catálogo do <span className="italic text-secondary">Coffee</span>
             </h2>
+
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               {serviceItems.map((item) => {
