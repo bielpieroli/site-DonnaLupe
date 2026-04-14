@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import cookieChocoChunk from '../../assets/img/cookie-choco-chunk.jpg'
-import Footer from '../../components/Footer'
+import cookieChocoChunk from '@/assets/img/cookie-choco-chunk.jpg'
+import Footer from '@/components/Footer'
 
 
 function About() {

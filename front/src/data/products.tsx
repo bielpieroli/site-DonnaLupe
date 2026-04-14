@@ -1,11 +1,11 @@
-import cookieCaramelo from '../assets/img/cookie-caramelo.jpg'
-import cookieChocoChunk from '../assets/img/cookie-choco-chunk.jpg'
-import cookieDoubleChoc from '../assets/img/cookie-double-choc.jpg'
-import cookieLimao from '../assets/img/cookie-limao.jpg'
-import cookieMatcha from '../assets/img/cookie-matcha.jpg'
-import cookieMorango from '../assets/img/cookie-morango.jpg'
-import cookiesData from '../mocks/cookies.json'
-import type { CookieDetail } from '../components/ProductDetailCard'
+import cookieCaramelo from '@/assets/img/cookie-caramelo.jpg'
+import cookieChocoChunk from '@/assets/img/cookie-choco-chunk.jpg'
+import cookieDoubleChoc from '@/assets/img/cookie-double-choc.jpg'
+import cookieLimao from '@/assets/img/cookie-limao.jpg'
+import cookieMatcha from '@/assets/img/cookie-matcha.jpg'
+import cookieMorango from '@/assets/img/cookie-morango.jpg'
+import cookiesData from '@/mocks/cookies.json'
+import type { CookieDetail } from '@/components/ProductDetailCard'
 
 type CookieMock = Omit<CookieDetail, 'img'> & { imageFile: string }
 
