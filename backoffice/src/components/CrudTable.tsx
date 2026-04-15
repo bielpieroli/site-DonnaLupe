@@ -7,14 +7,16 @@ import Badge from "@/components/core/Badge";
 import { useState, useMemo } from "react";
 import {
   ChevronDown, ChevronUp, ChevronsUpDown, Search, Plus, Pencil, Trash2, X,
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Check,
 } from "lucide-react";
 
 export interface CrudField {
   value: string;
   label: string;
-  type?: "text" | "badge" | "date" | "number";
+  type?: "text" | "textarea" | "select" | "badge" | "date" | "number" | "multivalue";
   badgeVariants?: Record<string, string>;
+  options?: string[];
+  multiValueOptions?: string[];
 }
 
 export interface CrudTableProps {
@@ -38,6 +40,8 @@ export function CrudTable({
   entityLabel = "item",
   defaultPageSize = 10,
 }: CrudTableProps) {
+  type FormValue = string | string[];
+
   const [filter, setFilter] = useState("");
   const [filterField, setFilterField] = useState(fields[0]?.value ?? "name");
   const [sortField, setSortField] = useState(fields[0]?.value ?? "name");
@@ -49,7 +53,32 @@ export function CrudTable({
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CrudItemType | null>(null);
-  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<Record<string, FormValue>>({});
+
+  const normalizeToStringArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.map((v) => String(v));
+    if (typeof value === "string") {
+      return value
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean);
+    }
+    return [];
+  };
+
+  const formatForCompare = (value: unknown): string => {
+    if (Array.isArray(value)) return value.map((v) => String(v)).join(", ");
+    return String(value ?? "");
+  };
+
+  const toggleMultiValue = (fieldValue: string, option: string) => {
+    setFormData((prev) => {
+      const current = normalizeToStringArray(prev[fieldValue]);
+      const exists = current.includes(option);
+      const next = exists ? current.filter((v) => v !== option) : [...current, option];
+      return { ...prev, [fieldValue]: next };
+    });
+  };
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -76,7 +105,7 @@ export function CrudTable({
     let result = [...data];
     if (filter.trim()) {
       result = result.filter(item => {
-        const val = String((item as Record<string, unknown>)[filterField] ?? "").toLowerCase();
+        const val = formatForCompare((item as Record<string, unknown>)[filterField]).toLowerCase();
         return val.includes(filter.toLowerCase());
       });
     }
@@ -101,7 +130,7 @@ export function CrudTable({
       }
 
       // fallback string
-      return String(aVal).localeCompare(String(bVal), "pt-BR", { numeric: true }) * direction;
+      return formatForCompare(aVal).localeCompare(formatForCompare(bVal), "pt-BR", { numeric: true }) * direction;
     });
 
   return result;
@@ -117,8 +146,11 @@ export function CrudTable({
 
   const openEdit = (item: CrudItemType) => {
     setSelectedItem(item);
-    const fd: Record<string, string> = {};
-    fields.forEach(f => { fd[f.value] = String((item as Record<string, unknown>)[f.value] ?? ""); });
+    const fd: Record<string, FormValue> = {};
+    fields.forEach((f) => {
+      const raw = (item as Record<string, unknown>)[f.value];
+      fd[f.value] = f.type === "multivalue" ? normalizeToStringArray(raw) : String(raw ?? "");
+    });
     setFormData(fd);
     setEditOpen(true);
   };
@@ -129,8 +161,10 @@ export function CrudTable({
   };
 
   const openCreate = () => {
-    const fd: Record<string, string> = {};
-    fields.forEach(f => { fd[f.value] = ""; });
+    const fd: Record<string, FormValue> = {};
+    fields.forEach((f) => {
+      fd[f.value] = f.type === "multivalue" ? [] : "";
+    });
     setFormData(fd);
     setCreateOpen(true);
   };
@@ -138,18 +172,36 @@ export function CrudTable({
   const SortIcon = ({ field }: { field: string }) => {
     if (sortField !== field) return <ChevronsUpDown className="inline ml-1 w-3.5 h-3.5 opacity-30" />;
     return sortOrder === "asc"
-      ? <ChevronUp className="inline ml-1 w-3.5 h-3.5 text-(--primary)" />
-      : <ChevronDown className="inline ml-1 w-3.5 h-3.5 text-(--primary)" />;
+      ? <ChevronUp className="inline ml-1 w-3.5 h-3.5 text-primary" />
+      : <ChevronDown className="inline ml-1 w-3.5 h-3.5 text-primary" />;
   };
 
   const renderCell = (item: CrudItemType, field: CrudField) => {
-    const val = String((item as Record<string, unknown>)[field.value] ?? "—");
-    if (field.type === "badge" && field.badgeVariants) {
-      const cls = field.badgeVariants[val] ?? "bg-[var(--surface)] text-(--text)";
+    const raw = (item as Record<string, unknown>)[field.value];
+    const val = String(raw ?? "—");
+
+    if (field.type === "multivalue") {
+      const values = normalizeToStringArray(raw);
+      if (!values.length) return <span className="text-muted">—</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {values.map((entry) => (
+            <Badge key={`${field.value}-${entry}`} className="px-2 py-0.5 text-xs font-medium bg-secondary-contrast/30 text-text">
+              {entry}
+            </Badge>
+          ))}
+        </div>
+      );
+    }
+
+    if ((field.type === "badge" || field.type === "select") && field.badgeVariants) {
+      const cls = field.badgeVariants[val] ?? "bg-surface text-text";
       return <Badge className={`text-xs font-medium px-2 py-0.5 ${cls}`}>{val}</Badge>;
     }
-    return <span className="text-(--text)">{val}</span>;
+    return <span className="text-text">{val}</span>;
   };
+
+  const getFieldOptions = (field: CrudField) => field.options ?? Object.keys(field.badgeVariants ?? {});
 
   const startItem = filteredAll.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const endItem = Math.min(safePage * pageSize, filteredAll.length);
@@ -177,7 +229,7 @@ export function CrudTable({
             ))}
           </Select>
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--muted) pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
             <Input
               placeholder={`Filtrar por ${fields.find(f => f.value === filterField)?.label ?? "campo"}…`}
               value={filter}
@@ -187,7 +239,7 @@ export function CrudTable({
             {filter && (
               <button
                 onClick={() => handleFilterChange("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-(--muted) hover:text-(--text)"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -200,7 +252,7 @@ export function CrudTable({
             className="shrink-0"
           >
             <Plus className="w-4 h-4" />
-            Novo {entityLabel}
+            Novo(a) {entityLabel}
           </Button>
         )}
       </div>
@@ -208,7 +260,7 @@ export function CrudTable({
       {/* Paginação */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
         {/* Info + Quantidade por página */}
-        <div className="flex items-center gap-3 text-xs text-(--muted)">
+        <div className="flex items-center gap-3 text-xs text-muted">
           <span>
             {filteredAll.length === 0
               ? "Nenhum registro"
@@ -239,7 +291,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(1)}
               disabled={safePage === 1}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Primeira página"
             >
               <ChevronsLeft className="w-4 h-4" />
@@ -249,7 +301,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Página anterior"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -257,7 +309,7 @@ export function CrudTable({
 
             {getPageNumbers().map((p, i) =>
               p === "..." ? (
-                <span key={`ellipsis-${i}`} className="w-8 select-none text-center text-sm text-(--muted)">
+                <span key={`ellipsis-${i}`} className="w-8 select-none text-center text-sm text-muted">
                   ···
                 </span>
               ) : (
@@ -268,8 +320,8 @@ export function CrudTable({
                   onClick={() => setPage(p as number)}
                   className={`h-8 w-8 p-0 rounded-lg text-sm transition-all ${
                     safePage === p
-                      ? "bg-(--primary) text-(--primary-contrast) font-semibold"
-                      : "text-(--muted)"
+                      ? "bg-primary text-primary-contrast font-semibold"
+                      : "text-muted"
                   }`}
                 >
                   {p}
@@ -282,7 +334,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Próxima página"
             >
               <ChevronRight className="w-4 h-4" />
@@ -292,7 +344,7 @@ export function CrudTable({
               size="sm"
               onClick={() => setPage(totalPages)}
               disabled={safePage === totalPages}
-              className="h-8 w-8 rounded-lg p-0 text-(--muted) disabled:opacity-30"
+              className="h-8 w-8 rounded-lg p-0 text-muted disabled:opacity-30"
               title="Última página"
             >
               <ChevronsRight className="w-4 h-4" />
@@ -302,33 +354,33 @@ export function CrudTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-(--border)">
+      <div className="overflow-hidden rounded-xl border border-border">
         <div className="overflow-x-auto">
           <table className="w-full min-w-215 border-collapse">
             <thead>
-              <tr className="bg-[color-mix(in_oklab,var(--secondary)_20%,var(--surface))]">
+              <tr className="bg-surface/95">
               {fields.map(f => (
                 <th
                   key={f.value}
-                  className="cursor-pointer select-none border-b border-(--border) px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted)"
+                  className="cursor-pointer select-none border-b border-border px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted"
                   onClick={() => handleSort(f.value)}
                 >
                   {f.label}
                   <SortIcon field={f.value} />
                 </th>
               ))}
-              <th className="w-24 border-b border-(--border) px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted)">Ações</th>
+              <th className="w-24 border-b border-border px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">Ações</th>
               </tr>
             </thead>
             <tbody>
             {paginated.length === 0 ? (
               <tr>
-                <td colSpan={fields.length + 1} className="py-12 text-center text-(--muted)">
+                <td colSpan={fields.length + 1} className="py-12 text-center text-muted">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="w-8 h-8 opacity-30" />
                     <p>Nenhum resultado encontrado</p>
                     {filter && (
-                      <button onClick={() => handleFilterChange("")} className="text-sm text-(--primary)">
+                      <button onClick={() => handleFilterChange("")} className="text-sm text-primary">
                         Limpar filtro
                       </button>
                     )}
@@ -340,21 +392,21 @@ export function CrudTable({
                 <tr
                   key={item.id}
                   className={`transition-colors ${
-                    i % 2 === 0 ? "bg-transparent" : "bg-[color-mix(in_oklab,var(--surface)_84%,var(--secondary)_16%)]"
+                    i % 2 === 0 ? "bg-transparent" : "bg-secondary/10"
                   }`}
                 >
                   {fields.map(f => (
-                    <td key={f.value} className="border-b border-(--border) px-4 py-3">
+                    <td key={f.value} className="border-b border-border px-4 py-3">
                       {renderCell(item, f)}
                     </td>
                   ))}
-                  <td className="border-b border-(--border) px-4 py-3">
+                  <td className="border-b border-border px-4 py-3">
                     <div className="flex gap-1.5">
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => openEdit(item)}
-                        className="h-10 w-10 rounded-lg p-0 text-(--muted)"
+                        className="h-10 w-10 rounded-lg p-0 text-muted"
                         title="Editar"
                       >
                         <Pencil className="w-4 h-4" />
@@ -363,7 +415,7 @@ export function CrudTable({
                         size="sm"
                         variant="ghost"
                         onClick={() => openDelete(item)}
-                        className="h-10 w-10 rounded-lg p-0 text-(--muted)"
+                        className="h-10 w-10 rounded-lg p-0 text-muted"
                         title="Excluir"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -381,24 +433,78 @@ export function CrudTable({
 
 
       {/* Create Dialog */}
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={`Novo ${entityLabel}`} widthClassName="max-w-md">
-          <div className="space-y-4 py-2">
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={`Novo ${entityLabel}`} widthClassName="max-w-2xl">
+          <div className="grid gap-4 py-2 sm:grid-cols-2">
             {fields.map(f => (
-              <div key={f.value} className="space-y-1.5">
-                <label htmlFor={`create-${f.value}`} className="text-sm text-(--muted) mr-2">{f.label}</label>
-                {f.type === "badge" && f.badgeVariants ? (
-                  <Select value={formData[f.value] ?? ""} onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}>
-                    <option value="">Selecionar {f.label}</option>
-                      {Object.keys(f.badgeVariants).map(v => (
-                        <option key={v} value={v}>{v}</option>
-                      ))}
-                  </Select>
-                ) : (
-                  <Input
+              <div key={f.value} className={`space-y-1.5 ${f.type === "textarea" ? "sm:col-span-2" : ""}`}>
+                <label htmlFor={`create-${f.value}`} className="text-sm text-muted mr-2">{f.label}</label>
+                {f.type === "badge" || f.type === "select" ? (
+                  <Select
                     id={`create-${f.value}`}
                     value={formData[f.value] ?? ""}
-                    onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
-                  />
+                    onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}
+                    className="w-full"
+                  >
+                    <option value="">Selecionar {f.label}</option>
+                    {getFieldOptions(f).map(v => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
+                  </Select>
+                ) : f.type === "multivalue" ? (
+                  <div className="rounded-xl p-2.5">
+                    {f.multiValueOptions && f.multiValueOptions.length > 0 ? (
+                      <div className="grid gap-2 max-h-40 overflow-y-auto pr-1">
+                        {f.multiValueOptions.map((option) => {
+                          const selected = normalizeToStringArray(formData[f.value]).includes(option);
+                          return (
+                            <label key={option} className="flex items-center gap-2 text-sm text-text">
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                onChange={() => toggleMultiValue(f.value, option)}
+                                className="peer sr-only"
+                              />
+                              <span className="flex h-5 w-5 items-center justify-center rounded-md border border-primary bg-surface transition-all duration-150 peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40">
+                                <Check className="h-3.5 w-3.5 text-primary-contrast opacity-0 transition-opacity duration-150 peer-checked:opacity-100" />
+                              </span>
+                              <span>{option}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Input
+                        id={`create-${f.value}`}
+                        value={normalizeToStringArray(formData[f.value]).join(", ")}
+                        onChange={(e) =>
+                          setFormData((d) => ({
+                            ...d,
+                            [f.value]: e.target.value
+                              .split(",")
+                              .map((v) => v.trim())
+                              .filter(Boolean),
+                          }))
+                        }
+                        placeholder="Separe por vírgula"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  f.type === "textarea" ? (
+                    <textarea
+                      id={`create-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                      rows={5}
+                      className="min-h-28 w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  ) : (
+                    <Input
+                      id={`create-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                    />
+                  )
                 )}
               </div>
             ))}
@@ -417,22 +523,77 @@ export function CrudTable({
       </Modal>
 
       {/* Edit Dialog */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title={`Editar ${entityLabel}`} widthClassName="max-w-md">
-          <div className="space-y-4 py-2">
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title={`Editar ${entityLabel}`} widthClassName="max-w-2xl">
+          <div className="grid gap-4 py-2 sm:grid-cols-2">
             {fields.map(f => (
-              <div key={f.value} className="space-y-1.5">
-                <label className="text-sm text-(--muted) mr-2">{f.label}</label>
-                {f.type === "badge" && f.badgeVariants ? (
-                  <Select value={formData[f.value] ?? ""} onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}>
-                      {Object.keys(f.badgeVariants).map(v => (
-                        <option key={v} value={v}>{v}</option>
-                      ))}
-                  </Select>
-                ) : (
-                  <Input
+              <div key={f.value} className={`space-y-1.5 ${f.type === "textarea" ? "sm:col-span-2" : ""}`}>
+                <label htmlFor={`edit-${f.value}`} className="text-sm text-muted mr-2">{f.label}</label>
+                {f.type === "badge" || f.type === "select" ? (
+                  <Select
+                    id={`edit-${f.value}`}
                     value={formData[f.value] ?? ""}
-                    onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
-                  />
+                    onChange={v => setFormData(d => ({ ...d, [f.value]: v.target.value }))}
+                    className="w-full"
+                  >
+                    <option value="">Selecionar {f.label}</option>
+                    {getFieldOptions(f).map(v => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
+                  </Select>
+                ) : f.type === "multivalue" ? (
+                  <div className="rounded-xl p-2.5">
+                    {f.multiValueOptions && f.multiValueOptions.length > 0 ? (
+                      <div className="grid gap-2 max-h-40 overflow-y-auto pr-1">
+                        {f.multiValueOptions.map((option) => {
+                          const selected = normalizeToStringArray(formData[f.value]).includes(option);
+                          return (
+                            <label key={option} className="flex items-center gap-2 text-sm text-text">
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                onChange={() => toggleMultiValue(f.value, option)}
+                                className="peer sr-only"
+                              />
+                              <span className="flex h-5 w-5 items-center justify-center rounded-md border border-primary bg-surface transition-all duration-150 peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40">
+                                <Check className="h-3.5 w-3.5 text-primary-contrast opacity-0 transition-opacity duration-150 peer-checked:opacity-100" />
+                              </span>
+                              <span>{option}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Input
+                        value={normalizeToStringArray(formData[f.value]).join(", ")}
+                        onChange={(e) =>
+                          setFormData((d) => ({
+                            ...d,
+                            [f.value]: e.target.value
+                              .split(",")
+                              .map((v) => v.trim())
+                              .filter(Boolean),
+                          }))
+                        }
+                        placeholder="Separe por vírgula"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  f.type === "textarea" ? (
+                    <textarea
+                      id={`edit-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                      rows={5}
+                      className="min-h-28 w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  ) : (
+                    <Input
+                      id={`edit-${f.value}`}
+                      value={String(formData[f.value] ?? "")}
+                      onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
+                    />
+                  )
                 )}
               </div>
             ))}
@@ -452,9 +613,9 @@ export function CrudTable({
 
       {/* Delete Dialog */}
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Confirmar exclusão" widthClassName="max-w-sm">
-          <p className="py-2 text-sm text-(--muted)">
+          <p className="py-2 text-sm text-muted">
             Tem certeza que deseja excluir{" "}
-            <span className="font-medium text-(--text-h)">"{selectedItem?.name}"</span>? Esta ação não pode ser desfeita.
+            <span className="font-medium text-text-h">"{selectedItem?.name}"</span>? Esta ação não pode ser desfeita.
           </p>
           <div className="mt-5 flex flex-wrap justify-end gap-2">
             <Button variant="ghost" onClick={() => setDeleteOpen(false)}>Cancelar</Button>

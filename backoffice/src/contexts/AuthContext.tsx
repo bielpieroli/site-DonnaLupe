@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-
+import { MOCK_USERS } from "@/mocks/users";
 type AuthUser = {
   email: string;
   name: string;
@@ -8,7 +8,7 @@ type AuthUser = {
 type AuthContextValue = {
   isAuthenticated: boolean;
   user: AuthUser | null;
-  login: (email: string, password: string) => void;
+  login: (email: string, password: string) => string | null;
   logout: () => void;
 };
 
@@ -50,7 +50,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isAuthenticated: user !== null,
       user,
-      login: (email: string) => {
+      login: (email: string, password: string) => {
+        const user = MOCK_USERS.find((u) => u.email === email && u.password === password);
+        if (!user) {
+          return "Credenciais inválidas.";
+        }
+
         const normalizedEmail = email.trim().toLowerCase();
         const fallbackName = normalizedEmail.split("@")[0] || "Administrador";
 
@@ -62,6 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
             .join(" ") || "Administrador",
         });
+
+        return null;
       },
       logout: () => setUser(null),
     }),

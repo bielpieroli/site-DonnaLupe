@@ -1,48 +1,62 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
-:root {
-  --primary: #882b00;
-  --primary-contrast: #ffffff;
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-contrast: var(--primary-contrast);
+  --color-secondary: var(--secondary);
+  --color-secondary-contrast: var(--secondary-contrast);
+  --color-accent: var(--accent);
+  --color-accent-orb: rgba(217, 119, 6, 0.16);
+  --color-primary-orb: rgba(211, 22, 53, 0.12);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-text: var(--text);
+  --color-text-h: var(--text-h);
+  --color-border: var(--border);
+  --background-image-panel-gradient: linear-gradient(140deg, rgba(38, 29, 27, 0.96), rgba(177, 17, 42, 0.18));
+  --background-image-home-banner: linear-gradient(130deg, rgba(38, 29, 27, 0.98), rgba(177, 17, 42, 0.16));
+  --background-image-login-hero: linear-gradient(160deg, rgba(211, 22, 53, 0.98), rgba(177, 17, 42, 0.96));
 
-  --secondary: #a16207;
-  --secondary-contrast: #ffffff;
-
-  --accent: #d97706;
-
-  --bg: #fafaf9;
-  --surface: #ffffff;
-
-  --muted: #78716c;
-
-  --text: #292524;
-  --text-h: #1c1917;
-
-  --border: #e7e5e4;
-
-  --font-comfortaa: "Comfortaa", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-body: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
+  --font-subtitle: "Caveat", "Comic Sans MS", cursive;
+  --font-comfortaa: "Playfair Display", ui-serif, Georgia, serif;
   --font-poppins: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #ad3700;
-    --primary-contrast: #ffffff;
+:root {
+  --primary: #d31635;
+  --primary-contrast: #fff7ee;
 
-    --secondary: #a16207;
-    --secondary-contrast: #ffffff;
+  --secondary: #b1112a;
+  --secondary-contrast: #f8f4f1;
 
-    --accent: #d97706;
+  --accent: #d97706;
 
-    --bg: #1d1919;
-    --surface: #292524;
+  --bg: #171211;
+  --surface: #261d1b;
 
-    --muted: #a8a29e;
+  --muted: #bdaea6;
 
-    --text: #e7e5e4;
-    --text-h: #fafaf9;
+  --text: #f4efeb;
+  --text-h: #fff7ee;
 
-    --border: #44403c;
-  }
+  --border: #311827;
+
+  --accent-orb: rgba(217, 119, 6, 0.16);
+  --primary-orb: rgba(211, 22, 53, 0.12);
+  --panel-gradient: linear-gradient(140deg, rgba(38, 29, 27, 0.96), rgba(177, 17, 42, 0.18));
+  --home-banner: linear-gradient(130deg, rgba(38, 29, 27, 0.98), rgba(177, 17, 42, 0.16));
+  --login-hero: linear-gradient(160deg, rgba(65, 0, 11, 0.98), rgba(150, 0, 22, 0.96));
+
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-body: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
+  --font-subtitle: "Caveat", "Comic Sans MS", cursive;
+
+  --font-comfortaa: var(--font-display);
+  --font-poppins: var(--font-body);
 }
 
 html,
@@ -64,70 +78,15 @@ body::-webkit-scrollbar {
 
 body {
   margin: 0;
-  font-family: var(--font-poppins);
+  font-family: var(--font-body);
+  color-scheme: dark;
   background:
-    radial-gradient(1200px 700px at 15% -10%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, color-mix(in oklab, var(--secondary) 10%, transparent), transparent 60%),
+    radial-gradient(1200px 700px at 15% -10%, rgba(211, 22, 53, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(177, 17, 42, 0.13), transparent 60%),
     var(--bg);
 
   background-attachment: fixed;
   color: var(--text);
-}
-
-@font-face {
-  font-family: "Comfortaa";
-  src: url("./assets/fonts/Comfortaa/Comfortaa-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Comfortaa";
-  src: url("./assets/fonts/Comfortaa/Comfortaa-Medium.ttf") format("truetype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Comfortaa";
-  src: url("./assets/fonts/Comfortaa/Comfortaa-SemiBold.ttf") format("truetype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Comfortaa";
-  src: url("./assets/fonts/Comfortaa/Comfortaa-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src: url("./assets/fonts/Poppins/Poppins-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src: url("./assets/fonts/Poppins/Poppins-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src: url("./assets/fonts/Poppins/Poppins-ExtraBold.ttf") format("truetype");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
 }
 
 * {
@@ -135,16 +94,28 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--accent) 35%, transparent);
+  background: var(--accent);
   color: var(--text-h);
 }
 
-.font-comfortaa {
-  font-family: var(--font-comfortaa);
+.bg-panel-gradient {
+  background-image: var(--panel-gradient);
 }
 
-.font-poppins {
-  font-family: var(--font-poppins);
+.bg-home-banner {
+  background-image: var(--home-banner);
+}
+
+.bg-login-hero {
+  background-image: var(--login-hero);
+}
+
+.bg-accent-orb {
+  background-color: var(--accent-orb);
+}
+
+.bg-primary-orb {
+  background-color: var(--primary-orb);
 }
 
 .scrollbar-hide {
