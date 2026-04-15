@@ -2,8 +2,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import HomePage from "@/pages/Home";
-import CartPage from "@/pages/Cart";
-import ProfilePage from "@/pages/Profile";
 import ShoppingPage from "@/pages/Shopping";
 import AboutPage from "@/pages/About";
 import CoffeePage from "@/pages/Coffee";
@@ -19,20 +17,12 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "/cart",
-        element: <CartPage />,
-      },
-      {
         path: "/shopping",
         element: <ShoppingPage />,
       },
       {
         path: "/about",
         element: <AboutPage />,
-      },
-      {
-        path: "/profile",
-        element: <ProfilePage />,
       },
       {
         path: "/coffee",
