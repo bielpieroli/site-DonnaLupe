@@ -10,8 +10,8 @@ export default function Header() {
   const activeTab = tabs.find((t) => t.path === location.pathname)?.key || "home";
 
   // Lógica de distribuição para Desktop
-  const leftTabs = tabs.filter((_, i) => i < tabs.length - 2);
-  const rightTabs = tabs.filter((_, i) => i >= tabs.length - 2);
+  const leftTabs = tabs.filter((_, i) => i < tabs.length +2);
+  //const rightTabs = tabs.filter((_, i) => i >= tabs.length - 2);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-primary-contrast shadow-sm">
@@ -43,11 +43,11 @@ export default function Header() {
           </div>
 
           {/* Direito */}
-          <nav className="hidden 2xl:flex flex-1 justify-end pl-20 gap-8">
+          {/* <nav className="hidden 2xl:flex flex-1 justify-end pl-20 gap-8">
             {rightTabs.map((tab) => (
               <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
             ))}
-          </nav>
+          </nav> */}
         </div>
 
         {/* MENU MOBILE DROP DOWN */}

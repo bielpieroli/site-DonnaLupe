@@ -10,7 +10,5 @@ export const tabs: Array<{ key: TabKey; label: string; path: string }> = [
   { key: "shopping", label: "Shopping", path: "/shopping" },
   { key: "coffee", label: "Coffee", path: "/coffee" },
 
-  { key: "cart", label: "Cart", path: "/cart" },
-
-  { key: "profile", label: "Profile", path: "/profile" },
+ 
 ];
