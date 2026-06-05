@@ -1,27 +1,46 @@
-PROJECT=donnalupe
+PROJECT=sitedonnalupe
 
-up:
-	docker compose -p $(PROJECT) up -d
+.PHONY: help up build down restart logs logs-front bash-front logs-backoffice bash-backoffice logs-backend bash-backend psql logs-db ps
 
-build:
-	docker compose -p $(PROJECT) up -d --build
+help: ## Mostra este menu de ajuda com os comandos disponíveis
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
-down:
+restart: ## Reinicia o projeto
+	docker compose -p $(PROJECT) down
+	docker compose -p $(PROJECT) --env-file ./backend/.env up -d --build
+
+build: ## Reconstrói as imagens e sobe os contêineres
+	docker compose -p $(PROJECT) --env-file ./backend/.env up -d --build
+
+down: ## Derruba todos os contêineres 
 	docker compose -p $(PROJECT) down
 
-restart: build down up
-
-logs:
+logs: ## Mostra os logs de TODOS os serviços em tempo real
 	docker compose -p $(PROJECT) logs -f
 
-logs-front:
+logs-front: ## Mostra os logs apenas do contêiner interface
 	docker compose -p $(PROJECT) logs -f front
 
-logs-backoffice:
-	docker compose -p $(PROJECT) logs -f backoffice
-
-bash-front:
+bash-front: ## Abre o terminal interativo dentro do interface
 	docker compose -p $(PROJECT) exec front sh
 
-bash-backoffice:
+logs-backoffice: ## Mostra os logs apenas do contêiner backoffice
+	docker compose -p $(PROJECT) logs -f backoffice
+
+bash-backoffice: ## Abre o terminal interativo dentro do backoffice
 	docker compose -p $(PROJECT) exec backoffice sh
+
+logs-backend: ## Mostra os logs apenas do contêiner backend
+	docker compose -p $(PROJECT) logs -f backend
+
+bash-backend: ## Abre o terminal (bash) interativo dentro do backend
+	docker compose -p $(PROJECT) exec backend sh
+
+psql: ## Acessa o banco de dados PostgreSQL via CLI usando as variáveis do .env
+	docker compose -p $(PROJECT) exec db sh -c 'psql -U $$DB_USER -d $$DB_NAME'
+
+logs-db: ## Mostra os logs apenas do banco de dados
+	docker compose -p $(PROJECT) logs -f db
+
+ps: ## Lista o status e as portas de todos os contêineres ativos do projeto
+	docker compose -p $(PROJECT) ps

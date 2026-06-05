@@ -1,5 +1,5 @@
 services:
-  front-site:
+  front:
     build: ./front
     container_name: front
     ports:
@@ -14,3 +14,36 @@ services:
       - "5174:5174"
     command: npm run dev -- --host
     restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15
+    container_name: db
+    restart: always
+    env_file:
+      - ./backend/.env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
