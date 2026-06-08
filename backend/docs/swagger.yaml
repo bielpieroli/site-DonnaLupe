@@ -1,0 +1,250 @@
+basePath: /
+definitions:
+  models.CreateUserBackofficeRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.LoginUserBackofficeRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.UpdateUserBackofficeRequest:
+    properties:
+      password:
+        minLength: 8
+        type: string
+    required:
+    - password
+    type: object
+host: localhost:4000
+info:
+  contact: {}
+  description: API do site da Donna Lupe
+  title: Donna Lupe Site API
+  version: "1.0"
+paths:
+  /admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica um usuário do backoffice e retorna um token JWT
+      parameters:
+      - description: Credenciais de acesso
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginUserBackofficeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login realizado com sucesso
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Requisição inválida
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Credenciais inválidas
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Erro interno
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login backoffice
+      tags:
+      - auth
+  /admin/usersBackoffice:
+    get:
+      description: Retorna todos os usuários do backoffice
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de usuários
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Erro interno
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista usuários backoffice
+      tags:
+      - usersBackoffice
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo usuário do backoffice
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserBackofficeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Requisição inválida
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Email já existe
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Erro interno
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria usuário backoffice
+      tags:
+      - usersBackoffice
+  /admin/usersBackoffice/{email}:
+    delete:
+      description: Remove um usuário do backoffice pelo email
+      parameters:
+      - description: Email do usuário
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuário removido com sucesso
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Usuário não encontrado
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Erro interno
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove usuário backoffice
+      tags:
+      - usersBackoffice
+    get:
+      description: Retorna um usuário do backoffice pelo email
+      parameters:
+      - description: Email do usuário
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuário encontrado
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Usuário não encontrado
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Erro interno
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Busca usuário backoffice por email
+      tags:
+      - usersBackoffice
+    put:
+      consumes:
+      - application/json
+      description: Atualiza a senha de um usuário do backoffice
+      parameters:
+      - description: Email do usuário
+        in: path
+        name: email
+        required: true
+        type: string
+      - description: Dados para atualização
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserBackofficeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuário atualizado com sucesso
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Requisição inválida
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Usuário não encontrado
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Erro interno
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza usuário backoffice
+      tags:
+      - usersBackoffice
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
