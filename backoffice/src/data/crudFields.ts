@@ -44,9 +44,20 @@ export const PRODUCT_FIELDS: CrudField[] = [
   },
 ];
 
+// Fields shown in the users table (display only)
 export const USER_FIELDS: CrudField[] = [
-  { value: "name", label: "Nome", type: "text" },
   { value: "email", label: "E-mail", type: "text" },
+];
+
+// Fields for the create modal: email + password
+export const USER_CREATE_FIELDS: CrudField[] = [
+  { value: "email", label: "E-mail", type: "text" },
+  { value: "password", label: "Senha (mín. 8 caracteres)", type: "password" },
+];
+
+// Fields for the edit modal: password only (email is the primary key)
+export const USER_EDIT_FIELDS: CrudField[] = [
+  { value: "password", label: "Nova Senha (mín. 8 caracteres)", type: "password" },
 ];
 
 export const PERMISSION_FIELDS: CrudField[] = [

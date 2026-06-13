@@ -14,24 +14,25 @@ var validate = validator.New()
 
 type AuthBackofficeHandler struct {
 	authService services.AuthBackofficeService
+	permService services.PermissionService
 }
 
-func NewAuthBackofficeHandler(authService services.AuthBackofficeService) *AuthBackofficeHandler {
-	return &AuthBackofficeHandler{authService: authService}
+func NewAuthBackofficeHandler(authService services.AuthBackofficeService, permService services.PermissionService) *AuthBackofficeHandler {
+	return &AuthBackofficeHandler{authService: authService, permService: permService}
 }
 
 // Login godoc
 // @Summary      Login backoffice
-// @Description  Autentica um usuário do backoffice e retorna um token JWT
+// @Description  Autentica um usuário do backoffice e retorna token JWT com permissões
 // @Tags         auth
 // @Accept       json
 // @Produce      json
 // @Param        request  body      models.LoginUserBackofficeRequest  true  "Credenciais de acesso"
-// @Success      200      {object}  map[string]interface{}             "Login realizado com sucesso"
-// @Failure      400      {object}  map[string]interface{}             "Requisição inválida"
-// @Failure      401      {object}  map[string]interface{}             "Credenciais inválidas"
-// @Failure      500      {object}  map[string]interface{}             "Erro interno"
-// @Router       /admin/login [post]
+// @Success      200      {object}  map[string]interface{}
+// @Failure      400      {object}  map[string]interface{}
+// @Failure      401      {object}  map[string]interface{}
+// @Failure      500      {object}  map[string]interface{}
+// @Router       /admin/auth/login [post]
 func (h *AuthBackofficeHandler) Login(c *gin.Context) {
 	var req models.LoginUserBackofficeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -52,17 +53,24 @@ func (h *AuthBackofficeHandler) Login(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Email ou senha inválidos"})
 			return
 		}
-		if err.Error() == "token generation failed" {
+		if err.Error() == "Falha na geração do token" {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Falha na geração do token"})
 			return
 		}
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Error interno do servidor"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Erro interno do servidor"})
+		return
+	}
+
+	perms, err := h.permService.GetFullPermissions(user.Email)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar permissões"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login realizado",
-		"user":    models.ToSafeUserBackoffice(user),
-		"token":   token,
+		"message":     "Login realizado",
+		"user":        models.ToSafeUserBackoffice(user),
+		"token":       token,
+		"permissions": perms,
 	})
 }

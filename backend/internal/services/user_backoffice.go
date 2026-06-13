@@ -10,8 +10,10 @@ import (
 	"strings"
 )
 
+var ErrEmailAlreadyExists = errors.New("E-mail já cadastrado")
+
 type UserBackofficeService interface {
-	InitializeAdmin() error
+	InitializeAdmin() (bool, error)
 	CreateUser(req models.CreateUserBackofficeRequest) (*models.SafeUserBackoffice, error)
 	GetAllUsers(page int, limit int, sortBy string, sortOrder string, searchBy string, searchValue string) (*models.UserBListResult, error)
 	GetUserByEmail(email string) (*models.SafeUserBackoffice, error)
@@ -28,18 +30,17 @@ func NewUserBackofficeService(repo repository.UserBackofficeRepository, password
 	return &userBackofficeService{repo: repo, passwordProvider: passwordProvider}
 }
 
-func (s *userBackofficeService) InitializeAdmin() error {
+func (s *userBackofficeService) InitializeAdmin() (bool, error) {
 	email := os.Getenv("ADMIN_EMAIL")
 	password := os.Getenv("ADMIN_PASSWORD")
 
 	if email == "" || password == "" {
-		return errors.New("ADMIN_EMAIL e ADMIN_PASSWORD devem estar definidos no .env")
+		return false, errors.New("ADMIN_EMAIL e ADMIN_PASSWORD devem estar definidos no .env")
 	}
 
 	_, err := s.repo.GetByEmail(email)
 	if err == nil {
-		// Admin já existe
-		return nil
+		return false, nil
 	}
 
 	_, err = s.CreateUser(models.CreateUserBackofficeRequest{
@@ -47,16 +48,16 @@ func (s *userBackofficeService) InitializeAdmin() error {
 		Password: password,
 	})
 	if err != nil {
-		return fmt.Errorf("Erro na inicialização do admin: %w", err)
+		return false, fmt.Errorf("Erro na inicialização do admin: %w", err)
 	}
 
-	return nil
+	return true, nil
 }
 
 func (s *userBackofficeService) CreateUser(req models.CreateUserBackofficeRequest) (*models.SafeUserBackoffice, error) {
 	_, err := s.repo.GetByEmail(req.Email)
 	if err == nil {
-		return nil, errors.New("E-mail já cadastrado")
+		return nil, ErrEmailAlreadyExists
 	}
 
 	hash, err := s.passwordProvider.Hash(req.Password)

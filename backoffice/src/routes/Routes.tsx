@@ -4,6 +4,7 @@ import HomePage from "@/pages/Home";
 import LoginPage from "@/pages/Login";
 import BackofficeUsers from "@/pages/UserBackoffice";
 import RequireAuth from "@/lib/RequireAuth";
+import RequirePermission from "@/lib/RequirePermission";
 import ProductsPage from "@/pages/Products";
 import PermissionsPage from "@/pages/PermissionsBackoffice";
 import LandingPage from "@/pages/LandingPageBackoffice";
@@ -29,20 +30,20 @@ export const router = createBrowserRouter([
             element: <HomePage />,
           },
           {
-            path: "/products",
-            element: <ProductsPage />,
+            element: <RequirePermission resource="products" />,
+            children: [{ path: "/products", element: <ProductsPage /> }],
           },
           {
-            path: "/backoffice-users",
-            element: <BackofficeUsers />,
+            element: <RequirePermission resource="users" />,
+            children: [{ path: "/backoffice-users", element: <BackofficeUsers /> }],
           },
           {
-            path: "/backoffice-permissions",
-            element: <PermissionsPage />,
+            element: <RequirePermission resource="permissions" />,
+            children: [{ path: "/backoffice-permissions", element: <PermissionsPage /> }],
           },
           {
-            path: "/backoffice-landing",
-            element: <LandingPage />,
+            element: <RequirePermission resource="landing" />,
+            children: [{ path: "/backoffice-landing", element: <LandingPage /> }],
           },
         ],
       },

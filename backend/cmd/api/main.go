@@ -11,7 +11,6 @@ import (
 
 	_ "backend/docs"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -32,7 +31,7 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}); err != nil {
+	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -40,46 +39,61 @@ func main() {
 	passwordProvider := providers.NewBcryptProvider()
 	jwtProvider := providers.NewJWTProvider()
 
-	// Backoffice users
+	// Repositories
 	userBackofficeRepo := repository.NewUserBackofficeRepository(database)
+	permissionRepo := repository.NewPermissionRepository(database)
+
+	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
-	userBackofficeHandler := handlers.NewUserBackofficeHandler(userBackofficeService)
-
-	// Auth backoffice
+	permissionService := services.NewPermissionService(permissionRepo)
 	authBackofficeService := services.NewAuthBackofficeService(userBackofficeRepo, passwordProvider, jwtProvider)
-	authBackofficeHandler := handlers.NewAuthBackofficeHandler(authBackofficeService)
 
-	// Inicializa admin padrão do .env
-	if err := userBackofficeService.InitializeAdmin(); err != nil {
+	// Handlers
+	userBackofficeHandler := handlers.NewUserBackofficeHandler(userBackofficeService, permissionService)
+	authBackofficeHandler := handlers.NewAuthBackofficeHandler(authBackofficeService, permissionService)
+	permissionHandler := handlers.NewPermissionHandler(permissionService, userBackofficeService)
+
+	// Inicializa admin padrão e suas permissões
+	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
 		panic("Failed to initialize admin: " + err.Error())
+	}
+	if err := permissionService.InitializeAdminPermissions(); err != nil {
+		panic("Failed to initialize admin permissions: " + err.Error())
 	}
 
 	r := gin.Default()
 
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5174"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		AllowCredentials: true,
-		ExposeHeaders:    []string{"Content-Length"},
-	}))
+	r.Use(middleware.CORSMiddleware(
+		"http://localhost:5173",
+		"http://localhost:5174",
+	))
 
 	// Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	authMW := middleware.AuthBackofficeMiddleware(jwtProvider)
+	permMW := func(resource string, level models.PermissionLevel) gin.HandlerFunc {
+		return middleware.RequirePermission(permissionService, resource, level)
+	}
+
 	// Rotas públicas
+	auth := r.Group("/admin/auth")
+	auth.POST("/login", authBackofficeHandler.Login)
+
+	// Registro: requer autenticação + permissão de escrita em "users"
+	auth.POST("/register", authMW, permMW("users", models.PermWrite), userBackofficeHandler.Register)
+
+	// Rotas administrativas protegidas
 	admin := r.Group("/admin")
-	admin.POST("/login", authBackofficeHandler.Login)
+	admin.Use(authMW)
 
-	// Rotas protegidas
-	backoffice := admin.Group("/")
-	backoffice.Use(middleware.AuthBackofficeMiddleware(jwtProvider))
+	admin.GET("/users", permMW("users", models.PermRead), userBackofficeHandler.GetAllUsers)
+	admin.GET("/users/:email", permMW("users", models.PermRead), userBackofficeHandler.GetUserByEmail)
+	admin.PUT("/users/:email", permMW("users", models.PermWrite), userBackofficeHandler.UpdateUser)
+	admin.DELETE("/users/:email", permMW("users", models.PermWrite), userBackofficeHandler.DeleteUser)
 
-	backoffice.POST("/usersBackoffice", userBackofficeHandler.CreateUser)
-	backoffice.GET("/usersBackoffice", userBackofficeHandler.GetAllUsers)
-	backoffice.GET("/usersBackoffice/:email", userBackofficeHandler.GetUserByEmail)
-	backoffice.PUT("/usersBackoffice/:email", userBackofficeHandler.UpdateUser)
-	backoffice.DELETE("/usersBackoffice/:email", userBackofficeHandler.DeleteUser)
+	admin.GET("/users/:email/permissions", permMW("permissions", models.PermRead), permissionHandler.GetPermissions)
+	admin.PUT("/users/:email/permissions", permMW("permissions", models.PermWrite), permissionHandler.SetPermissions)
 
 	r.Run(":4000")
 }

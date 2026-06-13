@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/login": {
+        "/admin/auth/login": {
             "post": {
-                "description": "Autentica um usuário do backoffice e retorna um token JWT",
+                "description": "Autentica um usuário do backoffice e retorna token JWT com permissões",
                 "consumes": [
                     "application/json"
                 ],
@@ -41,28 +41,28 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Login realizado com sucesso",
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Requisição inválida",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "401": {
-                        "description": "Credenciais inválidas",
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Erro interno",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -71,45 +71,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/usersBackoffice": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retorna todos os usuários do backoffice",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "usersBackoffice"
-                ],
-                "summary": "Lista usuários backoffice",
-                "responses": {
-                    "200": {
-                        "description": "Lista de usuários",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
+        "/admin/auth/register": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Cria um novo usuário do backoffice",
+                "description": "Cria um novo usuário do backoffice, com permissões opcionais",
                 "consumes": [
                     "application/json"
                 ],
@@ -117,9 +86,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "usersBackoffice"
+                    "auth"
                 ],
-                "summary": "Cria usuário backoffice",
+                "summary": "Registra usuário backoffice",
                 "parameters": [
                     {
                         "description": "Dados do usuário",
@@ -133,28 +102,28 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Usuário criado com sucesso",
+                        "description": "Created",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Requisição inválida",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "409": {
-                        "description": "Email já existe",
+                        "description": "Conflict",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Erro interno",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -163,7 +132,89 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/usersBackoffice/{email}": {
+        "/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retorna todos os usuários do backoffice com paginação e filtros",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Lista usuários backoffice",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Página",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limite",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "email",
+                        "description": "Ordenar por",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "asc",
+                        "description": "Ordem",
+                        "name": "sort_order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Campo de busca",
+                        "name": "search_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Valor de busca",
+                        "name": "search_value",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{email}": {
             "get": {
                 "security": [
                     {
@@ -175,7 +226,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "usersBackoffice"
+                    "users"
                 ],
                 "summary": "Busca usuário backoffice por email",
                 "parameters": [
@@ -189,21 +240,14 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Usuário encontrado",
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Usuário não encontrado",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno",
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -225,7 +269,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "usersBackoffice"
+                    "users"
                 ],
                 "summary": "Atualiza usuário backoffice",
                 "parameters": [
@@ -248,28 +292,28 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Usuário atualizado com sucesso",
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Requisição inválida",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Usuário não encontrado",
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Erro interno",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -283,12 +327,12 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Remove um usuário do backoffice pelo email",
+                "description": "Remove um usuário do backoffice e todas as suas permissões",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "usersBackoffice"
+                    "users"
                 ],
                 "summary": "Remove usuário backoffice",
                 "parameters": [
@@ -302,21 +346,136 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Usuário removido com sucesso",
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Usuário não encontrado",
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Erro interno",
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{email}/permissions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retorna todas as permissões do usuário por recurso (inclui \"none\" para recursos sem entrada)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "Lista permissões de um usuário",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email do usuário",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Substitui todas as permissões do usuário. Entradas com level \"none\" são ignoradas (ausência = sem acesso).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "Define permissões de um usuário",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email do usuário",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Permissões",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SetPermissionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -340,6 +499,12 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 8
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PermissionInput"
+                    }
                 }
             }
         },
@@ -356,6 +521,48 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 8
+                }
+            }
+        },
+        "models.PermissionInput": {
+            "type": "object",
+            "required": [
+                "level",
+                "resource"
+            ],
+            "properties": {
+                "level": {
+                    "$ref": "#/definitions/models.PermissionLevel"
+                },
+                "resource": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PermissionLevel": {
+            "type": "string",
+            "enum": [
+                "none",
+                "read",
+                "write"
+            ],
+            "x-enum-varnames": [
+                "PermNone",
+                "PermRead",
+                "PermWrite"
+            ]
+        },
+        "models.SetPermissionsRequest": {
+            "type": "object",
+            "required": [
+                "permissions"
+            ],
+            "properties": {
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PermissionInput"
+                    }
                 }
             }
         },
@@ -388,7 +595,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Donna Lupe Site API",
-	Description:      "API do site da Donna Lupe",
+	Description:      "API do Site da Donna Lupe",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

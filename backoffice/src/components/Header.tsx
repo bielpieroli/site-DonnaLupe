@@ -10,7 +10,13 @@ import { Tabs } from "@/constants/Tabs";
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, permissions } = useAuth();
+
+  const LEVEL_ORDER = { none: 0, read: 1, write: 2 } as const;
+  const visibleTabs = Tabs.filter((tab) => {
+    const perm = permissions.find((p) => p.resource === tab.key);
+    return (LEVEL_ORDER[perm?.level ?? "none"] ?? 0) >= LEVEL_ORDER["read"];
+  });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Referência para o primeiro item do menu para focar ao abrir
@@ -131,7 +137,7 @@ export default function Header() {
               aria-label="Navegação Principal"
               className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800 scrollbar-hide"
             >
-              {Tabs.map((tab) => (
+              {visibleTabs.map((tab) => (
                 <NavLink
                   key={tab.key}
                   to={tab.pageNavigate}
