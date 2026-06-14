@@ -20,7 +20,11 @@ Layout: `App.tsx` — `<AuthProvider>` wrapping `<Header />` + `<Outlet />`
     ├── /products              → ProductsPage
     ├── /backoffice-users      → UserBackofficePage
     ├── /backoffice-permissions → PermissionsPage
-    └── /backoffice-landing    → LandingPageBackoffice
+    ├── /backoffice-landing    → LandingPageBackoffice
+    ├── /backoffice-freight    → FreightPage
+    ├── /backoffice-orders     → OrdersPage
+    ├── /backoffice-deliveries → DeliveriesPage
+    └── /backoffice-ingredients → IngredientsBackoffice
 ```
 
 ---
@@ -50,6 +54,10 @@ Layout: `App.tsx` — `<AuthProvider>` wrapping `<Header />` + `<Outlet />`
   - **Users** → `/backoffice-users`
   - **Permissions** → `/backoffice-permissions`
   - **Landing Page** → `/backoffice-landing`
+  - **Frete** → `/backoffice-freight`
+  - **Pedidos** → `/backoffice-orders`
+  - **Entregas** → `/backoffice-deliveries`
+  - **Ingredientes** → `/backoffice-ingredients`
 - Cada card: ícone Lucide + label + descrição (dados de `src/constants/Tabs.tsx`)
 
 ### `UserBackofficePage` (`src/pages/UserBackoffice/index.tsx`)
@@ -70,6 +78,13 @@ Layout: `App.tsx` — `<AuthProvider>` wrapping `<Header />` + `<Outlet />`
 ### `LandingPageBackoffice` (`src/pages/LandingPageBackoffice/`)
 - `<CrudTable>` com campos de `LANDING_FIELDS`
 - Gerencia conteúdo dinâmico da vitrine pública
+
+### `IngredientsBackoffice` (`src/pages/IngredientsBackoffice/`)
+- Integra com `GET/POST/PUT/DELETE /admin/ingredients`
+- Usa `<CrudTable>` com campos de `INGREDIENT_FIELDS`
+- Permissão exigida: `ingredients`
+- Exibe cards de resumo com total de ingredientes e alertas de baixo estoque
+- Considera baixo estoque quando `stock <= 5`; `stock <= 0` aparece como `Esgotado`
 
 ---
 

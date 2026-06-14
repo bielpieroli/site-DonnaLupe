@@ -17,6 +17,28 @@ Tabela PostgreSQL gerenciada via GORM `AutoMigrate`.
 - Chave primária: `Email` (string, não usa ID autoincremental)
 - Sem campos de auditoria (`created_at`, `updated_at`) por padrão na versão atual
 
+### `Ingredient` (`ingredient.go`)
+Tabela PostgreSQL gerenciada via GORM `AutoMigrate`.
+
+| Campo | Tipo Go | Restrição DB |
+|-------|---------|--------------|
+| `Name` | `string` | PK, tamanho 120 |
+| `Stock` | `float64` | NOT NULL, `stock >= 0` |
+| `Unit` | `string` | NOT NULL, padrão `"un"` |
+| `ValueReais` | `float64` | NOT NULL, `value_reais >= 0` |
+
+### `ProductIngredient` (`ingredient.go`)
+Tabela pivô preparada para o relacionamento produto × ingrediente.
+
+| Campo | Tipo Go | Restrição DB |
+|-------|---------|--------------|
+| `ProductID` | `uint` | PK composta |
+| `IngredientName` | `string` | PK composta, index |
+| `Quantity` | `float64` | NOT NULL, `quantity >= 0` |
+| `Unit` | `string` | NOT NULL, padrão `"un"` |
+
+> O vínculo produto × ingrediente ainda não está exposto em rotas neste recorte.
+
 ---
 
 ## DTOs de Request
@@ -31,6 +53,17 @@ Tabela PostgreSQL gerenciada via GORM `AutoMigrate`.
 ### `LoginUserBackofficeRequest`
 - `Email string` — requerido
 - `Password string` — requerido
+
+### `CreateIngredientRequest`
+- `Name string` — requerido
+- `Stock float64` — maior ou igual a 0
+- `Unit string` — opcional; padrão `"un"` quando vazio
+- `ValueReais float64` — maior ou igual a 0
+
+### `UpdateIngredientRequest`
+- `Stock *float64` — opcional, maior ou igual a 0
+- `Unit *string` — opcional
+- `ValueReais *float64` — opcional, maior ou igual a 0
 
 ---
 

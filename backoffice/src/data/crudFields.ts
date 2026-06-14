@@ -136,3 +136,33 @@ export const LANDING_FIELDS: CrudField[] = [
     },
   },
 ];
+
+export const INGREDIENT_FIELDS: CrudField[] = [
+  { value: "name", label: "Ingrediente", type: "text" },
+  { value: "stock", label: "Estoque", type: "number" },
+  { value: "unit", label: "Unidade", type: "text" },
+  { value: "value_reais", label: "Valor (R$)", type: "number" },
+  {
+    value: "stock_status",
+    label: "Alerta",
+    type: "badge",
+    badgeVariants: {
+      OK: "bg-[#059669] border border-[#047857]",
+      "Baixo estoque": "bg-[#f59e0b] border border-[#d97706]",
+      Esgotado: "bg-[#ef4444] border border-[#dc2626]",
+    },
+  },
+];
+
+export const INGREDIENT_CREATE_FIELDS: CrudField[] = [
+  { value: "name", label: "Ingrediente", type: "text" },
+  { value: "stock", label: "Estoque", type: "number" },
+  { value: "unit", label: "Unidade", type: "text" },
+  { value: "value_reais", label: "Valor (R$)", type: "number" },
+];
+
+export const INGREDIENT_EDIT_FIELDS: CrudField[] = [
+  { value: "stock", label: "Estoque", type: "number" },
+  { value: "unit", label: "Unidade", type: "text" },
+  { value: "value_reais", label: "Valor (R$)", type: "number" },
+];
