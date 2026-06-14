@@ -26,6 +26,8 @@ var KnownResources = []string{
 	"products",
 	"permissions",
 	"landing",
+	"freight",
+	"orders",
 }
 
 type Permission struct {

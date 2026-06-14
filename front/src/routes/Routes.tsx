@@ -1,33 +1,21 @@
-// import dos componentes para as paginas
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import HomePage from "@/pages/Home";
 import ShoppingPage from "@/pages/Shopping";
 import AboutPage from "@/pages/About";
 import CoffeePage from "@/pages/Coffee";
+import CartPage from "@/pages/Cart";
 
-// criação do router
 export const router = createBrowserRouter([
   {
-    path: "/", // path base onde iremos reenderizar outras paginas dentro dessa pagina 
+    path: "/",
     element: <App />,
-    children: [ // paths das paginas filhas que serão reenderizadas dentro de app
-      {
-        path: "/",
-        element: <HomePage />,
-      },
-      {
-        path: "/shopping",
-        element: <ShoppingPage />,
-      },
-      {
-        path: "/about",
-        element: <AboutPage />,
-      },
-      {
-        path: "/coffee",
-        element: <CoffeePage />,
-      }
+    children: [
+      { path: "/",         element: <HomePage /> },
+      { path: "/shopping", element: <ShoppingPage /> },
+      { path: "/about",    element: <AboutPage /> },
+      { path: "/coffee",   element: <CoffeePage /> },
+      { path: "/cart",     element: <CartPage /> },
     ],
   },
 ]);

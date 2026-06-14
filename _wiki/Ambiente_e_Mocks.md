@@ -18,6 +18,8 @@ Arquivo: `backend/.env` (criado a partir de `backend/.env.example`)
 | `ADMIN_EMAIL` | Email do admin inicial | `admin@admin.com` |
 | `ADMIN_PASSWORD` | Senha do admin inicial | `admin1234` |
 | `JWT_BACKOFFICE_SECRET` | Chave de assinatura JWT | string longa aleatória |
+| `MP_ACCESS_TOKEN` | Access Token do Mercado Pago (criação de preferências) | obtido em mercadopago.com.br/developers |
+| `FRONT_URL` | URL pública do frontend (back_urls do MP) | `http://localhost:5173` |
 
 - O backend chama `InitializeAdmin()` no boot usando `ADMIN_EMAIL` + `ADMIN_PASSWORD`
 - Sem `.env` configurado, o serviço falha ao conectar no banco

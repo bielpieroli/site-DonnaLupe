@@ -1,4 +1,4 @@
-import { LayoutTemplate, Package, ShieldCheck, Users } from "lucide-react";
+import { LayoutTemplate, Package, ShieldCheck, ShoppingBag, Truck, Users } from "lucide-react";
 
 export const Tabs: {
   key: string;
@@ -44,5 +44,32 @@ export const Tabs: {
     icon: <LayoutTemplate className="w-5 h-5" />,
     bg: "bg-secondary/10",
     hoverBg: "group-hover:bg-secondary/20",
+  },
+  {
+    key: "freight",
+    label: "Frete",
+    description: "Defina o preço de entrega por faixa de distância (km) a partir da loja.",
+    pageNavigate: "/backoffice-freight",
+    icon: <Truck className="w-5 h-5" />,
+    bg: "bg-primary/10",
+    hoverBg: "group-hover:bg-primary/20",
+  },
+  {
+    key: "orders",
+    label: "Pedidos",
+    description: "Visualize todos os pedidos, receita total e relatório de vendas.",
+    pageNavigate: "/backoffice-orders",
+    icon: <ShoppingBag className="w-5 h-5" />,
+    bg: "bg-secondary/10",
+    hoverBg: "group-hover:bg-secondary/20",
+  },
+  {
+    key: "deliveries",
+    label: "Entregas",
+    description: "Acompanhe e atualize o status de cada entrega em andamento.",
+    pageNavigate: "/backoffice-deliveries",
+    icon: <Package className="w-5 h-5" />,
+    bg: "bg-primary/10",
+    hoverBg: "group-hover:bg-primary/20",
   },
 ];

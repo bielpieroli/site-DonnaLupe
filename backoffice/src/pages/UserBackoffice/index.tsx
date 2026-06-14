@@ -8,18 +8,11 @@ import Notification from "@/components/Notification";
 import { ArrowLeft, UserCog } from "lucide-react";
 import { USER_FIELDS, USER_CREATE_FIELDS, USER_EDIT_FIELDS } from "@/data/crudFields";
 import { usersAPI, authAPI } from "@/api";
-import { isAxiosError } from "axios";
 import { useHasPermission } from "@/contexts/AuthContext";
+import { apiMsg } from "@/lib/formatting";
 
 interface UserItem extends CrudItemType {
   email: string;
-}
-
-function apiMsg(err: unknown, fallback: string): string {
-  if (isAxiosError(err)) {
-    return (err.response?.data as { error?: string })?.error ?? fallback;
-  }
-  return err instanceof Error ? err.message : fallback;
 }
 
 export default function UsersCRUD() {

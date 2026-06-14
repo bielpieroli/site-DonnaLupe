@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { IoMenu, IoClose } from "react-icons/io5";
+import { IoMenu, IoClose, IoCartOutline } from "react-icons/io5";
 import Logo from "@/assets/img/logo.png";
 import { tabs } from "@/constants/Tabs";
+import { useCart } from "@/contexts/CartContext";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const activeTab = tabs.find((t) => t.path === location.pathname)?.key || "home";
+  const { totalItems } = useCart();
 
   // Lógica de distribuição para Desktop
   const leftTabs = tabs.filter((_, i) => i < tabs.length +2);
@@ -34,6 +36,22 @@ export default function Header() {
               <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
             ))}
           </nav>
+
+          {/* Cart icon */}
+          <Link
+            to="/cart"
+            aria-label={`Carrinho (${totalItems} ite${totalItems === 1 ? "m" : "ns"})`}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 2xl:right-0 flex items-center"
+          >
+            <div className="relative">
+              <IoCartOutline className="h-7 w-7 text-primary" />
+              {totalItems > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-extrabold text-primary-contrast">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
+            </div>
+          </Link>
 
           {/* LOGO CENTRAL */}
           <div className="absolute left-1/2 -translate-x-1/2 z-20 top-3/4 -translate-y-1/2">

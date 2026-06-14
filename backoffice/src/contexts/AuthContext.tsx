@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { authAPI } from '@/api'
+import { authAPI, permissionsAPI } from '@/api'
 import { TOKEN_KEY } from '@/api/client'
 import type { AuthUser, Permission, StoredSession } from '@/types/APIResponseType'
 
@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(stored?.user ?? null)
   const [permissions, setPermissions] = useState<Permission[]>(stored?.permissions ?? [])
 
+  // Persist session to localStorage whenever user or permissions change.
   useEffect(() => {
     if (!user) {
       window.localStorage.removeItem(SESSION_KEY)
@@ -62,6 +63,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     window.localStorage.setItem(SESSION_KEY, JSON.stringify(session))
   }, [user, permissions])
+
+  // Refresh permissions from the API on every mount so new resources added
+  // to the backend are reflected without requiring the user to re-login.
+  useEffect(() => {
+    if (!user) return
+    permissionsAPI.getByUser(user.email)
+      .then((res) => setPermissions(res.permissions))
+      .catch(() => { /* keep cached permissions on error */ })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const value = useMemo<AuthContextValue>(
     () => ({

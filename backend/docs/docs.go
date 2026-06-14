@@ -132,6 +132,282 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/freight/rules": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "freight"
+                ],
+                "summary": "Lista faixas de frete cadastradas",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "freight"
+                ],
+                "summary": "Cria uma faixa de frete",
+                "parameters": [
+                    {
+                        "description": "Dados da regra",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FreightRuleInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/freight/rules/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "freight"
+                ],
+                "summary": "Atualiza uma faixa de frete",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID da regra",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados atualizados",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FreightRuleInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "freight"
+                ],
+                "summary": "Remove uma faixa de frete",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID da regra",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Lista pedidos",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filtro por status do pedido",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filtro por status de entrega",
+                        "name": "delivery_status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filtro por modo de entrega",
+                        "name": "delivery_mode",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Detalhes de um pedido",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do pedido",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders/{id}/delivery-status": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Atualiza status de entrega de um pedido",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do pedido",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Novo status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/admin/users": {
             "get": {
                 "security": [
@@ -483,9 +759,169 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/checkout/preference": {
+            "post": {
+                "description": "Recebe os itens do carrinho e o custo de frete, cria uma preferência server-side no Mercado Pago e retorna o link de checkout.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checkout"
+                ],
+                "summary": "Cria preferência de pagamento no Mercado Pago",
+                "parameters": [
+                    {
+                        "description": "Itens e frete",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CheckoutPreferenceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.CheckoutPreferenceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/freight/quote": {
+            "post": {
+                "description": "Usa a Distance Matrix API do Google Maps para calcular a distância até a loja e retorna o preço de frete conforme as faixas cadastradas.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "freight"
+                ],
+                "summary": "Calcula frete para um endereço de entrega",
+                "parameters": [
+                    {
+                        "description": "Endereço completo de entrega",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FreightQuoteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/webhook/mp": {
+            "post": {
+                "responses": {}
+            }
         }
     },
     "definitions": {
+        "models.CheckoutItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price_value": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.CheckoutPreferenceRequest": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "cep": {
+                    "type": "string"
+                },
+                "complement": {
+                    "type": "string"
+                },
+                "freight_cost": {
+                    "type": "number"
+                },
+                "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/models.CheckoutItem"
+                    }
+                },
+                "number": {
+                    "type": "string"
+                },
+                "pickup_mode": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.CheckoutPreferenceResponse": {
+            "type": "object",
+            "properties": {
+                "initPoint": {
+                    "type": "string"
+                },
+                "preferenceId": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateUserBackofficeRequest": {
             "type": "object",
             "required": [
@@ -505,6 +941,39 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.PermissionInput"
                     }
+                }
+            }
+        },
+        "models.FreightQuoteRequest": {
+            "type": "object",
+            "required": [
+                "cep",
+                "number"
+            ],
+            "properties": {
+                "cep": {
+                    "type": "string"
+                },
+                "complement": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.FreightRuleInput": {
+            "type": "object",
+            "required": [
+                "max_distance_km"
+            ],
+            "properties": {
+                "max_distance_km": {
+                    "type": "number"
+                },
+                "price_reais": {
+                    "type": "number",
+                    "minimum": 0
                 }
             }
         },

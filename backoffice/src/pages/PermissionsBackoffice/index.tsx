@@ -12,12 +12,14 @@ import { isAxiosError } from "axios";
 import type { Permission, PermissionLevel } from "@/types/APIResponseType";
 import { useHasPermission } from "@/contexts/AuthContext";
 
-// Keep in sync with backend/internal/models/permission.go → KnownResources
+// Keep in sync with backend/internal/models/permission.go (KnownResources)
 const RESOURCES: { key: string; label: string }[] = [
   { key: "users",       label: "Usuários" },
   { key: "products",    label: "Produtos" },
   { key: "permissions", label: "Permissões" },
   { key: "landing",     label: "Landing Page" },
+  { key: "freight",     label: "Frete" },
+  { key: "orders",      label: "Pedidos" },
 ];
 
 const LEVEL_BADGE: Record<PermissionLevel, { label: string; cls: string }> = {

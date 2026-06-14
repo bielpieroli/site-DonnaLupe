@@ -69,6 +69,47 @@ Autenticação: Bearer JWT no header `Authorization`
 | Products CRUD (backoffice) | Mock local | Endpoints de products no backend ainda não existem |
 | Landing Page (backoffice) | Mock local | Endpoints de landing no backend ainda não existem |
 | Vitrine (front) | Estático | Dados em `cookies.json`, sem API |
+| Checkout MP (front→backend) | **Integrado** | `POST /checkout/preference` cria preferência server-side; requer `MP_ACCESS_TOKEN` no `.env` |
+
+---
+
+---
+
+### Frete (`/freight` e `/admin/freight`)
+
+#### `POST /freight/quote` — Público
+- Geocodifica o endereço via **Nominatim (OSM)** e calcula distância de rota via **OSRM** — sem API key.
+- Coordenadas fixas da loja: `lat=-22.0019, lon=-47.9337` (ICMC-USP, São Carlos-SP).
+- Retorna o preço conforme a menor faixa que cobre a distância.
+- **Body:** `{ "cep": "13565905", "number": "400", "complement": "" }`
+- **Response 200:** `{ "quote": { "distance_km", "price_reais", "max_distance_km" } }`
+- **Erros:** 422 (endereço não encontrado, rota impossível, fora da área de entrega)
+
+#### `GET /admin/freight/rules` — JWT + read em "freight"
+- **Response 200:** `{ "rules": [{ "id", "max_distance_km", "price_reais" }] }` (ordenado por distância)
+
+#### `POST /admin/freight/rules` — JWT + write em "freight"
+- **Body:** `{ "max_distance_km": 3.0, "price_reais": 8.50 }`
+- **Response 201:** `{ "rule": { ... } }`
+
+#### `PUT /admin/freight/rules/:id` — JWT + write em "freight"
+- **Body:** igual ao POST
+- **Response 200:** `{ "rule": { ... } }`
+
+#### `DELETE /admin/freight/rules/:id` — JWT + write em "freight"
+- **Response 200:** `{ "message": "Regra removida com sucesso" }`
+
+---
+
+### Checkout / Mercado Pago (`/checkout`)
+
+#### `POST /checkout/preference` — Público
+- Cria uma preferência de pagamento no Mercado Pago server-side e retorna o link de checkout.
+- **Body:** `{ "items": [{ "id", "name", "quantity", "price_value" }], "freight_cost": 0.0, "pickup_mode": false }`
+- **Response 201:** `{ "preferenceId", "initPoint" }` — o frontend redireciona para `initPoint`
+- **Erros:** 400 (payload inválido), 502 (erro ao chamar MP ou `MP_ACCESS_TOKEN` ausente)
+- Quando `pickup_mode: true`, frete não é adicionado como item MP.
+- Back URLs configuradas via `FRONT_URL` (padrão `http://localhost:5173`): `/cart?status=success|failure|pending`
 
 ---
 
@@ -77,9 +118,10 @@ Autenticação: Bearer JWT no header `Authorization`
 ### 1. Adicionar Novos Recursos ao Sistema de Permissões
 - Adicionar a string do recurso em `models.KnownResources` (`internal/models/permission.go`)
 - Aplicar `permMW("novo-recurso", models.PermRead/Write)` nas novas rotas em `main.go`
+- **Adicionar o recurso também ao array `RESOURCES` em `backoffice/src/pages/PermissionsBackoffice/index.tsx`** — esse array é hardcoded e deve espelhar exatamente o `KnownResources` do backend; se ficar desatualizado, a página não exibirá as colunas novas e um "Salvar" irá apagar as permissões daquele recurso no banco (o PUT faz replace completo)
 - Nenhuma mudança de schema necessária
 
-### 3. Endpoints Faltantes (backend a implementar)
+### 2. Endpoints Faltantes (backend a implementar)
 - `GET/POST/PUT/DELETE /admin/products`
 - `GET/POST/PUT/DELETE /admin/landing`
 
