@@ -113,7 +113,7 @@ export const LANDING_FIELDS: CrudField[] = [
   {
     value: "imagem",
     label: "Imagem",
-    type: "text",
+    type: "image",
   },
   {
     value: "botaoTexto",

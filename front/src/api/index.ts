@@ -23,7 +23,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 // Public API — no auth required (customer-facing endpoints)
+export type LandingContent = {
+  id: number
+  name: string
+  secao: string
+  titulo: string
+  subtitulo: string
+  descricao: string
+  imagem: string
+  botaoTexto: string
+  botaoLink: string
+  status: string
+}
+
 export const api = {
+  landing: {
+    getActive: () => request<{ contents: LandingContent[] }>('/landing'),
+  },
   // Products will be fetched here once the backend implements GET /products
   // products: {
   //   getAll: () => request<ProductsResponse>('/products'),

@@ -33,7 +33,7 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}); err != nil {
+	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}, &models.LandingContent{}); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -46,6 +46,7 @@ func main() {
 	permissionRepo := repository.NewPermissionRepository(database)
 	freightRepo := repository.NewFreightRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
+	landingRepo := repository.NewLandingRepository(database)
 
 	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
@@ -53,6 +54,7 @@ func main() {
 	authBackofficeService := services.NewAuthBackofficeService(userBackofficeRepo, passwordProvider, jwtProvider)
 	freightService := services.NewFreightService(freightRepo)
 	orderService := services.NewOrderService(orderRepo)
+	landingService := services.NewLandingService(landingRepo)
 
 	checkoutService, err := services.NewCheckoutService(orderService)
 	if err != nil {
@@ -66,6 +68,7 @@ func main() {
 	freightHandler := handlers.NewFreightHandler(freightService)
 	checkoutHandler := handlers.NewCheckoutHandler(checkoutService)
 	orderHandler := handlers.NewOrderHandler(orderService, os.Getenv("MP_ACCESS_TOKEN"))
+	landingHandler := handlers.NewLandingHandler(landingService)
 
 	// Inicializa admin padrão e suas permissões
 	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
@@ -73,6 +76,9 @@ func main() {
 	}
 	if err := permissionService.InitializeAdminPermissions(); err != nil {
 		panic("Failed to initialize admin permissions: " + err.Error())
+	}
+	if err := landingService.InitializeDefaults(); err != nil {
+		panic("Failed to initialize landing content: " + err.Error())
 	}
 
 	r := gin.Default()
@@ -115,6 +121,9 @@ func main() {
 	// Frete - rota pública de cotação
 	r.POST("/freight/quote", freightHandler.Quote)
 
+	// Landing page - conteúdo público
+	r.GET("/landing", landingHandler.GetPublic)
+
 	// Frete - gestão de preço de frete (backoffice)
 	freight := admin.Group("/freight")
 	freight.GET("/rules", permMW("freight", models.PermRead), freightHandler.GetRules)
@@ -127,6 +136,13 @@ func main() {
 	orders.GET("", permMW("orders", models.PermRead), orderHandler.GetAll)
 	orders.GET("/:id", permMW("orders", models.PermRead), orderHandler.GetByID)
 	orders.PUT("/:id/delivery-status", permMW("orders", models.PermWrite), orderHandler.UpdateDeliveryStatus)
+
+	// Landing page (backoffice)
+	landing := admin.Group("/landing")
+	landing.GET("", permMW("landing", models.PermRead), landingHandler.GetAll)
+	landing.POST("", permMW("landing", models.PermWrite), landingHandler.Create)
+	landing.PUT("/:id", permMW("landing", models.PermWrite), landingHandler.Update)
+	landing.DELETE("/:id", permMW("landing", models.PermWrite), landingHandler.Delete)
 
 	// Webhook público do Mercado Pago
 	r.POST("/webhook/mp", orderHandler.Webhook)

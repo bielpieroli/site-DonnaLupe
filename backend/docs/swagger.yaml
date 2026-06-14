@@ -75,6 +75,31 @@ definitions:
     required:
     - max_distance_km
     type: object
+  models.LandingContentInput:
+    properties:
+      botaoLink:
+        type: string
+      botaoTexto:
+        type: string
+      descricao:
+        type: string
+      imagem:
+        type: string
+      name:
+        type: string
+      secao:
+        type: string
+      status:
+        type: string
+      subtitulo:
+        type: string
+      titulo:
+        type: string
+    required:
+    - name
+    - secao
+    - titulo
+    type: object
   models.LoginUserBackofficeRequest:
     properties:
       email:
@@ -303,6 +328,91 @@ paths:
       summary: Atualiza uma faixa de frete
       tags:
       - freight
+  /admin/landing:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista conteúdos da landing page
+      tags:
+      - landing
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conteúdo da landing
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LandingContentInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria conteúdo da landing page
+      tags:
+      - landing
+  /admin/landing/{id}:
+    delete:
+      parameters:
+      - description: ID do conteúdo
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove conteúdo da landing page
+      tags:
+      - landing
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do conteúdo
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Conteúdo atualizado
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LandingContentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza conteúdo da landing page
+      tags:
+      - landing
   /admin/orders:
     get:
       parameters:
@@ -683,6 +793,19 @@ paths:
       summary: Calcula frete para um endereço de entrega
       tags:
       - freight
+  /landing:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Lista conteúdos ativos da landing page
+      tags:
+      - landing
   /webhook/mp:
     post:
       responses: {}

@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '@/components/Footer'
 import { PRODUCTS } from '@/data/products'
+import { api, type LandingContent } from '@/api'
 
 import HomeCookieImg from '@/assets/img/cookie-home.png'
 import cookieMorangoIMG from '@/assets/img/cookie-morango.jpg'
@@ -20,7 +21,20 @@ type Testimonial = {
   bg: string
 }
 
-const favorites: Favorite[] = [
+const landingImageMap: Record<string, string> = {
+  'cookie-home.png': HomeCookieImg,
+  'cookie-morango.jpg': cookieMorangoIMG,
+  'cookie-matcha.jpg': cookieMatchaIMG,
+  'cookie-choco-chunk.jpg': cookieChocoChunkIMG,
+}
+
+const resolveLandingImage = (image: string, fallback: string) => {
+  if (!image) return fallback
+  if (image.startsWith('data:image/') || image.startsWith('http://') || image.startsWith('https://')) return image
+  return landingImageMap[image] ?? fallback
+}
+
+const fallbackFavorites: Favorite[] = [
   {
     title: 'Cookie de morango',
     description: 'Cookie artesanal com pedaços de morango e ganache de chocolate',
@@ -38,7 +52,7 @@ const favorites: Favorite[] = [
   },
 ]
 
-const testimonials: Testimonial[] = [
+const fallbackTestimonials: Testimonial[] = [
   {
     name: 'Ana Clara',
     text: '“Gente, eu CHOREI comendo o de caramelo salgado. Não é exagero. É viciante demais! 🥹”',
@@ -58,6 +72,60 @@ const testimonials: Testimonial[] = [
 
 export default function Home() {
   const sliderRef = useRef<HTMLDivElement>(null)
+  const [landingContent, setLandingContent] = useState<LandingContent[]>([])
+
+  useEffect(() => {
+    api.landing
+      .getActive()
+      .then((res) => setLandingContent(res.contents ?? []))
+      .catch(() => setLandingContent([]))
+  }, [])
+
+  const bySection = (section: string) =>
+    landingContent.filter((item) => item.secao === section && item.status !== 'Inativo')
+
+  const heroContent = bySection('Hero')[0]
+  const hero = {
+    subtitle: heroContent?.subtitulo || 'Cookies & Coffee Break',
+    title: heroContent?.titulo || 'Cookies que fazem sorrir',
+    description:
+      heroContent?.descricao ||
+      'Feitos à mão com ingredientes de verdade, muito amor e uma pitada de magia. Cada mordida é um abraço quentinho.',
+    image: resolveLandingImage(heroContent?.imagem ?? '', HomeCookieImg),
+    buttonText: heroContent?.botaoTexto || 'Ver cookies',
+    buttonLink: heroContent?.botaoLink || '/shopping',
+  }
+
+  const favorites =
+    bySection('Favoritos').length > 0
+      ? bySection('Favoritos').slice(0, 3).map((item, index) => ({
+          title: item.titulo,
+          description: item.descricao,
+          image: resolveLandingImage(item.imagem, fallbackFavorites[index]?.image ?? cookieChocoChunkIMG),
+        }))
+      : fallbackFavorites
+
+  const testimonials =
+    bySection('Depoimentos').length > 0
+      ? bySection('Depoimentos').slice(0, 3).map((item, index) => ({
+          name: item.titulo,
+          text: item.descricao,
+          bg: ['bg-rose-50', 'bg-sky-50', 'bg-amber-50'][index] ?? 'bg-rose-50',
+        }))
+      : fallbackTestimonials
+
+  const ctaItems = bySection('CTA Final')
+  const ctaMain = ctaItems[0]
+  const ctaSecondary = ctaItems[1]
+  const cta = {
+    title: ctaMain?.titulo || 'Tá esperando o que pra experimentar?',
+    subtitle: ctaMain?.subtitulo || 'Peça online e receba seus cookies quentinhos em minutos.',
+    description: ctaMain?.descricao || 'Delivery ou retirada — você escolhe!',
+    primaryText: ctaMain?.botaoTexto || 'Fazer meu pedido 🍪',
+    primaryLink: ctaMain?.botaoLink || '/cart',
+    secondaryText: ctaSecondary?.botaoTexto || 'Ver cardápio 📋',
+    secondaryLink: ctaSecondary?.botaoLink || '/shopping',
+  }
 
   const scroll = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
@@ -75,28 +143,27 @@ export default function Home() {
         <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 max-w-7xl justify-center mx-auto">
           <div className="text-primary-contrast">
             <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
-              Cookies & Coffee Break
+              {hero.subtitle}
             </p>
             <h1 className="w-full font-display text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight">
-              Cookies que fazem sorrir
+              {hero.title}
             </h1>
 
             <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
-              Feitos à mão com ingredientes de verdade, muito amor e uma pitada de magia.
-              Cada mordida é um abraço quentinho.
+              {hero.description}
             </p>
 
             <Link
-              to="/shopping"
+              to={hero.buttonLink}
               className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-semibold text-white transition hover:scale-105"
             >
-              Ver cookies
+              {hero.buttonText}
             </Link>
           </div>
 
           <div className="relative flex items-center justify-center h-auto md:h-full py-6 md:py-0">
             <img
-              src={HomeCookieImg}
+              src={hero.image}
               alt="Cookie"
               className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-10 sm:-translate-y-6 lg:translate-y-0"
             />
@@ -259,27 +326,26 @@ export default function Home() {
       <section className=" bg-[radial-gradient(circle_at_center,rgba(215,38,77,0.06),transparent_60%)]">
         <div className="mx-auto max-w-6xl px-6 py-24 text-center">
           <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
-            Tá esperando o que <br />
-            pra <span className="italic text-primary">experimentar?</span>
+            {cta.title}
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-8 text-[#5a4a49]">
-            Peça online e receba seus cookies quentinhos em minutos. Delivery ou retirada — você escolhe!
+            {cta.subtitle} {cta.description}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              to="/cart"
+              to={cta.primaryLink}
               className="rounded-full bg-primary px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
             >
-              Fazer meu pedido 🍪
+              {cta.primaryText}
             </Link>
 
             <Link
-              to="/shopping"
+              to={cta.secondaryLink}
               className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-primary transition hover:scale-105"
             >
-              Ver cardápio 📋
+              {cta.secondaryText}
             </Link>
           </div>
         </div>

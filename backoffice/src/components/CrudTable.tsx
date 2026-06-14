@@ -13,7 +13,7 @@ import {
 export interface CrudField {
   value: string;
   label: string;
-  type?: "text" | "password" | "textarea" | "select" | "badge" | "date" | "number" | "multivalue";
+  type?: "text" | "password" | "textarea" | "select" | "badge" | "date" | "number" | "multivalue" | "image";
   badgeVariants?: Record<string, string>;
   options?: string[];
   multiValueOptions?: string[];
@@ -52,6 +52,24 @@ export function CrudTable({
   const resolvedCreateFields = createFields ?? fields;
   const resolvedEditFields = editFields ?? fields;
   type FormValue = string | string[];
+
+  const isPreviewableImage = (value: string) =>
+    value.startsWith("data:image/") || value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/");
+
+  const readImageFile = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ""));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleImageChange = async (fieldValue: string, file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    const dataUrl = await readImageFile(file);
+    setFormData((d) => ({ ...d, [fieldValue]: dataUrl }));
+  };
 
   const [filter, setFilter] = useState("");
   const [filterField, setFilterField] = useState(fields[0]?.value ?? "name");
@@ -209,6 +227,19 @@ export function CrudTable({
       const cls = field.badgeVariants[val] ?? "bg-surface text-text";
       return <Badge className={`text-xs font-medium px-2 py-0.5 ${cls}`}>{val}</Badge>;
     }
+
+    if (field.type === "image") {
+      if (!val || val === "—") return <span className="text-muted">—</span>;
+      if (!isPreviewableImage(val)) return <span className="text-text">{val}</span>;
+      return (
+        <img
+          src={val}
+          alt={item.name ? `Imagem de ${item.name}` : field.label}
+          className="h-12 w-12 rounded-lg border border-border object-cover"
+        />
+      );
+    }
+
     return <span className="text-text">{val}</span>;
   };
 
@@ -502,6 +533,26 @@ export function CrudTable({
                       />
                     )}
                   </div>
+                ) : f.type === "image" ? (
+                  <div className="space-y-2">
+                    <Input
+                      id={`create-${f.value}`}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageChange(f.value, e.target.files?.[0])}
+                    />
+                    {typeof formData[f.value] === "string" && formData[f.value] && (
+                      isPreviewableImage(String(formData[f.value])) ? (
+                        <img
+                          src={String(formData[f.value])}
+                          alt={`Preview de ${f.label}`}
+                          className="h-24 w-24 rounded-lg border border-border object-cover"
+                        />
+                      ) : (
+                        <p className="text-xs text-muted">{String(formData[f.value])}</p>
+                      )
+                    )}
+                  </div>
                 ) : (
                   f.type === "textarea" ? (
                     <textarea
@@ -590,6 +641,26 @@ export function CrudTable({
                         }
                         placeholder="Separe por vírgula"
                       />
+                    )}
+                  </div>
+                ) : f.type === "image" ? (
+                  <div className="space-y-2">
+                    <Input
+                      id={`edit-${f.value}`}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageChange(f.value, e.target.files?.[0])}
+                    />
+                    {typeof formData[f.value] === "string" && formData[f.value] && (
+                      isPreviewableImage(String(formData[f.value])) ? (
+                        <img
+                          src={String(formData[f.value])}
+                          alt={`Preview de ${f.label}`}
+                          className="h-24 w-24 rounded-lg border border-border object-cover"
+                        />
+                      ) : (
+                        <p className="text-xs text-muted">{String(formData[f.value])}</p>
+                      )
                     )}
                   </div>
                 ) : (

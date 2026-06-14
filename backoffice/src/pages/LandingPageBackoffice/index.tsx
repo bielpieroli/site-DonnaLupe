@@ -1,27 +1,98 @@
 import { CrudTable } from "@/components/CrudTable";
 import type { CrudItemType } from "@/types/CrudItem";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
 import { ArrowLeft, LayoutTemplate } from "lucide-react";
-import { MOCK_LANDING_CONTENT } from "@/mocks/landing";
 import { LANDING_FIELDS } from "@/data/crudFields";
+import Notification from "@/components/Notification";
+import { landingAPI, type LandingContent, type LandingContentInput } from "@/api/landing";
+import { apiMsg } from "@/lib/formatting";
+
+const LEGACY_LOCAL_STORAGE_KEY = "donna-lupe-landing-content";
+
+type LandingRow = CrudItemType & Omit<LandingContent, "id">;
+
+function toRow(content: LandingContent): LandingRow {
+  return {
+    ...content,
+    id: String(content.id),
+  };
+}
+
+function toInput(item: CrudItemType): LandingContentInput {
+  const row = item as LandingRow;
+  return {
+    name: String(row.name ?? "").trim(),
+    secao: String(row.secao ?? "").trim(),
+    titulo: String(row.titulo ?? "").trim(),
+    subtitulo: String(row.subtitulo ?? ""),
+    descricao: String(row.descricao ?? ""),
+    imagem: String(row.imagem ?? ""),
+    botaoTexto: String(row.botaoTexto ?? ""),
+    botaoLink: String(row.botaoLink ?? ""),
+    status: String(row.status ?? "Ativo"),
+  };
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [data, setData] = useState<CrudItemType[]>(MOCK_LANDING_CONTENT);
+  const [data, setData] = useState<LandingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" }>({
+    message: "",
+    type: "success",
+  });
 
-  const handleEdit = (item: CrudItemType) => {
-    setData((prev) => prev.map((i) => (i.id === item.id ? item : i)));
+  const notify = (message: string, type: "success" | "warning" = "success") =>
+    setNotification({ message, type });
+
+  const fetchLanding = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await landingAPI.getAll();
+      setData((res.contents ?? []).map(toRow));
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao carregar conteúdo da landing page."), "warning");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.removeItem(LEGACY_LOCAL_STORAGE_KEY);
+    fetchLanding();
+  }, [fetchLanding]);
+
+  const handleEdit = async (item: CrudItemType) => {
+    try {
+      const res = await landingAPI.update(Number(item.id), toInput(item));
+      setData((prev) => prev.map((entry) => (entry.id === item.id ? toRow(res.content) : entry)));
+      notify("Conteúdo atualizado com sucesso!");
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao atualizar conteúdo."), "warning");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setData((prev) => prev.filter((i) => i.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await landingAPI.delete(Number(id));
+      setData((prev) => prev.filter((entry) => entry.id !== id));
+      notify("Conteúdo removido com sucesso!");
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao remover conteúdo."), "warning");
+    }
   };
 
-  const handleCreate = (item: CrudItemType) => {
-    setData((prev) => [...prev, { ...item, id: String(Date.now()) }]);
+  const handleCreate = async (item: CrudItemType) => {
+    try {
+      const res = await landingAPI.create(toInput(item));
+      setData((prev) => [...prev, toRow(res.content)]);
+      notify("Conteúdo criado com sucesso!");
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao criar conteúdo."), "warning");
+    }
   };
 
   return (
@@ -60,15 +131,26 @@ export default function LandingPage() {
       </Card>
 
       <div className="rounded-xl border border-border bg-surface p-5">
-        <CrudTable
-          data={data}
-          fields={LANDING_FIELDS}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onCreate={handleCreate}
-          entityLabel="conteudo"
-        />
+        {loading ? (
+          <p className="py-12 text-center text-muted">Carregando conteúdo da landing page...</p>
+        ) : (
+          <CrudTable
+            data={data}
+            fields={LANDING_FIELDS}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onCreate={handleCreate}
+            entityLabel="conteudo"
+          />
+        )}
       </div>
+
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        visible={Boolean(notification.message)}
+        onClose={() => setNotification((n) => ({ ...n, message: "" }))}
+      />
     </section>
   );
 }

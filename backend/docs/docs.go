@@ -283,6 +283,143 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/landing": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "landing"
+                ],
+                "summary": "Lista conteúdos da landing page",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "landing"
+                ],
+                "summary": "Cria conteúdo da landing page",
+                "parameters": [
+                    {
+                        "description": "Conteúdo da landing",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LandingContentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/landing/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "landing"
+                ],
+                "summary": "Atualiza conteúdo da landing page",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do conteúdo",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Conteúdo atualizado",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LandingContentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "landing"
+                ],
+                "summary": "Remove conteúdo da landing page",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do conteúdo",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/admin/orders": {
             "get": {
                 "security": [
@@ -857,6 +994,26 @@ const docTemplate = `{
                 }
             }
         },
+        "/landing": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "landing"
+                ],
+                "summary": "Lista conteúdos ativos da landing page",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/webhook/mp": {
             "post": {
                 "responses": {}
@@ -974,6 +1131,43 @@ const docTemplate = `{
                 "price_reais": {
                     "type": "number",
                     "minimum": 0
+                }
+            }
+        },
+        "models.LandingContentInput": {
+            "type": "object",
+            "required": [
+                "name",
+                "secao",
+                "titulo"
+            ],
+            "properties": {
+                "botaoLink": {
+                    "type": "string"
+                },
+                "botaoTexto": {
+                    "type": "string"
+                },
+                "descricao": {
+                    "type": "string"
+                },
+                "imagem": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "secao": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "subtitulo": {
+                    "type": "string"
+                },
+                "titulo": {
+                    "type": "string"
                 }
             }
         },
