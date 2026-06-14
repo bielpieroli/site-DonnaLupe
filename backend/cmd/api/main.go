@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"backend/internal/db"
 	"backend/internal/handlers"
 	"backend/internal/middleware"
@@ -11,7 +13,6 @@ import (
 
 	_ "backend/docs"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -32,7 +33,7 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}); err != nil {
+	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -40,46 +41,95 @@ func main() {
 	passwordProvider := providers.NewBcryptProvider()
 	jwtProvider := providers.NewJWTProvider()
 
-	// Backoffice users
+	// Repositories
 	userBackofficeRepo := repository.NewUserBackofficeRepository(database)
+	permissionRepo := repository.NewPermissionRepository(database)
+	freightRepo := repository.NewFreightRepository(database)
+	orderRepo := repository.NewOrderRepository(database)
+
+	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
-	userBackofficeHandler := handlers.NewUserBackofficeHandler(userBackofficeService)
-
-	// Auth backoffice
+	permissionService := services.NewPermissionService(permissionRepo)
 	authBackofficeService := services.NewAuthBackofficeService(userBackofficeRepo, passwordProvider, jwtProvider)
-	authBackofficeHandler := handlers.NewAuthBackofficeHandler(authBackofficeService)
+	freightService := services.NewFreightService(freightRepo)
+	orderService := services.NewOrderService(orderRepo)
 
-	// Inicializa admin padrão do .env
-	if err := userBackofficeService.InitializeAdmin(); err != nil {
+	checkoutService, err := services.NewCheckoutService(orderService)
+	if err != nil {
+		panic("Checkout service: " + err.Error())
+	}
+
+	// Handlers
+	userBackofficeHandler := handlers.NewUserBackofficeHandler(userBackofficeService, permissionService)
+	authBackofficeHandler := handlers.NewAuthBackofficeHandler(authBackofficeService, permissionService)
+	permissionHandler := handlers.NewPermissionHandler(permissionService, userBackofficeService)
+	freightHandler := handlers.NewFreightHandler(freightService)
+	checkoutHandler := handlers.NewCheckoutHandler(checkoutService)
+	orderHandler := handlers.NewOrderHandler(orderService, os.Getenv("MP_ACCESS_TOKEN"))
+
+	// Inicializa admin padrão e suas permissões
+	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
 		panic("Failed to initialize admin: " + err.Error())
+	}
+	if err := permissionService.InitializeAdminPermissions(); err != nil {
+		panic("Failed to initialize admin permissions: " + err.Error())
 	}
 
 	r := gin.Default()
 
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5174"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		AllowCredentials: true,
-		ExposeHeaders:    []string{"Content-Length"},
-	}))
+	r.Use(middleware.CORSMiddleware(
+		"http://localhost:5173",
+		"http://localhost:5174",
+	))
 
 	// Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	authMW := middleware.AuthBackofficeMiddleware(jwtProvider)
+	permMW := func(resource string, level models.PermissionLevel) gin.HandlerFunc {
+		return middleware.RequirePermission(permissionService, resource, level)
+	}
+
 	// Rotas públicas
+	auth := r.Group("/admin/auth")
+	auth.POST("/login", authBackofficeHandler.Login)
+
+	// Registro: requer autenticação + permissão de escrita em "users"
+	auth.POST("/register", authMW, permMW("users", models.PermWrite), userBackofficeHandler.Register)
+
+	// Rotas administrativas protegidas
 	admin := r.Group("/admin")
-	admin.POST("/login", authBackofficeHandler.Login)
+	admin.Use(authMW)
 
-	// Rotas protegidas
-	backoffice := admin.Group("/")
-	backoffice.Use(middleware.AuthBackofficeMiddleware(jwtProvider))
+	admin.GET("/users", permMW("users", models.PermRead), userBackofficeHandler.GetAllUsers)
+	admin.GET("/users/:email", permMW("users", models.PermRead), userBackofficeHandler.GetUserByEmail)
+	admin.PUT("/users/:email", permMW("users", models.PermWrite), userBackofficeHandler.UpdateUser)
+	admin.DELETE("/users/:email", permMW("users", models.PermWrite), userBackofficeHandler.DeleteUser)
 
-	backoffice.POST("/usersBackoffice", userBackofficeHandler.CreateUser)
-	backoffice.GET("/usersBackoffice", userBackofficeHandler.GetAllUsers)
-	backoffice.GET("/usersBackoffice/:email", userBackofficeHandler.GetUserByEmail)
-	backoffice.PUT("/usersBackoffice/:email", userBackofficeHandler.UpdateUser)
-	backoffice.DELETE("/usersBackoffice/:email", userBackofficeHandler.DeleteUser)
+	admin.GET("/users/:email/permissions", permMW("permissions", models.PermRead), permissionHandler.GetPermissions)
+	admin.PUT("/users/:email/permissions", permMW("permissions", models.PermWrite), permissionHandler.SetPermissions)
+
+	// Checkout - rota pública de criação de preferência MP
+	r.POST("/checkout/preference", checkoutHandler.CreatePreference)
+
+	// Frete - rota pública de cotação
+	r.POST("/freight/quote", freightHandler.Quote)
+
+	// Frete - gestão de preço de frete (backoffice)
+	freight := admin.Group("/freight")
+	freight.GET("/rules", permMW("freight", models.PermRead), freightHandler.GetRules)
+	freight.POST("/rules", permMW("freight", models.PermWrite), freightHandler.CreateRule)
+	freight.PUT("/rules/:id", permMW("freight", models.PermWrite), freightHandler.UpdateRule)
+	freight.DELETE("/rules/:id", permMW("freight", models.PermWrite), freightHandler.DeleteRule)
+
+	// Pedidos (backoffice)
+	orders := admin.Group("/orders")
+	orders.GET("", permMW("orders", models.PermRead), orderHandler.GetAll)
+	orders.GET("/:id", permMW("orders", models.PermRead), orderHandler.GetByID)
+	orders.PUT("/:id/delivery-status", permMW("orders", models.PermWrite), orderHandler.UpdateDeliveryStatus)
+
+	// Webhook público do Mercado Pago
+	r.POST("/webhook/mp", orderHandler.Webhook)
 
 	r.Run(":4000")
 }

@@ -12,17 +12,18 @@ import (
 )
 
 type UserBackofficeHandler struct {
-	service services.UserBackofficeService
+	service     services.UserBackofficeService
+	permService services.PermissionService
 }
 
-func NewUserBackofficeHandler(service services.UserBackofficeService) *UserBackofficeHandler {
-	return &UserBackofficeHandler{service: service}
+func NewUserBackofficeHandler(service services.UserBackofficeService, permService services.PermissionService) *UserBackofficeHandler {
+	return &UserBackofficeHandler{service: service, permService: permService}
 }
 
-// CreateUser godoc
-// @Summary      Cria usuário backoffice
-// @Description  Cria um novo usuário do backoffice
-// @Tags         usersBackoffice
+// Register godoc
+// @Summary      Registra usuário backoffice
+// @Description  Cria um novo usuário do backoffice, com permissões opcionais
+// @Tags         auth
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -31,8 +32,8 @@ func NewUserBackofficeHandler(service services.UserBackofficeService) *UserBacko
 // @Failure      400      {object}  map[string]interface{}
 // @Failure      409      {object}  map[string]interface{}
 // @Failure      500      {object}  map[string]interface{}
-// @Router       /admin/usersBackoffice [post]
-func (h *UserBackofficeHandler) CreateUser(c *gin.Context) {
+// @Router       /admin/auth/register [post]
+func (h *UserBackofficeHandler) Register(c *gin.Context) {
 	var req models.CreateUserBackofficeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		if len(req.Password) < 8 {
@@ -45,12 +46,19 @@ func (h *UserBackofficeHandler) CreateUser(c *gin.Context) {
 
 	user, err := h.service.CreateUser(req)
 	if err != nil {
-		if err.Error() == "e-mail já cadastrado" {
+		if errors.Is(err, services.ErrEmailAlreadyExists) {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	if len(req.Permissions) > 0 {
+		if err := h.permService.SetUserPermissions(user.Email, req.Permissions); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Usuário criado, mas erro ao salvar permissões: " + err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Usuário criado com sucesso!", "user": user})
@@ -59,7 +67,7 @@ func (h *UserBackofficeHandler) CreateUser(c *gin.Context) {
 // GetAllUsers godoc
 // @Summary      Lista usuários backoffice
 // @Description  Retorna todos os usuários do backoffice com paginação e filtros
-// @Tags         usersBackoffice
+// @Tags         users
 // @Produce      json
 // @Security     BearerAuth
 // @Param        page          query     int     false  "Página"          default(1)
@@ -71,7 +79,7 @@ func (h *UserBackofficeHandler) CreateUser(c *gin.Context) {
 // @Success      200           {object}  map[string]interface{}
 // @Failure      400           {object}  map[string]interface{}
 // @Failure      500           {object}  map[string]interface{}
-// @Router       /admin/usersBackoffice [get]
+// @Router       /admin/users [get]
 func (h *UserBackofficeHandler) GetAllUsers(c *gin.Context) {
 	page := 1
 	limit := 10
@@ -120,13 +128,13 @@ func (h *UserBackofficeHandler) GetAllUsers(c *gin.Context) {
 // GetUserByEmail godoc
 // @Summary      Busca usuário backoffice por email
 // @Description  Retorna um usuário do backoffice pelo email
-// @Tags         usersBackoffice
+// @Tags         users
 // @Produce      json
 // @Security     BearerAuth
 // @Param        email  path      string  true  "Email do usuário"
 // @Success      200    {object}  map[string]interface{}
 // @Failure      404    {object}  map[string]interface{}
-// @Router       /admin/usersBackoffice/{email} [get]
+// @Router       /admin/users/{email} [get]
 func (h *UserBackofficeHandler) GetUserByEmail(c *gin.Context) {
 	email := c.Param("email")
 
@@ -142,7 +150,7 @@ func (h *UserBackofficeHandler) GetUserByEmail(c *gin.Context) {
 // UpdateUser godoc
 // @Summary      Atualiza usuário backoffice
 // @Description  Atualiza a senha de um usuário do backoffice
-// @Tags         usersBackoffice
+// @Tags         users
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -152,7 +160,7 @@ func (h *UserBackofficeHandler) GetUserByEmail(c *gin.Context) {
 // @Failure      400      {object}  map[string]interface{}
 // @Failure      404      {object}  map[string]interface{}
 // @Failure      500      {object}  map[string]interface{}
-// @Router       /admin/usersBackoffice/{email} [put]
+// @Router       /admin/users/{email} [put]
 func (h *UserBackofficeHandler) UpdateUser(c *gin.Context) {
 	email := c.Param("email")
 
@@ -180,20 +188,25 @@ func (h *UserBackofficeHandler) UpdateUser(c *gin.Context) {
 
 // DeleteUser godoc
 // @Summary      Remove usuário backoffice
-// @Description  Remove um usuário do backoffice pelo email
-// @Tags         usersBackoffice
+// @Description  Remove um usuário do backoffice e todas as suas permissões
+// @Tags         users
 // @Produce      json
 // @Security     BearerAuth
 // @Param        email  path      string  true  "Email do usuário"
 // @Success      200    {object}  map[string]interface{}
 // @Failure      404    {object}  map[string]interface{}
 // @Failure      500    {object}  map[string]interface{}
-// @Router       /admin/usersBackoffice/{email} [delete]
+// @Router       /admin/users/{email} [delete]
 func (h *UserBackofficeHandler) DeleteUser(c *gin.Context) {
 	email := c.Param("email")
 
 	if _, err := h.service.GetUserByEmail(email); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Usuário a ser deletado não existe"})
+		return
+	}
+
+	if err := h.permService.DeleteByEmail(email); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao remover permissões do usuário"})
 		return
 	}
 

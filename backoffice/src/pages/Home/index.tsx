@@ -4,9 +4,16 @@ import Card from "@/components/core/Card";
 import { ArrowRight } from "lucide-react";
 import { Tabs } from "@/constants/Tabs";
 
+const LEVEL_ORDER = { none: 0, read: 1, write: 2 } as const;
+
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, permissions } = useAuth();
   const navigate = useNavigate();
+
+  const visibleTabs = Tabs.filter((tab) => {
+    const perm = permissions.find((p) => p.resource === tab.key);
+    return (LEVEL_ORDER[perm?.level ?? "none"] ?? 0) >= LEVEL_ORDER["read"];
+  });
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
@@ -30,7 +37,7 @@ export default function HomePage() {
 
       {/* CRUD cards */}
       <div className="grid md:grid-cols-3 gap-4">
-      {Tabs.map((item) => {
+      {visibleTabs.map((item) => {
         const Icon: React.ReactNode = item.icon;
         return (
           <Card

@@ -13,7 +13,7 @@ import {
 export interface CrudField {
   value: string;
   label: string;
-  type?: "text" | "textarea" | "select" | "badge" | "date" | "number" | "multivalue";
+  type?: "text" | "password" | "textarea" | "select" | "badge" | "date" | "number" | "multivalue";
   badgeVariants?: Record<string, string>;
   options?: string[];
   multiValueOptions?: string[];
@@ -22,11 +22,17 @@ export interface CrudField {
 export interface CrudTableProps {
   data: CrudItemType[];
   fields: CrudField[];
+  /** Override fields shown in the create modal. Falls back to `fields`. */
+  createFields?: CrudField[];
+  /** Override fields shown in the edit modal. Falls back to `fields`. */
+  editFields?: CrudField[];
   onEdit: (item: CrudItemType) => void;
   onDelete: (id: string) => void;
   onCreate?: (item: CrudItemType) => void;
   entityLabel?: string;
   defaultPageSize?: number;
+  /** Hides all write actions (create, edit, delete). Use for read-only users. */
+  readOnly?: boolean;
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -34,12 +40,17 @@ const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 export function CrudTable({
   data,
   fields,
+  createFields,
+  editFields,
   onEdit,
   onDelete,
   onCreate,
   entityLabel = "item",
   defaultPageSize = 10,
+  readOnly = false,
 }: CrudTableProps) {
+  const resolvedCreateFields = createFields ?? fields;
+  const resolvedEditFields = editFields ?? fields;
   type FormValue = string | string[];
 
   const [filter, setFilter] = useState("");
@@ -147,7 +158,7 @@ export function CrudTable({
   const openEdit = (item: CrudItemType) => {
     setSelectedItem(item);
     const fd: Record<string, FormValue> = {};
-    fields.forEach((f) => {
+    resolvedEditFields.forEach((f) => {
       const raw = (item as Record<string, unknown>)[f.value];
       fd[f.value] = f.type === "multivalue" ? normalizeToStringArray(raw) : String(raw ?? "");
     });
@@ -162,7 +173,7 @@ export function CrudTable({
 
   const openCreate = () => {
     const fd: Record<string, FormValue> = {};
-    fields.forEach((f) => {
+    resolvedCreateFields.forEach((f) => {
       fd[f.value] = f.type === "multivalue" ? [] : "";
     });
     setFormData(fd);
@@ -246,7 +257,7 @@ export function CrudTable({
             )}
           </div>
         </div>
-        {onCreate && (
+        {!readOnly && onCreate && (
           <Button
             onClick={openCreate}
             className="shrink-0"
@@ -369,7 +380,7 @@ export function CrudTable({
                   <SortIcon field={f.value} />
                 </th>
               ))}
-              <th className="w-24 border-b border-border px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">Ações</th>
+              {!readOnly && <th className="w-24 border-b border-border px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">Ações</th>}
               </tr>
             </thead>
             <tbody>
@@ -400,28 +411,30 @@ export function CrudTable({
                       {renderCell(item, f)}
                     </td>
                   ))}
-                  <td className="border-b border-border px-4 py-3">
-                    <div className="flex gap-1.5">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEdit(item)}
-                        className="h-10 w-10 rounded-lg p-0 text-muted"
-                        title="Editar"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openDelete(item)}
-                        className="h-10 w-10 rounded-lg p-0 text-muted"
-                        title="Excluir"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </td>
+                  {!readOnly && (
+                    <td className="border-b border-border px-4 py-3">
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openEdit(item)}
+                          className="h-10 w-10 rounded-lg p-0 text-muted"
+                          title="Editar"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openDelete(item)}
+                          className="h-10 w-10 rounded-lg p-0 text-muted"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}
@@ -435,7 +448,7 @@ export function CrudTable({
       {/* Create Dialog */}
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={`Novo ${entityLabel}`} widthClassName="max-w-2xl">
           <div className="grid gap-4 py-2 sm:grid-cols-2">
-            {fields.map(f => (
+            {resolvedCreateFields.map(f => (
               <div key={f.value} className={`space-y-1.5 ${f.type === "textarea" ? "sm:col-span-2" : ""}`}>
                 <label htmlFor={`create-${f.value}`} className="text-sm text-muted mr-2">{f.label}</label>
                 {f.type === "badge" || f.type === "select" ? (
@@ -501,6 +514,7 @@ export function CrudTable({
                   ) : (
                     <Input
                       id={`create-${f.value}`}
+                      type={f.type === "password" ? "password" : "text"}
                       value={String(formData[f.value] ?? "")}
                       onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
                     />
@@ -525,7 +539,7 @@ export function CrudTable({
       {/* Edit Dialog */}
       <Modal open={editOpen} onClose={() => setEditOpen(false)} title={`Editar ${entityLabel}`} widthClassName="max-w-2xl">
           <div className="grid gap-4 py-2 sm:grid-cols-2">
-            {fields.map(f => (
+            {resolvedEditFields.map(f => (
               <div key={f.value} className={`space-y-1.5 ${f.type === "textarea" ? "sm:col-span-2" : ""}`}>
                 <label htmlFor={`edit-${f.value}`} className="text-sm text-muted mr-2">{f.label}</label>
                 {f.type === "badge" || f.type === "select" ? (
@@ -590,6 +604,7 @@ export function CrudTable({
                   ) : (
                     <Input
                       id={`edit-${f.value}`}
+                      type={f.type === "password" ? "password" : "text"}
                       value={String(formData[f.value] ?? "")}
                       onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
                     />

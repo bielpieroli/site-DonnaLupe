@@ -1,28 +1,88 @@
 import { CrudTable } from "@/components/CrudTable";
 import type { CrudItemType } from "@/types/CrudItem";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
+import Notification from "@/components/Notification";
 import { ArrowLeft, UserCog } from "lucide-react";
-import { MOCK_USERS } from "@/mocks/users";
-import { USER_FIELDS } from "@/data/crudFields";
+import { USER_FIELDS, USER_CREATE_FIELDS, USER_EDIT_FIELDS } from "@/data/crudFields";
+import { usersAPI, authAPI } from "@/api";
+import { useHasPermission } from "@/contexts/AuthContext";
+import { apiMsg } from "@/lib/formatting";
+
+interface UserItem extends CrudItemType {
+  email: string;
+}
 
 export default function UsersCRUD() {
   const navigate = useNavigate();
-  const [data, setData] = useState<CrudItemType[]>(MOCK_USERS);
+  const canWrite = useHasPermission("users", "write");
+  const [data, setData] = useState<UserItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" }>({
+    message: "",
+    type: "success",
+  });
 
-  // TODO: Integrar com backend para persistência real dos dados no BD
-  const handleEdit = (item: CrudItemType) => {
-    setData(prev => prev.map(i => i.id === item.id ? item : i));
+  const notify = (message: string, type: "success" | "warning" = "success") =>
+    setNotification({ message, type });
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await usersAPI.getAll({ limit: 100 });
+      setData(
+        res.users.map((u) => ({
+          id: u.email,
+          name: u.email,
+          email: u.email,
+        })),
+      );
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao carregar usuários."), "warning");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleCreate = async (item: CrudItemType) => {
+    const user = item as UserItem & { password?: string };
+    try {
+      await authAPI.register(user.email, user.password ?? "");
+      notify("Usuário criado com sucesso!");
+      await fetchUsers();
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao criar usuário."), "warning");
+    }
   };
-  const handleDelete = (id: string) => setData(prev => prev.filter(i => i.id !== id));
-  const handleCreate = (item: CrudItemType) => setData(prev => [...prev, { ...item, id: String(Date.now()) }]);
 
+  const handleEdit = async (item: CrudItemType) => {
+    const user = item as UserItem & { password?: string };
+    try {
+      await usersAPI.update(user.email, user.password ?? "");
+      notify("Senha atualizada com sucesso!");
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao atualizar usuário."), "warning");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await usersAPI.delete(id);
+      notify("Usuário removido com sucesso!");
+      setData((prev) => prev.filter((u) => u.id !== id));
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao remover usuário."), "warning");
+    }
+  };
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10 space-y-6 overflow-x-auto scrollbar-hide">
-      {/* Header card situando a página */}
       <Card className="relative overflow-hidden border-border bg-panel-gradient">
         <div className="pointer-events-none absolute top-0 right-0 h-72 w-72 rounded-full bg-accent-orb blur-3xl" />
         <div className="pb-4 p-6">
@@ -38,32 +98,42 @@ export default function UsersCRUD() {
           </p>
         </div>
         <div className="px-6 pb-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="gap-2 px-3"
-              onClick={() => navigate('/home')}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </Button>
-      
-          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="gap-2 px-3"
+            onClick={() => navigate("/home")}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </Button>
         </div>
       </Card>
 
-      {/* Tabela com os usuários do Backoffice */}
       <div className="rounded-xl border border-border bg-surface p-5">
-        <CrudTable
-          data={data}
-          fields={USER_FIELDS}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onCreate={handleCreate}
-          entityLabel="usuário"
-        />
+        {loading ? (
+          <p className="py-12 text-center text-muted">Carregando usuários…</p>
+        ) : (
+          <CrudTable
+            data={data}
+            fields={USER_FIELDS}
+            createFields={USER_CREATE_FIELDS}
+            editFields={USER_EDIT_FIELDS}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onCreate={handleCreate}
+            entityLabel="usuário"
+            readOnly={!canWrite}
+          />
+        )}
       </div>
+
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        visible={Boolean(notification.message)}
+        onClose={() => setNotification((n) => ({ ...n, message: "" }))}
+      />
     </section>
   );
 }

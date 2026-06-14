@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,7 +23,7 @@ export default function LoginPage() {
   const state = location.state as LocationState | null;
   const destination = state?.from?.pathname ?? "/home";
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!email.trim() || !password.trim()) {
@@ -30,7 +31,10 @@ export default function LoginPage() {
       return;
     }
 
-    const msg = login(email, password);
+    setLoading(true);
+    const msg = await login(email, password);
+    setLoading(false);
+
     if (msg) {
       setErrorMessage(msg);
       return;
@@ -114,12 +118,13 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="group relative h-12 w-full overflow-hidden rounded-xl font-semibold active:scale-[0.98]"
+              <Button
+                type="submit"
+                disabled={loading}
+                className="group relative h-12 w-full overflow-hidden rounded-xl font-semibold active:scale-[0.98] disabled:opacity-60"
               >
                 <span className="flex items-center gap-2">
-                  Acessar Painel
+                  {loading ? "Entrando…" : "Acessar Painel"}
                   <LockKeyhole size={18} className="transition-transform group-hover:translate-x-1" />
                 </span>
               </Button>

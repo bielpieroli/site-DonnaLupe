@@ -2,10 +2,13 @@ import { useState } from 'react'
 import ProductDetailCard, { type CookieDetail } from '@/components/ProductDetailCard'
 import { PRODUCTS } from '@/data/products'
 import Footer from '@/components/Footer'
+import { useCart } from '@/contexts/CartContext'
 
 function Shopping() {
+  const { addItem } = useCart()
   const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
   const [quantity, setQuantity] = useState(1)
+  const [addedId, setAddedId] = useState<number | null>(null)
 
   const openDetails = (product: CookieDetail) => {
     setSelectedProduct(product)
@@ -14,6 +17,15 @@ function Shopping() {
 
   const closeDetails = () => {
     setSelectedProduct(null)
+  }
+
+  const handleAddToCart = (product: CookieDetail, qty: number) => {
+    addItem(product, qty)
+    setAddedId(product.id)
+    setTimeout(() => {
+      setAddedId(null)
+      closeDetails()
+    }, 800)
   }
 
   return (
@@ -106,6 +118,8 @@ function Shopping() {
                   onDecrease={() => setQuantity((prev) => Math.max(1, prev - 1))}
                   onIncrease={() => setQuantity((prev) => prev + 1)}
                   onClose={closeDetails}
+                  onAddToCart={(qty) => handleAddToCart(selectedProduct, qty)}
+                  added={addedId === selectedProduct.id}
                 />
               </div>
             </div>

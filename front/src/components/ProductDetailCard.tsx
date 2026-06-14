@@ -18,6 +18,8 @@ type ProductDetailCardProps = {
   onDecrease: () => void;
   onIncrease: () => void;
   onClose: () => void;
+  onAddToCart?: (quantity: number) => void;
+  added?: boolean;
 };
 
 function ProductDetailCard({
@@ -26,6 +28,8 @@ function ProductDetailCard({
   onDecrease,
   onIncrease,
   onClose,
+  onAddToCart,
+  added = false,
 }: ProductDetailCardProps) {
   return (
     <div className="w-full overflow-hidden rounded-3xl bg-[#f4f1ed] shadow-[0_20px_80px_rgba(30,16,10,0.45)] sm:rounded-4xl md:max-w-245">
@@ -131,8 +135,15 @@ function ProductDetailCard({
               </button>
             </div>
 
-            <button className="w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-contrast transition-colors hover:bg-secondary sm:w-auto sm:px-7">
-              Adicionar {product.price}
+            <button
+              type="button"
+              onClick={() => onAddToCart?.(quantity)}
+              disabled={added}
+              className={`w-full rounded-full px-6 py-3 text-sm font-semibold text-primary-contrast transition-colors sm:w-auto sm:px-7 ${
+                added ? "bg-[#2d7a3a]" : "bg-primary hover:bg-secondary"
+              }`}
+            >
+              {added ? "Adicionado ✓" : `Adicionar ${product.price}`}
             </button>
           </div>
         </div>

@@ -1,89 +1,121 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { MOCK_USERS } from "@/mocks/users";
-type AuthUser = {
-  email: string;
-  name: string;
-};
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { authAPI, permissionsAPI } from '@/api'
+import { TOKEN_KEY } from '@/api/client'
+import type { AuthUser, Permission, StoredSession } from '@/types/APIResponseType'
 
 type AuthContextValue = {
-  isAuthenticated: boolean;
-  user: AuthUser | null;
-  login: (email: string, password: string) => string | null;
-  logout: () => void;
-};
+  isAuthenticated: boolean
+  user: AuthUser | null
+  permissions: Permission[]
+  login: (email: string, password: string) => Promise<string | null>
+  logout: () => void
+}
 
-const storageKey = "semcomp-backoffice-auth";
+const SESSION_KEY = 'semcomp-backoffice-auth'
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+const AuthContext = createContext<AuthContextValue | null>(null)
 
-function readStoredUser(): AuthUser | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const rawValue = window.localStorage.getItem(storageKey);
-  if (!rawValue) {
-    return null;
-  }
-
+function readStoredSession(): { user: AuthUser; permissions: Permission[] } | null {
+  if (typeof window === 'undefined') return null
+  const raw = window.localStorage.getItem(SESSION_KEY)
+  if (!raw) return null
   try {
-    return JSON.parse(rawValue) as AuthUser;
+    const data = JSON.parse(raw) as Partial<StoredSession>
+    if (!data.email) return null
+    return {
+      user: { email: data.email, name: data.name ?? data.email },
+      permissions: data.permissions ?? [],
+    }
   } catch {
-    window.localStorage.removeItem(storageKey);
-    return null;
+    window.localStorage.removeItem(SESSION_KEY)
+    return null
   }
 }
 
+function deriveDisplayName(email: string): string {
+  const prefix = email.trim().toLowerCase().split('@')[0] ?? 'Administrador'
+  return (
+    prefix
+      .split(/[._-]/)
+      .filter(Boolean)
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ') || 'Administrador'
+  )
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => readStoredUser());
+  const stored = readStoredSession()
+  const [user, setUser] = useState<AuthUser | null>(stored?.user ?? null)
+  const [permissions, setPermissions] = useState<Permission[]>(stored?.permissions ?? [])
 
+  // Persist session to localStorage whenever user or permissions change.
   useEffect(() => {
-    if (user) {
-      window.localStorage.setItem(storageKey, JSON.stringify(user));
-      return;
+    if (!user) {
+      window.localStorage.removeItem(SESSION_KEY)
+      window.localStorage.removeItem(TOKEN_KEY)
+      return
     }
+    const session: StoredSession = {
+      email: user.email,
+      name: user.name,
+      token: window.localStorage.getItem(TOKEN_KEY) ?? '',
+      permissions,
+    }
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  }, [user, permissions])
 
-    window.localStorage.removeItem(storageKey);
-  }, [user]);
+  // Refresh permissions from the API on every mount so new resources added
+  // to the backend are reflected without requiring the user to re-login.
+  useEffect(() => {
+    if (!user) return
+    permissionsAPI.getByUser(user.email)
+      .then((res) => setPermissions(res.permissions))
+      .catch(() => { /* keep cached permissions on error */ })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const value = useMemo<AuthContextValue>(
     () => ({
       isAuthenticated: user !== null,
       user,
-      login: (email: string, password: string) => {
-        const user = MOCK_USERS.find((u) => u.email === email && u.password === password);
-        if (!user) {
-          return "Credenciais inválidas.";
+      permissions,
+
+      login: async (email: string, password: string): Promise<string | null> => {
+        try {
+          const res = await authAPI.login(email, password)
+          // TOKEN_KEY já foi persistido dentro de authAPI.login()
+          const name = deriveDisplayName(res.user.email)
+          setPermissions(res.permissions)
+          setUser({ email: res.user.email, name })
+          return null
+        } catch (err) {
+          if (err instanceof Error) return err.message
+          return 'Erro inesperado ao fazer login'
         }
-
-        const normalizedEmail = email.trim().toLowerCase();
-        const fallbackName = normalizedEmail.split("@")[0] || "Administrador";
-
-        setUser({
-          email: normalizedEmail,
-          name: fallbackName
-            .split(/[._-]/)
-            .filter(Boolean)
-            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-            .join(" ") || "Administrador",
-        });
-
-        return null;
       },
-      logout: () => setUser(null),
-    }),
-    [user],
-  );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+      logout: () => {
+        setUser(null)
+        setPermissions([])
+        window.localStorage.removeItem(SESSION_KEY)
+        window.localStorage.removeItem(TOKEN_KEY)
+      },
+    }),
+    [user, permissions],
+  )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
+}
 
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-
-  return context;
+export function useHasPermission(resource: string, level: 'read' | 'write'): boolean {
+  const { permissions } = useAuth()
+  const order = { none: 0, read: 1, write: 2 } as const
+  const perm = permissions.find((p) => p.resource === resource)
+  return (order[perm?.level ?? 'none'] ?? 0) >= order[level]
 }

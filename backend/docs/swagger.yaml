@@ -1,5 +1,43 @@
 basePath: /
 definitions:
+  models.CheckoutItem:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price_value:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  models.CheckoutPreferenceRequest:
+    properties:
+      cep:
+        type: string
+      complement:
+        type: string
+      freight_cost:
+        type: number
+      items:
+        items:
+          $ref: '#/definitions/models.CheckoutItem'
+        minItems: 1
+        type: array
+      number:
+        type: string
+      pickup_mode:
+        type: boolean
+    required:
+    - items
+    type: object
+  models.CheckoutPreferenceResponse:
+    properties:
+      initPoint:
+        type: string
+      preferenceId:
+        type: string
+    type: object
   models.CreateUserBackofficeRequest:
     properties:
       email:
@@ -7,9 +45,35 @@ definitions:
       password:
         minLength: 8
         type: string
+      permissions:
+        items:
+          $ref: '#/definitions/models.PermissionInput'
+        type: array
     required:
     - email
     - password
+    type: object
+  models.FreightQuoteRequest:
+    properties:
+      cep:
+        type: string
+      complement:
+        type: string
+      number:
+        type: string
+    required:
+    - cep
+    - number
+    type: object
+  models.FreightRuleInput:
+    properties:
+      max_distance_km:
+        type: number
+      price_reais:
+        minimum: 0
+        type: number
+    required:
+    - max_distance_km
     type: object
   models.LoginUserBackofficeRequest:
     properties:
@@ -22,6 +86,35 @@ definitions:
     - email
     - password
     type: object
+  models.PermissionInput:
+    properties:
+      level:
+        $ref: '#/definitions/models.PermissionLevel'
+      resource:
+        type: string
+    required:
+    - level
+    - resource
+    type: object
+  models.PermissionLevel:
+    enum:
+    - none
+    - read
+    - write
+    type: string
+    x-enum-varnames:
+    - PermNone
+    - PermRead
+    - PermWrite
+  models.SetPermissionsRequest:
+    properties:
+      permissions:
+        items:
+          $ref: '#/definitions/models.PermissionInput'
+        type: array
+    required:
+    - permissions
+    type: object
   models.UpdateUserBackofficeRequest:
     properties:
       password:
@@ -33,15 +126,15 @@ definitions:
 host: localhost:4000
 info:
   contact: {}
-  description: API do site da Donna Lupe
+  description: API do Site da Donna Lupe
   title: Donna Lupe Site API
   version: "1.0"
 paths:
-  /admin/login:
+  /admin/auth/login:
     post:
       consumes:
       - application/json
-      description: Autentica um usuário do backoffice e retorna um token JWT
+      description: Autentica um usuário do backoffice e retorna token JWT com permissões
       parameters:
       - description: Credenciais de acesso
         in: body
@@ -53,53 +146,33 @@ paths:
       - application/json
       responses:
         "200":
-          description: Login realizado com sucesso
+          description: OK
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Requisição inválida
+          description: Bad Request
           schema:
             additionalProperties: true
             type: object
         "401":
-          description: Credenciais inválidas
+          description: Unauthorized
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Erro interno
+          description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
       summary: Login backoffice
       tags:
       - auth
-  /admin/usersBackoffice:
-    get:
-      description: Retorna todos os usuários do backoffice
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Lista de usuários
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Erro interno
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Lista usuários backoffice
-      tags:
-      - usersBackoffice
+  /admin/auth/register:
     post:
       consumes:
       - application/json
-      description: Cria um novo usuário do backoffice
+      description: Cria um novo usuário do backoffice, com permissões opcionais
       parameters:
       - description: Dados do usuário
         in: body
@@ -111,33 +184,261 @@ paths:
       - application/json
       responses:
         "201":
-          description: Usuário criado com sucesso
+          description: Created
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Requisição inválida
+          description: Bad Request
           schema:
             additionalProperties: true
             type: object
         "409":
-          description: Email já existe
+          description: Conflict
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Erro interno
+          description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Cria usuário backoffice
+      summary: Registra usuário backoffice
       tags:
-      - usersBackoffice
-  /admin/usersBackoffice/{email}:
+      - auth
+  /admin/freight/rules:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista faixas de frete cadastradas
+      tags:
+      - freight
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dados da regra
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FreightRuleInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria uma faixa de frete
+      tags:
+      - freight
+  /admin/freight/rules/{id}:
     delete:
-      description: Remove um usuário do backoffice pelo email
+      parameters:
+      - description: ID da regra
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove uma faixa de frete
+      tags:
+      - freight
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID da regra
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados atualizados
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FreightRuleInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza uma faixa de frete
+      tags:
+      - freight
+  /admin/orders:
+    get:
+      parameters:
+      - description: Filtro por status do pedido
+        in: query
+        name: status
+        type: string
+      - description: Filtro por status de entrega
+        in: query
+        name: delivery_status
+        type: string
+      - description: Filtro por modo de entrega
+        in: query
+        name: delivery_mode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista pedidos
+      tags:
+      - orders
+  /admin/orders/{id}:
+    get:
+      parameters:
+      - description: ID do pedido
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Detalhes de um pedido
+      tags:
+      - orders
+  /admin/orders/{id}/delivery-status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do pedido
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Novo status
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza status de entrega de um pedido
+      tags:
+      - orders
+  /admin/users:
+    get:
+      description: Retorna todos os usuários do backoffice com paginação e filtros
+      parameters:
+      - default: 1
+        description: Página
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limite
+        in: query
+        name: limit
+        type: integer
+      - default: email
+        description: Ordenar por
+        in: query
+        name: sort_by
+        type: string
+      - default: asc
+        description: Ordem
+        in: query
+        name: sort_order
+        type: string
+      - description: Campo de busca
+        in: query
+        name: search_by
+        type: string
+      - description: Valor de busca
+        in: query
+        name: search_value
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista usuários backoffice
+      tags:
+      - users
+  /admin/users/{email}:
+    delete:
+      description: Remove um usuário do backoffice e todas as suas permissões
       parameters:
       - description: Email do usuário
         in: path
@@ -148,17 +449,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: Usuário removido com sucesso
+          description: OK
           schema:
             additionalProperties: true
             type: object
         "404":
-          description: Usuário não encontrado
+          description: Not Found
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Erro interno
+          description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
@@ -166,7 +467,7 @@ paths:
       - BearerAuth: []
       summary: Remove usuário backoffice
       tags:
-      - usersBackoffice
+      - users
     get:
       description: Retorna um usuário do backoffice pelo email
       parameters:
@@ -179,17 +480,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: Usuário encontrado
+          description: OK
           schema:
             additionalProperties: true
             type: object
         "404":
-          description: Usuário não encontrado
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Erro interno
+          description: Not Found
           schema:
             additionalProperties: true
             type: object
@@ -197,7 +493,7 @@ paths:
       - BearerAuth: []
       summary: Busca usuário backoffice por email
       tags:
-      - usersBackoffice
+      - users
     put:
       consumes:
       - application/json
@@ -218,22 +514,22 @@ paths:
       - application/json
       responses:
         "200":
-          description: Usuário atualizado com sucesso
+          description: OK
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Requisição inválida
+          description: Bad Request
           schema:
             additionalProperties: true
             type: object
         "404":
-          description: Usuário não encontrado
+          description: Not Found
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Erro interno
+          description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
@@ -241,7 +537,155 @@ paths:
       - BearerAuth: []
       summary: Atualiza usuário backoffice
       tags:
-      - usersBackoffice
+      - users
+  /admin/users/{email}/permissions:
+    get:
+      description: Retorna todas as permissões do usuário por recurso (inclui "none"
+        para recursos sem entrada)
+      parameters:
+      - description: Email do usuário
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista permissões de um usuário
+      tags:
+      - permissions
+    put:
+      consumes:
+      - application/json
+      description: Substitui todas as permissões do usuário. Entradas com level "none"
+        são ignoradas (ausência = sem acesso).
+      parameters:
+      - description: Email do usuário
+        in: path
+        name: email
+        required: true
+        type: string
+      - description: Permissões
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SetPermissionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Define permissões de um usuário
+      tags:
+      - permissions
+  /checkout/preference:
+    post:
+      consumes:
+      - application/json
+      description: Recebe os itens do carrinho e o custo de frete, cria uma preferência
+        server-side no Mercado Pago e retorna o link de checkout.
+      parameters:
+      - description: Itens e frete
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CheckoutPreferenceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CheckoutPreferenceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "502":
+          description: Bad Gateway
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Cria preferência de pagamento no Mercado Pago
+      tags:
+      - checkout
+  /freight/quote:
+    post:
+      consumes:
+      - application/json
+      description: Usa a Distance Matrix API do Google Maps para calcular a distância
+        até a loja e retorna o preço de frete conforme as faixas cadastradas.
+      parameters:
+      - description: Endereço completo de entrega
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FreightQuoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Calcula frete para um endereço de entrega
+      tags:
+      - freight
+  /webhook/mp:
+    post:
+      responses: {}
 securityDefinitions:
   BearerAuth:
     in: header
