@@ -141,7 +141,7 @@ export const INGREDIENT_FIELDS: CrudField[] = [
   { value: "name", label: "Ingrediente", type: "text" },
   { value: "stock", label: "Estoque", type: "number" },
   { value: "unit", label: "Unidade", type: "text" },
-  { value: "value_reais", label: "Valor (R$)", type: "number" },
+  { value: "value_reais", label: "Valor por unidade (R$)", type: "number" },
   {
     value: "stock_status",
     label: "Alerta",
@@ -158,11 +158,11 @@ export const INGREDIENT_CREATE_FIELDS: CrudField[] = [
   { value: "name", label: "Ingrediente", type: "text" },
   { value: "stock", label: "Estoque", type: "number" },
   { value: "unit", label: "Unidade", type: "text" },
-  { value: "value_reais", label: "Valor (R$)", type: "number" },
+  { value: "value_reais", label: "Valor por unidade (R$)", type: "number" },
 ];
 
 export const INGREDIENT_EDIT_FIELDS: CrudField[] = [
   { value: "stock", label: "Estoque", type: "number" },
   { value: "unit", label: "Unidade", type: "text" },
-  { value: "value_reais", label: "Valor (R$)", type: "number" },
+  { value: "value_reais", label: "Valor por unidade (R$)", type: "number" },
 ];
