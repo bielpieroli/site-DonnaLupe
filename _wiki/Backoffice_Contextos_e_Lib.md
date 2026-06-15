@@ -70,6 +70,10 @@ Lê `token` de `localStorage['semcomp-backoffice-auth']` automaticamente em cada
 | `api.users` | `delete(email)` | `DELETE /admin/users/:email` |
 | `api.permissions` | `getByUser(email)` | `GET /admin/users/:email/permissions` |
 | `api.permissions` | `setByUser(email, permissions)` | `PUT /admin/users/:email/permissions` |
+| `api.ingredients` | `getAll()` | `GET /admin/ingredients` |
+| `api.ingredients` | `create(input)` | `POST /admin/ingredients` |
+| `api.ingredients` | `update(name, input)` | `PUT /admin/ingredients/:name` |
+| `api.ingredients` | `delete(name)` | `DELETE /admin/ingredients/:name` |
 
 ### Tratamento de erros
 
@@ -120,7 +124,7 @@ Exports: `PermissionLevel`, `Permission`, `AuthUser`, `StoredSession`, `LoginRes
 
 - **Página redesenhada:** mostra tabela de usuários × recursos com badges de nível
 - **Recursos conhecidos** (em `PermissionsBackoffice/index.tsx` — manter em sincronia com `backend/internal/models/permission.go → KnownResources`):
-  - `users`, `products`, `permissions`, `landing`
+  - `users`, `products`, `permissions`, `landing`, `freight`, `orders`, `ingredients`
 - **Níveis:** `write` = RW (verde), `read` = R (azul), `none` = — (cinza)
 - Edição via modal com `<Select>` por recurso → chama `PUT /admin/users/:email/permissions`
 

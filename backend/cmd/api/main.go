@@ -33,7 +33,7 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}); err != nil {
+	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}, &models.Ingredient{}, &models.ProductIngredient{}); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -46,6 +46,7 @@ func main() {
 	permissionRepo := repository.NewPermissionRepository(database)
 	freightRepo := repository.NewFreightRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
+	ingredientRepo := repository.NewIngredientRepository(database)
 
 	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
@@ -53,6 +54,7 @@ func main() {
 	authBackofficeService := services.NewAuthBackofficeService(userBackofficeRepo, passwordProvider, jwtProvider)
 	freightService := services.NewFreightService(freightRepo)
 	orderService := services.NewOrderService(orderRepo)
+	ingredientService := services.NewIngredientService(ingredientRepo)
 
 	checkoutService, err := services.NewCheckoutService(orderService)
 	if err != nil {
@@ -66,6 +68,7 @@ func main() {
 	freightHandler := handlers.NewFreightHandler(freightService)
 	checkoutHandler := handlers.NewCheckoutHandler(checkoutService)
 	orderHandler := handlers.NewOrderHandler(orderService, os.Getenv("MP_ACCESS_TOKEN"))
+	ingredientHandler := handlers.NewIngredientHandler(ingredientService)
 
 	// Inicializa admin padrão e suas permissões
 	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
@@ -127,6 +130,13 @@ func main() {
 	orders.GET("", permMW("orders", models.PermRead), orderHandler.GetAll)
 	orders.GET("/:id", permMW("orders", models.PermRead), orderHandler.GetByID)
 	orders.PUT("/:id/delivery-status", permMW("orders", models.PermWrite), orderHandler.UpdateDeliveryStatus)
+
+	// Ingredientes (backoffice)
+	ingredients := admin.Group("/ingredients")
+	ingredients.GET("", permMW("ingredients", models.PermRead), ingredientHandler.GetAll)
+	ingredients.POST("", permMW("ingredients", models.PermWrite), ingredientHandler.Create)
+	ingredients.PUT("/:name", permMW("ingredients", models.PermWrite), ingredientHandler.Update)
+	ingredients.DELETE("/:name", permMW("ingredients", models.PermWrite), ingredientHandler.Delete)
 
 	// Webhook público do Mercado Pago
 	r.POST("/webhook/mp", orderHandler.Webhook)
