@@ -1,4 +1,4 @@
-import { FileText, LayoutTemplate, Package, ShieldCheck, ShoppingBag, Truck, Users, Wheat } from "lucide-react";
+import { FileText, Package, ShieldCheck, ShoppingBag, Truck, Users, Wheat } from "lucide-react";
 
 export const Tabs: {
   key: string;
@@ -35,15 +35,6 @@ export const Tabs: {
     icon: <ShieldCheck className="w-5 h-5" />,
     bg: "bg-primary/10",
     hoverBg: "group-hover:bg-primary/20",
-  },
-  {
-    key: "landing",
-    label: "Landing Page",
-    description: "Gerencie os conteúdos exibidos na Landing Page da loja.",
-    pageNavigate: "/backoffice-landing",
-    icon: <LayoutTemplate className="w-5 h-5" />,
-    bg: "bg-secondary/10",
-    hoverBg: "group-hover:bg-secondary/20",
   },
   {
     key: "content",

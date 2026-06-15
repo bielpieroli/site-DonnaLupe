@@ -111,7 +111,7 @@ export default function PageContentsBackoffice() {
           </h1>
 
           <p className="mt-1 text-muted">
-            Edite textos, botões e imagens de About, Shopping, Coffee e Footer.
+            Edite textos, botões e imagens de Landing, About, Shopping, Coffee e Footer.
           </p>
         </div>
 

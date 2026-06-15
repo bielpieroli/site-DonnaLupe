@@ -26,7 +26,6 @@ var KnownResources = []string{
 	"products",
 	"content",
 	"permissions",
-	"landing",
 	"freight",
 	"orders",
 	"ingredients",

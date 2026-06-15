@@ -154,8 +154,9 @@ export const PAGE_CONTENT_FIELDS: CrudField[] = [
     value: "page",
     label: "Página",
     type: "select",
-    options: ["about", "shopping", "coffee", "footer"],
+    options: ["landing", "about", "shopping", "coffee", "footer"],
     badgeVariants: {
+      landing: "bg-[#be123c] border border-[#9f1239]",
       about: "bg-[#7c3aed] border border-[#6d28d9]",
       shopping: "bg-[#1d4ed8] border border-[#1e40af]",
       coffee: "bg-[#b45309] border border-[#92400e]",

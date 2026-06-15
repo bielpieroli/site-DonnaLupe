@@ -18,7 +18,6 @@ const RESOURCES: { key: string; label: string }[] = [
   { key: "products",    label: "Produtos" },
   { key: "content",     label: "Conteúdos" },
   { key: "permissions", label: "Permissões" },
-  { key: "landing",     label: "Landing Page" },
   { key: "freight",     label: "Frete" },
   { key: "orders",      label: "Pedidos" },
   { key: "ingredients", label: "Ingredientes" },

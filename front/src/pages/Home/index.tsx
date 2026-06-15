@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '@/components/Footer'
 import { PRODUCTS } from '@/data/products'
-import { api, type LandingContent } from '@/api'
+import { api, type PageContent } from '@/api'
 
 import HomeCookieImg from '@/assets/img/cookie-home.png'
 import cookieMorangoIMG from '@/assets/img/cookie-morango.jpg'
@@ -72,44 +72,44 @@ const fallbackTestimonials: Testimonial[] = [
 
 export default function Home() {
   const sliderRef = useRef<HTMLDivElement>(null)
-  const [landingContent, setLandingContent] = useState<LandingContent[]>([])
+  const [landingContent, setLandingContent] = useState<PageContent[]>([])
 
   useEffect(() => {
-    api.landing
-      .getActive()
+    api.pageContents
+      .getActive('landing')
       .then((res) => setLandingContent(res.contents ?? []))
       .catch(() => setLandingContent([]))
   }, [])
 
   const bySection = (section: string) =>
-    landingContent.filter((item) => item.secao === section && item.status !== 'Inativo')
+    landingContent.filter((item) => item.section === section && item.status !== 'Inativo')
 
   const heroContent = bySection('Hero')[0]
   const hero = {
-    subtitle: heroContent?.subtitulo || 'Cookies & Coffee Break',
-    title: heroContent?.titulo || 'Cookies que fazem sorrir',
+    subtitle: heroContent?.subtitle || 'Cookies & Coffee Break',
+    title: heroContent?.title || 'Cookies que fazem sorrir',
     description:
-      heroContent?.descricao ||
+      heroContent?.description ||
       'Feitos à mão com ingredientes de verdade, muito amor e uma pitada de magia. Cada mordida é um abraço quentinho.',
-    image: resolveLandingImage(heroContent?.imagem ?? '', HomeCookieImg),
-    buttonText: heroContent?.botaoTexto || 'Ver cookies',
-    buttonLink: heroContent?.botaoLink || '/shopping',
+    image: resolveLandingImage(heroContent?.image ?? '', HomeCookieImg),
+    buttonText: heroContent?.buttonText || 'Ver cookies',
+    buttonLink: heroContent?.buttonLink || '/shopping',
   }
 
   const favorites =
     bySection('Favoritos').length > 0
       ? bySection('Favoritos').slice(0, 3).map((item, index) => ({
-          title: item.titulo,
-          description: item.descricao,
-          image: resolveLandingImage(item.imagem, fallbackFavorites[index]?.image ?? cookieChocoChunkIMG),
+          title: item.title,
+          description: item.description,
+          image: resolveLandingImage(item.image, fallbackFavorites[index]?.image ?? cookieChocoChunkIMG),
         }))
       : fallbackFavorites
 
   const testimonials =
     bySection('Depoimentos').length > 0
       ? bySection('Depoimentos').slice(0, 3).map((item, index) => ({
-          name: item.titulo,
-          text: item.descricao,
+          name: item.title,
+          text: item.description,
           bg: ['bg-rose-50', 'bg-sky-50', 'bg-amber-50'][index] ?? 'bg-rose-50',
         }))
       : fallbackTestimonials
@@ -118,13 +118,13 @@ export default function Home() {
   const ctaMain = ctaItems[0]
   const ctaSecondary = ctaItems[1]
   const cta = {
-    title: ctaMain?.titulo || 'Tá esperando o que pra experimentar?',
-    subtitle: ctaMain?.subtitulo || 'Peça online e receba seus cookies quentinhos em minutos.',
-    description: ctaMain?.descricao || 'Delivery ou retirada — você escolhe!',
-    primaryText: ctaMain?.botaoTexto || 'Fazer meu pedido 🍪',
-    primaryLink: ctaMain?.botaoLink || '/cart',
-    secondaryText: ctaSecondary?.botaoTexto || 'Ver cardápio 📋',
-    secondaryLink: ctaSecondary?.botaoLink || '/shopping',
+    title: ctaMain?.title || 'Tá esperando o que pra experimentar?',
+    subtitle: ctaMain?.subtitle || 'Peça online e receba seus cookies quentinhos em minutos.',
+    description: ctaMain?.description || 'Delivery ou retirada — você escolhe!',
+    primaryText: ctaMain?.buttonText || 'Fazer meu pedido 🍪',
+    primaryLink: ctaMain?.buttonLink || '/cart',
+    secondaryText: ctaSecondary?.buttonText || 'Ver cardápio 📋',
+    secondaryLink: ctaSecondary?.buttonLink || '/shopping',
   }
 
   const scroll = (direction: 'left' | 'right') => {
