@@ -12,6 +12,7 @@ import PageContentsPage from "@/pages/PageContentsBackoffice";
 import FreightPage from "@/pages/FreightBackoffice";
 import OrdersPage from "@/pages/OrdersBackoffice";
 import DeliveriesPage from "@/pages/DeliveriesBackoffice";
+import IngredientsPage from "@/pages/IngredientsBackoffice";
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
           {
             element: <RequirePermission resource="freight" />,
             children: [{ path: "/backoffice-freight", element: <FreightPage /> }],
+          },
+          {
+            element: <RequirePermission resource="ingredients" />,
+            children: [{ path: "/backoffice-ingredients", element: <IngredientsPage /> }],
           },
           {
             element: <RequirePermission resource="orders" />,

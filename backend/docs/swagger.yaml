@@ -38,6 +38,21 @@ definitions:
       preferenceId:
         type: string
     type: object
+  models.CreateIngredientRequest:
+    properties:
+      name:
+        type: string
+      stock:
+        minimum: 0
+        type: number
+      unit:
+        type: string
+      value_reais:
+        minimum: 0
+        type: number
+    required:
+    - name
+    type: object
   models.CreateUserBackofficeRequest:
     properties:
       email:
@@ -206,6 +221,17 @@ definitions:
         type: array
     required:
     - permissions
+    type: object
+  models.UpdateIngredientRequest:
+    properties:
+      stock:
+        minimum: 0
+        type: number
+      unit:
+        type: string
+      value_reais:
+        minimum: 0
+        type: number
     type: object
   models.UpdateUserBackofficeRequest:
     properties:
@@ -395,6 +421,120 @@ paths:
       summary: Atualiza uma faixa de frete
       tags:
       - freight
+  /admin/ingredients:
+    get:
+      description: Lista o estoque de ingredientes cadastrados
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista ingredientes
+      tags:
+      - ingredients
+    post:
+      consumes:
+      - application/json
+      description: Cadastra um novo ingrediente do estoque
+      parameters:
+      - description: Dados do ingrediente
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateIngredientRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cadastra ingrediente
+      tags:
+      - ingredients
+  /admin/ingredients/{name}:
+    delete:
+      description: Remove um ingrediente e seus vínculos em product_ingredients
+      parameters:
+      - description: Nome do ingrediente
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove ingrediente
+      tags:
+      - ingredients
+    put:
+      consumes:
+      - application/json
+      description: Atualiza estoque, unidade ou valor de um ingrediente
+      parameters:
+      - description: Nome do ingrediente
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Dados para atualização
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateIngredientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza ingrediente
+      tags:
+      - ingredients
   /admin/landing:
     get:
       produces:

@@ -1,4 +1,4 @@
-import { FileText, LayoutTemplate, Package, ShieldCheck, ShoppingBag, Truck, Users } from "lucide-react";
+import { FileText, LayoutTemplate, Package, ShieldCheck, ShoppingBag, Truck, Users, Wheat } from "lucide-react";
 
 export const Tabs: {
   key: string;
@@ -62,6 +62,15 @@ export const Tabs: {
     icon: <Truck className="w-5 h-5" />,
     bg: "bg-primary/10",
     hoverBg: "group-hover:bg-primary/20",
+  },
+  {
+    key: "ingredients",
+    label: "Ingredientes",
+    description: "Gerencie estoque, unidade, valor e alertas de baixo estoque dos ingredientes.",
+    pageNavigate: "/backoffice-ingredients",
+    icon: <Wheat className="w-5 h-5" />,
+    bg: "bg-secondary/10",
+    hoverBg: "group-hover:bg-secondary/20",
   },
   {
     key: "orders",

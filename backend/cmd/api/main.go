@@ -33,7 +33,17 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}, &models.LandingContent{}, &models.Product{}, &models.PageContent{}); err != nil {
+	if err := database.AutoMigrate(
+		&models.UserBackoffice{},
+		&models.Permission{},
+		&models.FreightRule{},
+		&models.Order{},
+		&models.LandingContent{},
+		&models.Product{},
+		&models.PageContent{},
+		&models.Ingredient{},
+		&models.ProductIngredient{},
+	); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -49,6 +59,7 @@ func main() {
 	landingRepo := repository.NewLandingRepository(database)
 	productRepo := repository.NewProductRepository(database)
 	pageContentRepo := repository.NewPageContentRepository(database)
+	ingredientRepo := repository.NewIngredientRepository(database)
 
 	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
@@ -59,6 +70,7 @@ func main() {
 	landingService := services.NewLandingService(landingRepo)
 	productService := services.NewProductService(productRepo)
 	pageContentService := services.NewPageContentService(pageContentRepo)
+	ingredientService := services.NewIngredientService(ingredientRepo)
 
 	checkoutService, err := services.NewCheckoutService(orderService)
 	if err != nil {
@@ -75,6 +87,7 @@ func main() {
 	landingHandler := handlers.NewLandingHandler(landingService)
 	productHandler := handlers.NewProductHandler(productService)
 	pageContentHandler := handlers.NewPageContentHandler(pageContentService)
+	ingredientHandler := handlers.NewIngredientHandler(ingredientService)
 
 	// Inicializa admin padrão e suas permissões
 	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
@@ -175,6 +188,13 @@ func main() {
 	pageContents.POST("", permMW("content", models.PermWrite), pageContentHandler.Create)
 	pageContents.PUT("/:id", permMW("content", models.PermWrite), pageContentHandler.Update)
 	pageContents.DELETE("/:id", permMW("content", models.PermWrite), pageContentHandler.Delete)
+
+	// Ingredientes (backoffice)
+	ingredients := admin.Group("/ingredients")
+	ingredients.GET("", permMW("ingredients", models.PermRead), ingredientHandler.GetAll)
+	ingredients.POST("", permMW("ingredients", models.PermWrite), ingredientHandler.Create)
+	ingredients.PUT("/:name", permMW("ingredients", models.PermWrite), ingredientHandler.Update)
+	ingredients.DELETE("/:name", permMW("ingredients", models.PermWrite), ingredientHandler.Delete)
 
 	// Webhook público do Mercado Pago
 	r.POST("/webhook/mp", orderHandler.Webhook)

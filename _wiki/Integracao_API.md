@@ -66,6 +66,7 @@ Autenticação: Bearer JWT no header `Authorization`
 | Register (backoffice) | **Integrado** | `UsersCRUD.handleCreate` chama `POST /auth/register` |
 | Users CRUD (backoffice) | **Integrado** | `GET/PUT/DELETE /admin/users` com notificações de feedback |
 | Permissions CRUD (backoffice) | **Integrado** | Página redesenhada: tabela usuário × recurso + modal de edição |
+| Ingredients CRUD (backoffice) | **Integrado** | `GET/POST/PUT/DELETE /admin/ingredients` + alerta de baixo estoque no painel |
 | Products CRUD (backoffice) | Mock local | Endpoints de products no backend ainda não existem |
 | Landing Page (backoffice) | Mock local | Endpoints de landing no backend ainda não existem |
 | Vitrine (front) | Estático | Dados em `cookies.json`, sem API |
@@ -113,6 +114,42 @@ Autenticação: Bearer JWT no header `Authorization`
 
 ---
 
+### Ingredientes (`/admin/ingredients`)
+
+Rotas 100% administrativas para estoque de ingredientes. Clientes comuns não consomem estes endpoints.
+
+| Método | Path | Permissão | Descrição |
+|--------|------|-----------|-----------|
+| GET | `/admin/ingredients` | read em "ingredients" | Lista ingredientes em ordem alfabética |
+| POST | `/admin/ingredients` | write em "ingredients" | Cadastra ingrediente |
+| PUT | `/admin/ingredients/:name` | write em "ingredients" | Atualiza estoque, unidade ou valor |
+| DELETE | `/admin/ingredients/:name` | write em "ingredients" | Remove ingrediente e vínculos em `product_ingredients` |
+
+**Body de criação:**
+
+```json
+{
+  "name": "Farinha",
+  "stock": 10,
+  "unit": "kg",
+  "value_reais": 7.5
+}
+```
+
+**Body de atualização parcial:**
+
+```json
+{
+  "stock": 12,
+  "unit": "kg",
+  "value_reais": 8.25
+}
+```
+
+No backoffice, a tela `/backoffice-ingredients` mostra alertas quando `stock <= 5`.
+
+---
+
 ## Próximas Integrações Necessárias
 
 ### 1. Adicionar Novos Recursos ao Sistema de Permissões
@@ -124,6 +161,7 @@ Autenticação: Bearer JWT no header `Authorization`
 ### 2. Endpoints Faltantes (backend a implementar)
 - `GET/POST/PUT/DELETE /admin/products`
 - `GET/POST/PUT/DELETE /admin/landing`
+- Vínculo produto × ingrediente: ainda não implementado por decisão de escopo atual
 
 ---
 

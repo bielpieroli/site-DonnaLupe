@@ -6,4 +6,5 @@ export { ordersAPI } from "./orders";
 export { landingAPI } from "./landing";
 export { productsAPI } from "./products";
 export { pageContentsAPI } from "./pageContents";
+export { ingredientsAPI } from "./ingredients";
 export { default as client } from "./client";

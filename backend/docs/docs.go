@@ -283,6 +283,182 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/ingredients": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Lista o estoque de ingredientes cadastrados",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ingredients"
+                ],
+                "summary": "Lista ingredientes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cadastra um novo ingrediente do estoque",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ingredients"
+                ],
+                "summary": "Cadastra ingrediente",
+                "parameters": [
+                    {
+                        "description": "Dados do ingrediente",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateIngredientRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ingredients/{name}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Atualiza estoque, unidade ou valor de um ingrediente",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ingredients"
+                ],
+                "summary": "Atualiza ingrediente",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nome do ingrediente",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados para atualização",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateIngredientRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Remove um ingrediente e seus vínculos em product_ingredients",
+                "tags": [
+                    "ingredients"
+                ],
+                "summary": "Remove ingrediente",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nome do ingrediente",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/admin/landing": {
             "get": {
                 "security": [
@@ -1446,6 +1622,28 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateIngredientRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "stock": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "value_reais": {
+                    "type": "number",
+                    "minimum": 0
+                }
+            }
+        },
         "models.CreateUserBackofficeRequest": {
             "type": "object",
             "required": [
@@ -1693,6 +1891,22 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.PermissionInput"
                     }
+                }
+            }
+        },
+        "models.UpdateIngredientRequest": {
+            "type": "object",
+            "properties": {
+                "stock": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "value_reais": {
+                    "type": "number",
+                    "minimum": 0
                 }
             }
         },
