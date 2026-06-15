@@ -16,8 +16,8 @@ import (
 var webhookClient = &http.Client{Timeout: 10 * time.Second}
 
 type OrderHandler struct {
-	service  services.OrderService
-	mpToken  string
+	service services.OrderService
+	mpToken string
 }
 
 func NewOrderHandler(service services.OrderService, mpToken string) *OrderHandler {

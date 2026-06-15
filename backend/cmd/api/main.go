@@ -33,7 +33,7 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}, &models.LandingContent{}); err != nil {
+	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}, &models.LandingContent{}, &models.Product{}, &models.PageContent{}); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -47,6 +47,8 @@ func main() {
 	freightRepo := repository.NewFreightRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
 	landingRepo := repository.NewLandingRepository(database)
+	productRepo := repository.NewProductRepository(database)
+	pageContentRepo := repository.NewPageContentRepository(database)
 
 	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
@@ -55,6 +57,8 @@ func main() {
 	freightService := services.NewFreightService(freightRepo)
 	orderService := services.NewOrderService(orderRepo)
 	landingService := services.NewLandingService(landingRepo)
+	productService := services.NewProductService(productRepo)
+	pageContentService := services.NewPageContentService(pageContentRepo)
 
 	checkoutService, err := services.NewCheckoutService(orderService)
 	if err != nil {
@@ -69,6 +73,8 @@ func main() {
 	checkoutHandler := handlers.NewCheckoutHandler(checkoutService)
 	orderHandler := handlers.NewOrderHandler(orderService, os.Getenv("MP_ACCESS_TOKEN"))
 	landingHandler := handlers.NewLandingHandler(landingService)
+	productHandler := handlers.NewProductHandler(productService)
+	pageContentHandler := handlers.NewPageContentHandler(pageContentService)
 
 	// Inicializa admin padrão e suas permissões
 	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
@@ -79,6 +85,12 @@ func main() {
 	}
 	if err := landingService.InitializeDefaults(); err != nil {
 		panic("Failed to initialize landing content: " + err.Error())
+	}
+	if err := productService.InitializeDefaults(); err != nil {
+		panic("Failed to initialize products: " + err.Error())
+	}
+	if err := pageContentService.InitializeDefaults(); err != nil {
+		panic("Failed to initialize page contents: " + err.Error())
 	}
 
 	r := gin.Default()
@@ -124,6 +136,12 @@ func main() {
 	// Landing page - conteúdo público
 	r.GET("/landing", landingHandler.GetPublic)
 
+	// Produtos - catálogo público
+	r.GET("/products", productHandler.GetPublic)
+
+	// Conteúdos das páginas públicas
+	r.GET("/page-contents/:page", pageContentHandler.GetPublic)
+
 	// Frete - gestão de preço de frete (backoffice)
 	freight := admin.Group("/freight")
 	freight.GET("/rules", permMW("freight", models.PermRead), freightHandler.GetRules)
@@ -143,6 +161,20 @@ func main() {
 	landing.POST("", permMW("landing", models.PermWrite), landingHandler.Create)
 	landing.PUT("/:id", permMW("landing", models.PermWrite), landingHandler.Update)
 	landing.DELETE("/:id", permMW("landing", models.PermWrite), landingHandler.Delete)
+
+	// Produtos (backoffice)
+	products := admin.Group("/products")
+	products.GET("", permMW("products", models.PermRead), productHandler.GetAll)
+	products.POST("", permMW("products", models.PermWrite), productHandler.Create)
+	products.PUT("/:id", permMW("products", models.PermWrite), productHandler.Update)
+	products.DELETE("/:id", permMW("products", models.PermWrite), productHandler.Delete)
+
+	// Conteúdos das páginas (backoffice)
+	pageContents := admin.Group("/page-contents")
+	pageContents.GET("", permMW("content", models.PermRead), pageContentHandler.GetAll)
+	pageContents.POST("", permMW("content", models.PermWrite), pageContentHandler.Create)
+	pageContents.PUT("/:id", permMW("content", models.PermWrite), pageContentHandler.Update)
+	pageContents.DELETE("/:id", permMW("content", models.PermWrite), pageContentHandler.Delete)
 
 	// Webhook público do Mercado Pago
 	r.POST("/webhook/mp", orderHandler.Webhook)

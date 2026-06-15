@@ -1,22 +1,109 @@
 import { CrudTable } from "@/components/CrudTable";
 import type { CrudItemType } from "@/types/CrudItem";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
-import { MOCK_PRODUCTS } from "@/mocks/products";
 import { PRODUCT_FIELDS } from "@/data/crudFields";
+import Notification from "@/components/Notification";
+import { productsAPI, type Product, type ProductInput } from "@/api/products";
+import { apiMsg } from "@/lib/formatting";
+
+type ProductRow = CrudItemType & Omit<Product, "id">;
+
+function toRow(product: Product): ProductRow {
+  return {
+    ...product,
+    id: String(product.id),
+  } as ProductRow;
+}
+
+function toNumber(value: unknown): number {
+  const parsed = Number(String(value ?? "0").replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function toInput(item: CrudItemType): ProductInput {
+  const row = item as ProductRow;
+  return {
+    name: String(row.name ?? "").trim(),
+    subtitle: String(row.subtitle ?? ""),
+    kind: String(row.kind ?? "Shopping") as ProductInput["kind"],
+    category: String(row.category ?? ""),
+    description: String(row.description ?? ""),
+    priceValue: toNumber(row.priceValue),
+    weight: String(row.weight ?? ""),
+    ingredientsText: String(row.ingredientsText ?? ""),
+    allergens: String(row.allergens ?? ""),
+    badge: String(row.badge ?? ""),
+    image: String(row.image ?? ""),
+    stock: toNumber(row.stock),
+    flavor: String(row.flavor ?? ""),
+    unit: String(row.unit ?? ""),
+    sizesText: String(row.sizesText ?? ""),
+    sizeCountsText: String(row.sizeCountsText ?? ""),
+    status: String(row.status ?? "Disponível"),
+  };
+}
 
 export default function Products() {
   const navigate = useNavigate();
-  const [data, setData] = useState<CrudItemType[]>(MOCK_PRODUCTS);
+  const [data, setData] = useState<ProductRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" }>({
+    message: "",
+    type: "success",
+  });
 
-  const handleEdit = (item: CrudItemType) => {
-    setData(prev => prev.map(i => i.id === item.id ? item : i));
+  const notify = (message: string, type: "success" | "warning" = "success") =>
+    setNotification({ message, type });
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await productsAPI.getAll();
+      setData((res.products ?? []).map(toRow));
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao carregar produtos."), "warning");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const handleEdit = async (item: CrudItemType) => {
+    try {
+      const res = await productsAPI.update(Number(item.id), toInput(item));
+      setData(prev => prev.map(i => i.id === item.id ? toRow(res.product) : i));
+      notify("Produto atualizado com sucesso!");
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao atualizar produto."), "warning");
+    }
   };
-  const handleDelete = (id: string) => setData(data => data.filter(i => i.id !== id));
-  const handleCreate = (item: CrudItemType) => setData(data => [...data, { ...item, id: String(Date.now()) }]);
+
+  const handleDelete = async (id: string) => {
+    try {
+      await productsAPI.delete(Number(id));
+      setData(data => data.filter(i => i.id !== id));
+      notify("Produto removido com sucesso!");
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao remover produto."), "warning");
+    }
+  };
+
+  const handleCreate = async (item: CrudItemType) => {
+    try {
+      const res = await productsAPI.create(toInput(item));
+      setData(data => [...data, toRow(res.product)]);
+      notify("Produto criado com sucesso!");
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao criar produto."), "warning");
+    }
+  };
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10 space-y-6">
@@ -52,15 +139,26 @@ export default function Products() {
 
       {/* Tabela de Produtos */}
       <div className="rounded-xl border border-border bg-surface p-5">
-        <CrudTable
-          data={data}
-          fields={PRODUCT_FIELDS}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onCreate={handleCreate}
-          entityLabel="produto"
-        />
+        {loading ? (
+          <p className="py-12 text-center text-muted">Carregando produtos...</p>
+        ) : (
+          <CrudTable
+            data={data}
+            fields={PRODUCT_FIELDS}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onCreate={handleCreate}
+            entityLabel="produto"
+          />
+        )}
       </div>
+
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        visible={Boolean(notification.message)}
+        onClose={() => setNotification((n) => ({ ...n, message: "" }))}
+      />
     </section>
   );
 } 

@@ -1,14 +1,53 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ProductDetailCard, { type CookieDetail } from '@/components/ProductDetailCard'
 import { PRODUCTS } from '@/data/products'
 import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
+import { api, type Product } from '@/api'
+import { resolveProductImage } from '@/lib/productImages'
+import { findSection, usePageContents } from '@/lib/pageContent'
+
+function productToCookie(product: Product): CookieDetail {
+  return {
+    id: product.id,
+    name: product.name,
+    subtitle: product.subtitle,
+    category: product.category,
+    description: product.description,
+    price: product.price,
+    weight: product.weight,
+    ingredients: product.ingredients,
+    allergens: product.allergens,
+    badge: product.badge,
+    img: resolveProductImage(product.image || product.img),
+  }
+}
 
 function Shopping() {
   const { addItem } = useCart()
+  const contents = usePageContents('shopping')
+  const header = findSection(contents, 'Header')
+  const [products, setProducts] = useState<CookieDetail[]>(PRODUCTS)
   const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [addedId, setAddedId] = useState<number | null>(null)
+
+  useEffect(() => {
+    let active = true
+
+    api.products.getAll('Shopping')
+      .then((res) => {
+        if (!active || !res.products?.length) return
+        setProducts(res.products.map(productToCookie))
+      })
+      .catch(() => {
+        if (active) setProducts(PRODUCTS)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   const openDetails = (product: CookieDetail) => {
     setSelectedProduct(product)
@@ -35,21 +74,21 @@ function Shopping() {
           <header className="mb-16 ">
             <div className="max-w-7xl px-8 text-center sm:text-left">
               <p className="font-subtitle font-bold text-primary text-4xl text-lg sm:text-2xl">
-                Monte seu pedido!
+                {header?.subtitle || 'Monte seu pedido!'}
               </p>
 
               <h1 className="mb-2 font-display text-4xl font-extrabold leading-tight text-text-h sm:text-5xl lg:text-6xl">
-                Nosso <span className="text-primary">Catálogo</span>
+                {header?.title || 'Nosso Catálogo'}
               </h1>
 
               <p className="text-sm leading-relaxed text-text sm:text-base lg:text-lg">
-                Explore nossa seleção de produtos exclusivos.
+                {header?.description || 'Explore nossa seleção de produtos exclusivos.'}
               </p>
             </div>
           </header>
 
           <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
-            {PRODUCTS.map((product) => (
+            {products.map((product) => (
               <article
                 key={product.id}
                 className="flex h-full w-full max-w-sm cursor-pointer flex-col overflow-hidden rounded-[30px] bg-[#f4f2f0] shadow-[0_8px_28px_rgba(38,20,11,0.12)] transition-transform duration-300 hover:-translate-y-1"

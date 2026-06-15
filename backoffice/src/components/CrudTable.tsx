@@ -565,7 +565,7 @@ export function CrudTable({
                   ) : (
                     <Input
                       id={`create-${f.value}`}
-                      type={f.type === "password" ? "password" : "text"}
+                      type={f.type === "password" ? "password" : f.type === "number" ? "number" : "text"}
                       value={String(formData[f.value] ?? "")}
                       onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
                     />
@@ -675,7 +675,7 @@ export function CrudTable({
                   ) : (
                     <Input
                       id={`edit-${f.value}`}
-                      type={f.type === "password" ? "password" : "text"}
+                      type={f.type === "password" ? "password" : f.type === "number" ? "number" : "text"}
                       value={String(formData[f.value] ?? "")}
                       onChange={e => setFormData(d => ({ ...d, [f.value]: e.target.value }))}
                     />

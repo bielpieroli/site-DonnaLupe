@@ -1,4 +1,4 @@
-import { LayoutTemplate, Package, ShieldCheck, ShoppingBag, Truck, Users } from "lucide-react";
+import { FileText, LayoutTemplate, Package, ShieldCheck, ShoppingBag, Truck, Users } from "lucide-react";
 
 export const Tabs: {
   key: string;
@@ -44,6 +44,15 @@ export const Tabs: {
     icon: <LayoutTemplate className="w-5 h-5" />,
     bg: "bg-secondary/10",
     hoverBg: "group-hover:bg-secondary/20",
+  },
+  {
+    key: "content",
+    label: "Conteúdos",
+    description: "Gerencie textos, imagens e botões das páginas públicas.",
+    pageNavigate: "/backoffice-content",
+    icon: <FileText className="w-5 h-5" />,
+    bg: "bg-primary/10",
+    hoverBg: "group-hover:bg-primary/20",
   },
   {
     key: "freight",
