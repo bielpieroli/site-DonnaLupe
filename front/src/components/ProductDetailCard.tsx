@@ -1,11 +1,13 @@
 type CookieDetail = {
-  id: number;
+  id: string;
   name: string;
   subtitle: string;
   category: string;
   description: string;
   price: string;
+  priceValue: number;
   weight: string;
+  stock?: number;
   ingredients: string[];
   allergens: string;
   badge: string;
@@ -79,9 +81,9 @@ function ProductDetailCard({
             </p>
 
             <p className="text-sm text-[#6a5b52] sm:text-base">
-              Peso:{' '}
+              {product.weight ? 'Peso' : 'Estoque'}:{' '}
               <span className="font-bold text-text-h">
-                {product.weight}
+                {product.weight || `${product.stock ?? 0} em estoque`}
               </span>
             </p>
           </div>

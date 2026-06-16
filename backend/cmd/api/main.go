@@ -33,7 +33,7 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}); err != nil {
+	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}, &models.Product{}); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -46,6 +46,7 @@ func main() {
 	permissionRepo := repository.NewPermissionRepository(database)
 	freightRepo := repository.NewFreightRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
+	productRepo := repository.NewProductRepository(database)
 
 	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
@@ -53,6 +54,7 @@ func main() {
 	authBackofficeService := services.NewAuthBackofficeService(userBackofficeRepo, passwordProvider, jwtProvider)
 	freightService := services.NewFreightService(freightRepo)
 	orderService := services.NewOrderService(orderRepo)
+	productService := services.NewProductService(productRepo)
 
 	checkoutService, err := services.NewCheckoutService(orderService)
 	if err != nil {
@@ -66,6 +68,7 @@ func main() {
 	freightHandler := handlers.NewFreightHandler(freightService)
 	checkoutHandler := handlers.NewCheckoutHandler(checkoutService)
 	orderHandler := handlers.NewOrderHandler(orderService, os.Getenv("MP_ACCESS_TOKEN"))
+	productHandler := handlers.NewProductHandler(productService)
 
 	// Inicializa admin padrão e suas permissões
 	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
@@ -94,6 +97,9 @@ func main() {
 	auth := r.Group("/admin/auth")
 	auth.POST("/login", authBackofficeHandler.Login)
 
+	r.GET("/products", productHandler.GetAll)
+	r.GET("/products/:name", productHandler.GetByName)
+
 	// Registro: requer autenticação + permissão de escrita em "users"
 	auth.POST("/register", authMW, permMW("users", models.PermWrite), userBackofficeHandler.Register)
 
@@ -108,6 +114,10 @@ func main() {
 
 	admin.GET("/users/:email/permissions", permMW("permissions", models.PermRead), permissionHandler.GetPermissions)
 	admin.PUT("/users/:email/permissions", permMW("permissions", models.PermWrite), permissionHandler.SetPermissions)
+
+	admin.POST("/products", permMW("products", models.PermWrite), productHandler.Create)
+	admin.PUT("/products/:name", permMW("products", models.PermWrite), productHandler.Update)
+	admin.DELETE("/products/:name", permMW("products", models.PermWrite), productHandler.Delete)
 
 	// Checkout - rota pública de criação de preferência MP
 	r.POST("/checkout/preference", checkoutHandler.CreatePreference)
