@@ -20,6 +20,7 @@ const RESOURCES: { key: string; label: string }[] = [
   { key: "landing",     label: "Landing Page" },
   { key: "freight",     label: "Frete" },
   { key: "orders",      label: "Pedidos" },
+  { key: "ingredients", label: "Ingredientes" },
 ];
 
 const LEVEL_BADGE: Record<PermissionLevel, { label: string; cls: string }> = {
