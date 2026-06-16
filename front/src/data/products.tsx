@@ -7,7 +7,7 @@ import cookieMorango from '@/assets/img/cookie-morango.jpg'
 import cookiesData from '@/mocks/cookies.json'
 import type { CookieDetail } from '@/components/ProductDetailCard'
 
-type CookieMock = Omit<CookieDetail, 'img'> & { imageFile: string }
+type CookieMock = Omit<CookieDetail, 'id' | 'img' | 'priceValue'> & { id: number; imageFile: string }
 
 const cookieImages: Record<string, string> = {
   'cookie-caramelo.jpg': cookieCaramelo,
@@ -20,5 +20,7 @@ const cookieImages: Record<string, string> = {
 
 export const PRODUCTS: CookieDetail[] = (cookiesData as CookieMock[]).map((cookie) => ({
   ...cookie,
+  id: String(cookie.id),
+  priceValue: parseFloat(cookie.price.replace("R$", "").replace(",", ".").trim()) || 0,
   img: cookieImages[cookie.imageFile] ?? cookieChocoChunk,
 }))

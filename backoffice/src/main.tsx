@@ -1,4 +1,3 @@
-window.addEventListener('error', (e) => console.error("GLOBAL ERROR:", e.error));
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from "react-router-dom";

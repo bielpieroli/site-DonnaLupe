@@ -1,14 +1,35 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ProductDetailCard, { type CookieDetail } from '@/components/ProductDetailCard'
-import { PRODUCTS } from '@/data/products'
 import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
+import { getProducts } from '@/services/products'
 
 function Shopping() {
   const { addItem } = useCart()
+  const [products, setProducts] = useState<CookieDetail[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
   const [quantity, setQuantity] = useState(1)
-  const [addedId, setAddedId] = useState<number | null>(null)
+  const [addedId, setAddedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    getProducts()
+      .then((items) => {
+        if (!mounted) return
+        setProducts(items)
+        setError(null)
+      })
+      .catch((err) => {
+        if (!mounted) return
+        setError(err instanceof Error ? err.message : 'Erro ao carregar produtos.')
+      })
+      .finally(() => {
+        if (mounted) setLoading(false)
+      })
+    return () => { mounted = false }
+  }, [])
 
   const openDetails = (product: CookieDetail) => {
     setSelectedProduct(product)
@@ -48,8 +69,15 @@ function Shopping() {
             </div>
           </header>
 
-          <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
-            {PRODUCTS.map((product) => (
+          {loading ? (
+            <p className="py-16 text-center text-text">Carregando produtos...</p>
+          ) : error ? (
+            <p className="py-16 text-center text-primary">{error}</p>
+          ) : products.length === 0 ? (
+            <p className="py-16 text-center text-text">Nenhum produto disponível no momento.</p>
+          ) : (
+            <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+            {products.map((product) => (
               <article
                 key={product.id}
                 className="flex h-full w-full max-w-sm cursor-pointer flex-col overflow-hidden rounded-[30px] bg-[#f4f2f0] shadow-[0_8px_28px_rgba(38,20,11,0.12)] transition-transform duration-300 hover:-translate-y-1"
@@ -99,7 +127,8 @@ function Shopping() {
                 </div>
               </article>
             ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {selectedProduct && (

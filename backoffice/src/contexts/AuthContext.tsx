@@ -117,3 +117,4 @@ export function useHasPermission(resource: string, level: 'read' | 'write'): boo
   const perm = permissions.find((p) => p.resource === resource)
   return (order[perm?.level ?? 'none'] ?? 0) >= order[level]
 }
+
