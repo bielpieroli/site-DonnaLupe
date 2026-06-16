@@ -11,8 +11,12 @@ export default defineConfig({
     host: true,
   },
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-dom/client"],
   },
 })

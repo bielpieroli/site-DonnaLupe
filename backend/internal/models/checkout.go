@@ -1,7 +1,7 @@
 package models
 
 type CheckoutItem struct {
-	ID         int     `json:"id"`
+	ID         string  `json:"id"`
 	Name       string  `json:"name"`
 	Quantity   int     `json:"quantity"`
 	PriceValue float64 `json:"price_value"`

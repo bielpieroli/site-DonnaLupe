@@ -9,13 +9,15 @@ import { findSection, usePageContents } from '@/lib/pageContent'
 
 function productToCookie(product: Product): CookieDetail {
   return {
-    id: product.id,
+    id: String(product.id),
     name: product.name,
     subtitle: product.subtitle,
     category: product.category,
     description: product.description,
     price: product.price,
+    priceValue: product.priceValue,
     weight: product.weight,
+    stock: product.stock,
     ingredients: product.ingredients,
     allergens: product.allergens,
     badge: product.badge,
@@ -30,7 +32,7 @@ function Shopping() {
   const [products, setProducts] = useState<CookieDetail[]>(PRODUCTS)
   const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
   const [quantity, setQuantity] = useState(1)
-  const [addedId, setAddedId] = useState<number | null>(null)
+  const [addedId, setAddedId] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -64,7 +63,7 @@ func (s *checkoutService) CreatePreference(req models.CheckoutPreferenceRequest)
 	items := make([]mpItem, 0, len(req.Items)+1)
 	for _, item := range req.Items {
 		items = append(items, mpItem{
-			ID:         strconv.Itoa(item.ID),
+			ID:         item.ID,
 			Title:      item.Name,
 			Quantity:   item.Quantity,
 			UnitPrice:  item.PriceValue,

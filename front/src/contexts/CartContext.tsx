@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { CookieDetail } from "@/components/ProductDetailCard";
 
 export type CartItem = {
-  id: number;
+  id: string;
   name: string;
   subtitle: string;
   price: string;
@@ -15,8 +15,8 @@ export type CartItem = {
 type CartContextValue = {
   items: CartItem[];
   addItem: (product: CookieDetail, quantity: number) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, delta: number) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
@@ -25,10 +25,6 @@ type CartContextValue = {
 const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "donnalupe-cart";
-
-function parsePrice(raw: string): number {
-  return parseFloat(raw.replace("R$", "").replace(",", ".").trim()) || 0;
-}
 
 function loadFromStorage(): CartItem[] {
   try {
@@ -61,7 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           name: product.name,
           subtitle: product.subtitle,
           price: product.price,
-          priceValue: parsePrice(product.price),
+          priceValue: product.priceValue,
           img: product.img,
           weight: product.weight,
           quantity,
@@ -70,11 +66,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
-  function removeItem(id: number) {
+  function removeItem(id: string) {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
-  function updateQuantity(id: number, delta: number) {
+  function updateQuantity(id: string, delta: number) {
     setItems((prev) =>
       prev
         .map((i) => (i.id === id ? { ...i, quantity: i.quantity + delta } : i))
