@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { authAPI, permissionsAPI } from '@/api'
-import { TOKEN_KEY } from '@/api/client'
+import { TOKEN_KEY, SESSION_KEY } from '@/api/client'
 import type { AuthUser, Permission, StoredSession } from '@/types/APIResponseType'
 
 type AuthContextValue = {
@@ -10,8 +10,6 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<string | null>
   logout: () => void
 }
-
-const SESSION_KEY = 'semcomp-backoffice-auth'
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
@@ -119,3 +117,4 @@ export function useHasPermission(resource: string, level: 'read' | 'write'): boo
   const perm = permissions.find((p) => p.resource === resource)
   return (order[perm?.level ?? 'none'] ?? 0) >= order[level]
 }
+
