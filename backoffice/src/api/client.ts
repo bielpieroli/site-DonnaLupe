@@ -3,6 +3,7 @@ import type { AxiosInstance } from "axios";
 import { BASEURL } from "@/constants/ApiURL";
 
 const TOKEN_KEY = "donna-lupe-backoffice-token";
+const SESSION_KEY = "semcomp-backoffice-auth";
 
 const client: AxiosInstance = axios.create({
   baseURL: BASEURL,
@@ -24,17 +25,18 @@ client.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Remove token e redireciona para login em caso de 401
+// Remove sessão inteira e redireciona para login em caso de 401 (token expirado/inválido)
 client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(SESSION_KEY);
       window.location.href = "/login";
     }
     return Promise.reject(error);
   },
 );
 
-export { TOKEN_KEY };
+export { TOKEN_KEY, SESSION_KEY };
 export default client;
