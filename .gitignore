@@ -1,6 +1,61 @@
+# Environment and secrets
 .env
-.claudeignore
+.env.*
+!.env.example
+!.env.sample
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+coverage/
+tmp/
+temp/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Go
+*.test
+*.out
+coverage.out
+
+# Docker and local data
+docker-compose.override.yml
+*.pid
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Personal knowledge bases and AI assistants
 .claude/
-*.sync-conflict*
+.claudeignore
 CLAUDE.md
 .obsidian/
+.agents/
+.codex/
+_raw/
+_wiki/
+
+# Sync/conflict files
+*.sync-conflict*
+* conflicted copy *
