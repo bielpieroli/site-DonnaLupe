@@ -3,7 +3,7 @@ definitions:
   models.CheckoutItem:
     properties:
       id:
-        type: integer
+        type: string
       name:
         type: string
       price_value:

@@ -23,13 +23,22 @@ function About() {
     ['Ambiente acolhedor', 'Um espaço agradável, limpo e organizado para tornar cada visita melhor.'],
   ]
   const fallbackValueCards = [
-    ['✦', 'Fé', 'Trabalhar com propósito, gratidão e responsabilidade em tudo o que fazemos.'],
-    ['♡', 'Servir', 'Atender com alegria, humildade e cuidado, mesmo nos dias mais difíceis.'],
-    ['✓', 'Integridade', 'Agir com verdade, transparência e responsabilidade em cada detalhe.'],
-    ['⌂', 'Pertencimento', 'Fazer com que clientes e equipe se sintam especiais e parte da nossa história.'],
-    ['↗', 'Crescimento', 'Buscar melhoria contínua, superar limites e crescer com consistência.'],
-    ['R$', 'Mentalidade lucrativa', 'Cuidar da sustentabilidade do negócio para continuar servindo melhor.'],
-  ]
+  [
+    '✓',
+    'Confiança',
+    'Trabalhamos com transparência, responsabilidade e respeito em cada atendimento.'
+  ],
+  [
+    '♡',
+    'Atendimento próximo',
+    'Ouvimos cada cliente com atenção para oferecer uma experiência acolhedora e personalizada.'
+  ],
+  [
+    '✦',
+    'Qualidade',
+    'Buscamos excelência em cada detalhe para entregar sempre o melhor resultado.'
+  ],
+];
 
   return (
     <main className="bg-bg text-[#3d0d12]">

@@ -156,7 +156,7 @@ export default function Home() {
             <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
               {hero.subtitle}
             </p>
-            <h1 className="w-full font-display text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight">
+            <h1 className="w-full font-display text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight">
               {hero.title}
             </h1>
 

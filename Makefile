@@ -42,5 +42,8 @@ psql: ## Acessa o banco de dados PostgreSQL via CLI usando as variáveis do .env
 logs-db: ## Mostra os logs apenas do banco de dados
 	docker compose -p $(PROJECT) logs -f db
 
+reset: 
+	docker compose -p $(PROJECT) down -v
+
 ps: ## Lista o status e as portas de todos os contêineres ativos do projeto
 	docker compose -p $(PROJECT) ps

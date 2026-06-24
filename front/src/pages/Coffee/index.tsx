@@ -171,7 +171,7 @@ export default function CoffeePage() {
             <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
               {hero?.subtitle || "Cookies & Coffee Break"}
             </p>
-            <h1 className="w-full font-display text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight">
+            <h1 className="w-full font-display text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight">
               {hero?.title || "Monte o seu Coffee Break"}
             </h1>
 
