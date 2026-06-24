@@ -427,7 +427,7 @@ func defaultPageContents() []models.PageContent {
 			Name:        "Onde nos encontrar",
 			Section:     "Location",
 			Title:       "Onde nos encontrar",
-			Description: "Rua dos Cookies, 123\nDocelandia, SP\nSeg-Sáb: 9h - 20h\nDom: 10h - 18h",
+			Description: "Av. Trabalhador são-carlense, 400 - Centro. CEP: 13566-590\nSeg-Sáb: 9h - 20h\nDom: 10h - 18h",
 			Status:      "Ativo",
 		},
 		{
@@ -435,7 +435,7 @@ func defaultPageContents() []models.PageContent {
 			Name:        "Vem com a gente",
 			Section:     "Social",
 			Title:       "Vem com a gente!",
-			Description: "Instagram\nTikTok\nWhatsApp",
+			Description: "Instagram\nWhatsApp",
 			Status:      "Ativo",
 		},
 		{
