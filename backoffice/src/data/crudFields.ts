@@ -4,18 +4,19 @@ import { MOCK_USER_NAMES } from "@/mocks/users";
 export const PRODUCT_FIELDS: CrudField[] = [
   { value: "name", label: "Produto", type: "text" },
   {
-    value: "tipo",
+    value: "kind",
     label: "Tipo",
-    type: "badge",
+    type: "select",
+    options: ["Shopping", "Coffee"],
     badgeVariants: {
-      "Shopping": "bg-[#1d4ed8] border border-[#1e40af]",
-      "Coffee": "bg-[#7c3aed] border border-[#6d28d9]",
+      Shopping: "bg-[#1d4ed8] border border-[#1e40af]",
+      Coffee: "bg-[#7c3aed] border border-[#6d28d9]",
     },
   },
   {
-    value: "categoria",
+    value: "category",
     label: "Categoria",
-    type: "badge",
+    type: "text",
     badgeVariants: {
       "Classico": "bg-[#cc6b2f] border border-[#b25b28]",
       "Intenso": "bg-[#7f56c9] border border-[#6a3fb8]",
@@ -29,13 +30,24 @@ export const PRODUCT_FIELDS: CrudField[] = [
       "Bolos": "bg-[#dc2626] border border-[#991b1b]",
     },
   },
-  { value: "preco", label: "Preço", type: "text" },
-  { value: "estoque", label: "Estoque", type: "text" },
-  { value: "sabor", label: "Sabor", type: "text" },
+  { value: "subtitle", label: "Subtítulo", type: "text" },
+  { value: "description", label: "Descrição", type: "textarea" },
+  { value: "priceValue", label: "Preço (R$)", type: "number" },
+  { value: "stock", label: "Estoque", type: "number" },
+  { value: "flavor", label: "Sabor", type: "text" },
+  { value: "weight", label: "Peso", type: "text" },
+  { value: "ingredientsText", label: "Ingredientes", type: "textarea" },
+  { value: "allergens", label: "Alérgenos", type: "text" },
+  { value: "badge", label: "Selo", type: "text" },
+  { value: "image", label: "Imagem", type: "image" },
+  { value: "unit", label: "Unidade Coffee", type: "text" },
+  { value: "sizesText", label: "Tamanhos Coffee", type: "text" },
+  { value: "sizeCountsText", label: "Unidades por tamanho", type: "text" },
   {
     value: "status",
     label: "Status",
-    type: "badge",
+    type: "select",
+    options: ["Disponível", "Esgotado", "Em promoção"],
     badgeVariants: {
       Disponível: "bg-[#059669] border border-[#047857]",
       Esgotado: "bg-[#ef4444] border border-[#dc2626]",
@@ -113,7 +125,7 @@ export const LANDING_FIELDS: CrudField[] = [
   {
     value: "imagem",
     label: "Imagem",
-    type: "text",
+    type: "image",
   },
   {
     value: "botaoTexto",
@@ -125,6 +137,40 @@ export const LANDING_FIELDS: CrudField[] = [
     label: "Link do Botão",
     type: "text",
   },
+  {
+    value: "status",
+    label: "Status",
+    type: "select",
+    options: ["Ativo", "Inativo"],
+    badgeVariants: {
+      Ativo: "bg-[#059669] border border-[#047857]",
+      Inativo: "bg-[#ef4444] border border-[#dc2626]",
+    },
+  },
+];
+
+export const PAGE_CONTENT_FIELDS: CrudField[] = [
+  {
+    value: "page",
+    label: "Página",
+    type: "select",
+    options: ["landing", "about", "shopping", "coffee", "footer"],
+    badgeVariants: {
+      landing: "bg-[#be123c] border border-[#9f1239]",
+      about: "bg-[#7c3aed] border border-[#6d28d9]",
+      shopping: "bg-[#1d4ed8] border border-[#1e40af]",
+      coffee: "bg-[#b45309] border border-[#92400e]",
+      footer: "bg-[#475569] border border-[#334155]",
+    },
+  },
+  { value: "section", label: "Seção", type: "text" },
+  { value: "name", label: "Nome interno", type: "text" },
+  { value: "title", label: "Título", type: "text" },
+  { value: "subtitle", label: "Subtítulo", type: "text" },
+  { value: "description", label: "Descrição", type: "textarea" },
+  { value: "image", label: "Imagem", type: "image" },
+  { value: "buttonText", label: "Texto do Botão", type: "text" },
+  { value: "buttonLink", label: "Link do Botão", type: "text" },
   {
     value: "status",
     label: "Status",

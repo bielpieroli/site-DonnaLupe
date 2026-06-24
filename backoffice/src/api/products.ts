@@ -1,78 +1,53 @@
 import client from "./client";
 
 export type Product = {
+  id: number;
   name: string;
   subtitle: string;
+  kind: "Shopping" | "Coffee";
   category: string;
   description: string;
+  priceValue: number;
+  price: string;
+  weight: string;
+  ingredients: string[];
+  ingredientsText: string;
+  allergens: string;
+  badge: string;
+  image: string;
   img: string;
-  imageFile: string;
-  price: number;
-  weight: string;
-  ingredients: string[];
-  allergens: string;
-  badge: string;
   stock: number;
+  flavor: string;
+  unit: string;
+  sizes: string[];
+  sizesText: string;
+  sizeCounts: Record<string, number>;
+  sizeCountsText: string;
   status: string;
 };
 
-export type ProductFormInput = {
-  name: string;
-  subtitle: string;
-  category: string;
-  description: string;
-  imageFile: string;
-  price: number;
-  weight: string;
-  ingredients: string[];
-  allergens: string;
-  badge: string;
-  stock: number;
-  status: string;
-  img?: File | null;
-};
-
-function toFormData(input: ProductFormInput): FormData {
-  const form = new FormData();
-  form.append("name", input.name);
-  form.append("subtitle", input.subtitle);
-  form.append("category", input.category);
-  form.append("description", input.description);
-  form.append("imageFile", input.imageFile);
-  form.append("price", String(input.price));
-  form.append("weight", input.weight);
-  form.append("ingredients", JSON.stringify(input.ingredients));
-  form.append("allergens", input.allergens);
-  form.append("badge", input.badge);
-  form.append("stock", String(input.stock));
-  form.append("status", input.status);
-  if (input.img) form.append("img", input.img);
-  return form;
-}
+export type ProductInput = Omit<Product, "id" | "price" | "ingredients" | "img" | "sizes" | "sizeCounts">;
 
 export const productsAPI = {
-  getAll: async (): Promise<{ products: Product[] }> => {
-    const res = await client.get<{ products: Product[] }>("/products");
-    return res.data;
-  },
-
-  create: async (input: ProductFormInput): Promise<{ product: Product }> => {
-    const res = await client.post<{ product: Product }>("/admin/products", toFormData(input), {
-      headers: { "Content-Type": "multipart/form-data" },
+  getAll: async (kind?: string): Promise<{ products: Product[] }> => {
+    const res = await client.get<{ products: Product[] }>("/admin/products", {
+      params: kind ? { kind } : undefined,
     });
     return res.data;
   },
 
-  update: async (currentName: string, input: ProductFormInput): Promise<{ product: Product }> => {
-    const res = await client.put<{ product: Product }>(
-      `/admin/products/${encodeURIComponent(currentName)}`,
-      toFormData(input),
-      { headers: { "Content-Type": "multipart/form-data" } },
-    );
+  create: async (input: ProductInput): Promise<{ product: Product }> => {
+    const res = await client.post<{ product: Product }>("/admin/products", input);
     return res.data;
   },
 
-  delete: async (name: string): Promise<void> => {
-    await client.delete(`/admin/products/${encodeURIComponent(name)}`);
+  update: async (id: number, input: ProductInput): Promise<{ product: Product }> => {
+    const res = await client.put<{ product: Product }>(`/admin/products/${id}`, input);
+    return res.data;
+  },
+
+  delete: async (id: number): Promise<{ message: string }> => {
+    const res = await client.delete<{ message: string }>(`/admin/products/${id}`);
+    return res.data;
   },
 };

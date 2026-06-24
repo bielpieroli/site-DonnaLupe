@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from 'react-router-dom'
 import CoffeeImage from "@/assets/img/Coffee/coffebreak.jpg";
 import cookiesImg from "@/assets/img/Coffee/Products/cookies.jpg";
@@ -8,6 +8,9 @@ import empadaImg from "@/assets/img/Coffee/Products/empada.jpg";
 import boloImg from "@/assets/img/Coffee/Products/bolo.jpg";
 import DonnaLupeInfo from "@/constants/DonnaLupeInfo";
 import Footer from "@/components/Footer";
+import { api, type Product } from "@/api";
+import { resolveProductImage } from "@/lib/productImages";
+import { findSection, usePageContents } from "@/lib/pageContent";
 
 type CoffeeItem = {
   id: string;
@@ -77,10 +80,43 @@ const serviceItems: CoffeeItem[] = [
   },
 ];
 
+function productToCoffeeItem(product: Product): CoffeeItem {
+  return {
+    id: String(product.id),
+    name: product.name,
+    description: product.description,
+    unit: product.unit || "unidade",
+    sizes: product.sizes.length ? product.sizes : undefined,
+    sizeCounts: Object.keys(product.sizeCounts ?? {}).length ? product.sizeCounts : undefined,
+    image: resolveProductImage(product.image || product.img),
+  };
+}
+
 export default function CoffeePage() {
+  const contents = usePageContents("coffee");
+  const hero = findSection(contents, "Hero");
+  const catalogHeader = findSection(contents, "CatalogHeader");
+  const [items, setItems] = useState<CoffeeItem[]>(serviceItems);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
   const [cartItems, setCartItems] = useState<CartEntry[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    api.products.getAll("Coffee")
+      .then((res) => {
+        if (!active || !res.products?.length) return;
+        setItems(res.products.map(productToCoffeeItem));
+      })
+      .catch(() => {
+        if (active) setItems(serviceItems);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const increase = (id: string) => {
     setQuantities((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
@@ -133,21 +169,21 @@ export default function CoffeePage() {
         <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 max-w-7xl justify-center mx-auto">
           <div className="text-primary-contrast">
             <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
-              Cookies & Coffee Break
+              {hero?.subtitle || "Cookies & Coffee Break"}
             </p>
             <h1 className="w-full font-display text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight">
-              Monte o seu Coffee Break
+              {hero?.title || "Monte o seu Coffee Break"}
             </h1>
 
             <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
-              Escolha os produtos no catálogo do coffee e envie seu pedido para a gente pelo WhatsApp para um orçamento especial. Simples, prático e delicioso!
+              {hero?.description || "Escolha os produtos no catálogo do coffee e envie seu pedido para a gente pelo WhatsApp para um orçamento especial. Simples, prático e delicioso!"}
             </p>
 
             <Link
-              to="/shopping"
+              to={hero?.buttonLink || "/shopping"}
               className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-semibold text-white transition hover:scale-105"
             >
-              Conhecer os produtos
+              {hero?.buttonText || "Conhecer os produtos"}
             </Link>
 
           </div>
@@ -155,7 +191,7 @@ export default function CoffeePage() {
             
 
           <div className="relative flex items-center justify-center h-auto md:h-full py-6 md:py-0">
-              <img src={CoffeeImage} alt="Mesa de coffee break" className="w-full max-w-xs sm:max-w-sm lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-15 lg:translate-y-0 shadow-2xl rounded-4xl overflow-hidden" />
+              <img src={hero?.image ? resolveProductImage(hero.image, CoffeeImage) : CoffeeImage} alt="Mesa de coffee break" className="w-full max-w-xs sm:max-w-sm lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-15 lg:translate-y-0 shadow-2xl rounded-4xl overflow-hidden" />
             </div>
         </div>
       </section>
@@ -163,14 +199,14 @@ export default function CoffeePage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-12 lg:grid-cols-[2fr_1fr]">
           <div>
-            <p className="font-subtitle text-3xl font-bold italic text-primary">escolha os itens</p>
+            <p className="font-subtitle text-3xl font-bold italic text-primary">{catalogHeader?.subtitle || "escolha os itens"}</p>
             <h2 className="mt-2 font-serif text-5xl font-bold leading-tight md:text-6xl">
-              Catálogo do <span className="italic text-secondary">Coffee</span>
+              {catalogHeader?.title || "Catálogo do Coffee"}
             </h2>
 
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {serviceItems.map((item) => {
+              {items.map((item) => {
                 const quantity = quantities[item.id] ?? 0;
 
                 return (

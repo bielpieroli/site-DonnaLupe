@@ -4,12 +4,9 @@ import (
 	"backend/internal/models"
 	"backend/internal/repository"
 	"backend/internal/services"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,14 +19,15 @@ func NewProductHandler(service services.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
-// GetAll godoc
-// @Summary      Lista produtos ativos
+// GetPublic godoc
+// @Summary      Lista produtos disponíveis
 // @Tags         products
 // @Produce      json
+// @Param        kind query string false "Tipo de produto: Shopping ou Coffee"
 // @Success      200 {object} map[string]interface{}
 // @Router       /products [get]
-func (h *ProductHandler) GetAll(c *gin.Context) {
-	products, err := h.service.GetActive()
+func (h *ProductHandler) GetPublic(c *gin.Context) {
+	products, err := h.service.GetActive(c.Query("kind"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar produtos"})
 		return
@@ -37,166 +35,108 @@ func (h *ProductHandler) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"products": products})
 }
 
-// GetByName godoc
-// @Summary      Detalhes de um produto ativo
+// GetAll godoc
+// @Summary      Lista produtos do backoffice
 // @Tags         products
+// @Security     BearerAuth
 // @Produce      json
-// @Param        name path string true "Nome do produto"
+// @Param        kind query string false "Tipo de produto: Shopping ou Coffee"
 // @Success      200 {object} map[string]interface{}
-// @Failure      404 {object} map[string]interface{}
-// @Router       /products/{name} [get]
-func (h *ProductHandler) GetByName(c *gin.Context) {
-	product, err := h.service.GetActiveByName(c.Param("name"))
+// @Router       /admin/products [get]
+func (h *ProductHandler) GetAll(c *gin.Context) {
+	products, err := h.service.GetAll(c.Query("kind"))
 	if err != nil {
-		if errors.Is(err, repository.ErrProductNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar produto"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar produtos"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"product": product})
+	c.JSON(http.StatusOK, gin.H{"products": products})
 }
 
 // Create godoc
-// @Summary      Cria um produto
+// @Summary      Cria produto
 // @Tags         products
 // @Security     BearerAuth
-// @Accept       multipart/form-data
+// @Accept       json
 // @Produce      json
+// @Param        request body models.ProductInput true "Dados do produto"
 // @Success      201 {object} map[string]interface{}
 // @Router       /admin/products [post]
 func (h *ProductHandler) Create(c *gin.Context) {
-	input, hasImage, err := productInputFromMultipart(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var input models.ProductInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Requisição inválida: " + err.Error()})
 		return
 	}
-	if !hasImage {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "imagem é obrigatória"})
-		return
-	}
+
 	product, err := h.service.Create(input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar produto"})
 		return
 	}
+
 	c.JSON(http.StatusCreated, gin.H{"product": product})
 }
 
 // Update godoc
-// @Summary      Atualiza um produto
+// @Summary      Atualiza produto
 // @Tags         products
 // @Security     BearerAuth
-// @Accept       multipart/form-data
+// @Accept       json
 // @Produce      json
-// @Param        name path string true "Nome atual do produto"
+// @Param        id      path int                 true "ID do produto"
+// @Param        request body models.ProductInput true "Dados atualizados"
 // @Success      200 {object} map[string]interface{}
-// @Router       /admin/products/{name} [put]
+// @Failure      404 {object} map[string]interface{}
+// @Router       /admin/products/{id} [put]
 func (h *ProductHandler) Update(c *gin.Context) {
-	input, hasImage, err := productInputFromMultipart(c)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
 		return
 	}
-	product, err := h.service.Update(c.Param("name"), input, hasImage)
+
+	var input models.ProductInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Requisição inválida: " + err.Error()})
+		return
+	}
+
+	product, err := h.service.Update(uint(id), input)
 	if err != nil {
 		if errors.Is(err, repository.ErrProductNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar produto"})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"product": product})
 }
 
 // Delete godoc
-// @Summary      Desativa um produto
+// @Summary      Remove produto
 // @Tags         products
 // @Security     BearerAuth
-// @Param        name path string true "Nome do produto"
+// @Param        id path int true "ID do produto"
 // @Success      200 {object} map[string]interface{}
-// @Router       /admin/products/{name} [delete]
+// @Failure      404 {object} map[string]interface{}
+// @Router       /admin/products/{id} [delete]
 func (h *ProductHandler) Delete(c *gin.Context) {
-	if err := h.service.Deactivate(c.Param("name")); err != nil {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+		return
+	}
+
+	if err := h.service.Delete(uint(id)); err != nil {
 		if errors.Is(err, repository.ErrProductNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao desativar produto"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao remover produto"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Produto desativado com sucesso"})
-}
 
-func productInputFromMultipart(c *gin.Context) (models.ProductInput, bool, error) {
-	price, err := strconv.ParseFloat(c.PostForm("price"), 64)
-	if err != nil {
-		return models.ProductInput{}, false, errors.New("preço inválido")
-	}
-	stock, err := strconv.Atoi(c.PostForm("stock"))
-	if err != nil {
-		return models.ProductInput{}, false, errors.New("estoque inválido")
-	}
-
-	input := models.ProductInput{
-		Name:        c.PostForm("name"),
-		Subtitle:    c.PostForm("subtitle"),
-		Category:    c.PostForm("category"),
-		Description: c.PostForm("description"),
-		ImageFile:   c.PostForm("imageFile"),
-		Price:       price,
-		Weight:      c.PostForm("weight"),
-		Ingredients: parseIngredientsForm(c.PostForm("ingredients")),
-		Allergens:   c.PostForm("allergens"),
-		Badge:       c.PostForm("badge"),
-		Stock:       stock,
-		Status:      c.PostForm("status"),
-	}
-
-	file, err := c.FormFile("img")
-	if err != nil {
-		if errors.Is(err, http.ErrMissingFile) {
-			return input, false, nil
-		}
-		return models.ProductInput{}, false, errors.New("imagem inválida")
-	}
-
-	src, err := file.Open()
-	if err != nil {
-		return models.ProductInput{}, false, errors.New("erro ao abrir imagem")
-	}
-	defer src.Close()
-
-	bytes, err := io.ReadAll(src)
-	if err != nil {
-		return models.ProductInput{}, false, errors.New("erro ao ler imagem")
-	}
-	input.Img = bytes
-	return input, true, nil
-}
-
-func parseIngredientsForm(raw string) []string {
-	raw = strings.TrimSpace(raw)
-	if raw == "" {
-		return nil
-	}
-
-	var fromJSON []string
-	if err := json.Unmarshal([]byte(raw), &fromJSON); err == nil {
-		return fromJSON
-	}
-
-	fields := strings.FieldsFunc(raw, func(r rune) bool {
-		return r == ',' || r == '\n' || r == ';'
-	})
-	result := make([]string, 0, len(fields))
-	for _, field := range fields {
-		field = strings.TrimSpace(field)
-		if field != "" {
-			result = append(result, field)
-		}
-	}
-	return result
+	c.JSON(http.StatusOK, gin.H{"message": "Produto removido com sucesso"})
 }

@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '@/components/Footer'
 import { PRODUCTS } from '@/data/products'
+import { api, type PageContent } from '@/api'
 
 import HomeCookieImg from '@/assets/img/cookie-home.png'
 import cookieMorangoIMG from '@/assets/img/cookie-morango.jpg'
@@ -12,52 +13,130 @@ type Favorite = {
   title: string
   description: string
   image: string
+  buttonText: string
+  buttonLink: string
 }
 
-type Testimonial = {
-  name: string
-  text: string
-  bg: string
+type EssenceCard = {
+  title: string
+  description: string
 }
 
-const favorites: Favorite[] = [
+const landingImageMap: Record<string, string> = {
+  'cookie-home.png': HomeCookieImg,
+  'cookie-morango.jpg': cookieMorangoIMG,
+  'cookie-matcha.jpg': cookieMatchaIMG,
+  'cookie-choco-chunk.jpg': cookieChocoChunkIMG,
+}
+
+const resolveLandingImage = (image: string, fallback: string) => {
+  if (!image) return fallback
+  if (image.startsWith('data:image/') || image.startsWith('http://') || image.startsWith('https://')) return image
+  return landingImageMap[image] ?? fallback
+}
+
+const fallbackFavorites: Favorite[] = [
   {
     title: 'Cookie de morango',
-    description: 'Cookie artesanal com pedaços de morango e ganache de chocolate',
+    description: 'Cookie artesanal com pedaços de morango e ganache de chocolate.',
     image: cookieMorangoIMG,
+    buttonText: 'Quero esse!',
+    buttonLink: '/shopping',
   },
   {
     title: 'Cookie de Matcha',
-    description: 'Cookie artesanal com pedaços de Matcha e ganache de chocolate',
+    description: 'Cookie artesanal com matcha e ganache de chocolate.',
     image: cookieMatchaIMG,
+    buttonText: 'Quero esse!',
+    buttonLink: '/shopping',
   },
   {
     title: 'Cookie de chocolate',
-    description: 'Cookie artesanal com pedaços de chocolate e ganache de chocolate',
+    description: 'Cookie artesanal com pedaços de chocolate e ganache de chocolate.',
     image: cookieChocoChunkIMG,
+    buttonText: 'Quero esse!',
+    buttonLink: '/shopping',
   },
 ]
 
-const testimonials: Testimonial[] = [
+const fallbackEssenceCards: EssenceCard[] = [
   {
-    name: 'Ana Clara',
-    text: '“Gente, eu CHOREI comendo o de caramelo salgado. Não é exagero. É viciante demais! 🥹”',
-    bg: 'bg-rose-50',
+    title: 'Produtos de qualidade',
+    description: 'Cookies, sucos e alimentos preparados com cuidado para entregar sabor e uma boa experiência.',
   },
   {
-    name: 'Ana Clara',
-    text: '“Gente, eu CHOREI comendo o de caramelo salgado. Não é exagero. É viciante demais! 🥹”',
-    bg: 'bg-sky-50',
+    title: 'Atendimento com alegria',
+    description: 'Servir bem faz parte da nossa essência. Queremos que cada cliente se sinta especial.',
   },
   {
-    name: 'Ana Clara',
-    text: '“Gente, eu CHOREI comendo o de caramelo salgado. Não é exagero. É viciante demais! 🥹”',
-    bg: 'bg-amber-50',
+    title: 'Ambiente acolhedor',
+    description: 'Um espaço agradável, limpo e organizado para tornar cada momento mais leve e gostoso.',
   },
 ]
 
 export default function Home() {
   const sliderRef = useRef<HTMLDivElement>(null)
+  const [landingContent, setLandingContent] = useState<PageContent[]>([])
+
+  useEffect(() => {
+    api.pageContents
+      .getActive('landing')
+      .then((res) => setLandingContent(res.contents ?? []))
+      .catch(() => setLandingContent([]))
+  }, [])
+
+  const bySection = (section: string) =>
+    landingContent.filter((item) => item.section === section && item.status !== 'Inativo')
+  const firstSection = (section: string) => bySection(section)[0]
+
+  const heroContent = firstSection('Hero')
+  const hero = {
+    subtitle: heroContent?.subtitle || 'Donna Lupe • Cookies & Sucos',
+    title: heroContent?.title || 'Sabor que faz você se sentir especial',
+    description:
+      heroContent?.description ||
+      'Produtos de qualidade, atendimento com alegria e aquele cuidado que transforma cada visita em um momento mais gostoso.',
+    image: resolveLandingImage(heroContent?.image ?? '', HomeCookieImg),
+    buttonText: heroContent?.buttonText || 'Ver cardápio',
+    buttonLink: heroContent?.buttonLink || '/shopping',
+  }
+
+  const favoritesHeader = firstSection('Favoritos Header')
+  const catalogHeader = firstSection('CatalogHeader')
+  const catalogFooter = firstSection('CatalogFooter')
+  const essenceHeader = firstSection('EssenceHeader')
+
+  const favorites =
+    bySection('Favoritos').length > 0
+      ? bySection('Favoritos').slice(0, 3).map((item, index) => ({
+          title: item.title,
+          description: item.description,
+          image: resolveLandingImage(item.image, fallbackFavorites[index]?.image ?? cookieChocoChunkIMG),
+          buttonText: item.buttonText || 'Quero esse!',
+          buttonLink: item.buttonLink || '/shopping',
+        }))
+      : fallbackFavorites
+
+  const essenceCards =
+    bySection('EssenceCard').length > 0
+      ? bySection('EssenceCard').slice(0, 3).map((item) => ({
+          title: item.title,
+          description: item.description,
+        }))
+      : fallbackEssenceCards
+
+  const ctaItems = bySection('CTA Final')
+  const ctaMain = ctaItems[0]
+  const ctaSecondary = ctaItems[1]
+  const cta = {
+    title: ctaMain?.title || 'Pronto para escolher seu sabor favorito?',
+    subtitle: ctaMain?.subtitle || '',
+    description: ctaMain?.description || 'Confira o cardápio e monte seu pedido com os produtos que combinam com o seu momento.',
+    primaryText: ctaMain?.buttonText || 'Fazer meu pedido',
+    primaryLink: ctaMain?.buttonLink || '/cart',
+    secondaryText: ctaSecondary?.buttonText || 'Ver cardápio',
+    secondaryLink: ctaSecondary?.buttonLink || '/shopping',
+  }
 
   const scroll = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
@@ -75,28 +154,27 @@ export default function Home() {
         <div className="grid h-full w-full grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 max-w-7xl justify-center mx-auto">
           <div className="text-primary-contrast">
             <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
-              Cookies & Coffee Break
+              {hero.subtitle}
             </p>
             <h1 className="w-full font-display text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight">
-              Cookies que fazem sorrir
+              {hero.title}
             </h1>
 
             <p className="mt-6 w-full text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-white/90">
-              Feitos à mão com ingredientes de verdade, muito amor e uma pitada de magia.
-              Cada mordida é um abraço quentinho.
+              {hero.description}
             </p>
 
             <Link
-              to="/shopping"
+              to={hero.buttonLink}
               className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-semibold text-white transition hover:scale-105"
             >
-              Ver cookies
+              {hero.buttonText}
             </Link>
           </div>
 
           <div className="relative flex items-center justify-center h-auto md:h-full py-6 md:py-0">
             <img
-              src={HomeCookieImg}
+              src={hero.image}
               alt="Cookie"
               className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto object-contain mx-auto transform -translate-y-10 sm:-translate-y-6 lg:translate-y-0"
             />
@@ -105,12 +183,12 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 text-center ">
-        <p className="font-subtitle text-3xl font-bold italic text-primary">Os mais amados!</p>
+        <p className="font-subtitle text-3xl font-bold italic text-primary">{favoritesHeader?.subtitle || 'Os mais amados!'}</p>
         <h2 className="mt-2 font-display text-5xl font-extrabold md:text-6xl">
-          Nossos favoritos
+          {favoritesHeader?.title || 'Nossos favoritos'}
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-[#5a4a49]">
-          Os cookies que nossos clientes não conseguem parar de pedir
+          {favoritesHeader?.description || 'Cookies preparados com cuidado, sabor e qualidade para adoçar seu dia.'}
         </p>
 
         <div className="mt-12 grid gap-8 md:grid-cols-3">
@@ -126,10 +204,10 @@ export default function Home() {
                 <p className="mt-3 text-sm leading-6 text-[#6d5b59]">{item.description}</p>
 
                 <Link
-                  to="/shopping"
+                  to={item.buttonLink}
                   className="mt-5 inline-block rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white"
                 >
-                  Quero Esse!
+                  {item.buttonText}
                 </Link>
               </div>
             </article>
@@ -141,12 +219,12 @@ export default function Home() {
         <div className="grid items-end gap-6 md:grid-cols-2">
           <div>
             <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
-              Nossos <span className="text-[#d7264d]">Cookies</span>
+              {catalogHeader?.title || 'Nosso cardápio'}
             </h2>
           </div>
 
           <p className="max-w-xl text-lg text-[#5a4a49]">
-            Arraste pro lado e escolha teu favorito. Cada um mais irresistível que o outro →.
+            {catalogHeader?.description || 'Escolha seus sabores favoritos e aproveite produtos feitos para entregar qualidade, carinho e uma experiência especial.'}
           </p>
         </div>
 
@@ -210,76 +288,56 @@ export default function Home() {
         </div>
 
         <p className="mt-10 text-center font-subtitle  font-bold text-2xl  text-primary">
-          Monte sua caixinha com os sabores que quiser!
+          {catalogFooter?.title || 'Monte sua caixinha com os sabores que quiser!'}
         </p>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 text-center">
         <p className="font-subtitle text-[28px] font-bold text-primary">
-          o que tão falando por ai...
+          {essenceHeader?.subtitle || 'Nossa essência'}
         </p>
 
         <h2 className="mt-2 font-serif text-5xl font-bold md:text-6xl">
-          Declarações de <span className="italic text-primary">Amor</span>
+          {essenceHeader?.title || 'O que torna a Donna Lupe especial'}
         </h2>
 
-        <div className="mt-12 flex flex-wrap justify-center gap-6">
-          {testimonials.map((item, index) => {
-            const rotations = ['-rotate-3', 'rotate-3', '-rotate-2']
-            const avatarBg = ['bg-[#f3c6cf]', 'bg-[#9fd0e8]', 'bg-[#ecd36f]']
+        <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-[#5a4a49]">
+          {essenceHeader?.description || 'Nossa marca é guiada pelo compromisso de servir bem, oferecer produtos de qualidade e fazer com que cada pessoa se sinta bem recebida.'}
+        </p>
 
-            return (
-              <article
-                key={index}
-                className={`${item.bg} ${rotations[index]} min-h-55 rounded-[28px] px-5 py-6 text-left shadow-lg hover:scale-105 transition-transform`}
-              >
-                <div className="text-[16px] text-yellow-400">★★★★★</div>
-
-                <p className="mt-5 max-w-55 text-[14px] leading-7 text-[#4e3e3d]">
-                  {item.text}
-                </p>
-
-                <div className="mt-5 flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold text-[#7a2030] ${avatarBg[index]}`}
-                  >
-                    A
-                  </div>
-
-                  <span className="text-[14px] font-semibold text-[#2d0b12]">
-                    {item.name}
-                  </span>
-                </div>
-              </article>
-            )
-          })}
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {essenceCards.map((item) => (
+            <article key={item.title} className="rounded-[28px] bg-white px-7 py-8 text-left shadow-sm">
+              <h3 className="font-display text-3xl font-extrabold text-primary">{item.title}</h3>
+              <p className="mt-4 text-sm leading-7 text-[#5a4a49]">{item.description}</p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section className=" bg-[radial-gradient(circle_at_center,rgba(215,38,77,0.06),transparent_60%)]">
         <div className="mx-auto max-w-6xl px-6 py-24 text-center">
           <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
-            Tá esperando o que <br />
-            pra <span className="italic text-primary">experimentar?</span>
+            {cta.title}
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-8 text-[#5a4a49]">
-            Peça online e receba seus cookies quentinhos em minutos. Delivery ou retirada — você escolhe!
+            {cta.subtitle} {cta.description}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              to="/cart"
+              to={cta.primaryLink}
               className="rounded-full bg-primary px-8 py-4 font-bold text-white shadow-md transition hover:scale-105"
             >
-              Fazer meu pedido 🍪
+              {cta.primaryText}
             </Link>
 
             <Link
-              to="/shopping"
+              to={cta.secondaryLink}
               className="rounded-full border border-[#d8c7c0] bg-white px-8 py-4 font-bold text-primary transition hover:scale-105"
             >
-              Ver cardápio 📋
+              {cta.secondaryText}
             </Link>
           </div>
         </div>

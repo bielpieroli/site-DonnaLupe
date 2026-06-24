@@ -1,26 +1,17 @@
-import cookieCaramelo from '@/assets/img/cookie-caramelo.jpg'
-import cookieChocoChunk from '@/assets/img/cookie-choco-chunk.jpg'
-import cookieDoubleChoc from '@/assets/img/cookie-double-choc.jpg'
-import cookieLimao from '@/assets/img/cookie-limao.jpg'
-import cookieMatcha from '@/assets/img/cookie-matcha.jpg'
-import cookieMorango from '@/assets/img/cookie-morango.jpg'
 import cookiesData from '@/mocks/cookies.json'
 import type { CookieDetail } from '@/components/ProductDetailCard'
+import { resolveProductImage } from '@/lib/productImages'
 
 type CookieMock = Omit<CookieDetail, 'id' | 'img' | 'priceValue'> & { id: number; imageFile: string }
 
-const cookieImages: Record<string, string> = {
-  'cookie-caramelo.jpg': cookieCaramelo,
-  'cookie-choco-chunk.jpg': cookieChocoChunk,
-  'cookie-double-choc.jpg': cookieDoubleChoc,
-  'cookie-limao.jpg': cookieLimao,
-  'cookie-matcha.jpg': cookieMatcha,
-  'cookie-morango.jpg': cookieMorango,
+function priceToValue(price: string) {
+  const parsed = Number(price.replace("R$", "").replace(",", ".").trim())
+  return Number.isFinite(parsed) ? parsed : 0
 }
 
 export const PRODUCTS: CookieDetail[] = (cookiesData as CookieMock[]).map((cookie) => ({
   ...cookie,
   id: String(cookie.id),
-  priceValue: parseFloat(cookie.price.replace("R$", "").replace(",", ".").trim()) || 0,
-  img: cookieImages[cookie.imageFile] ?? cookieChocoChunk,
+  priceValue: priceToValue(cookie.price),
+  img: resolveProductImage(cookie.imageFile),
 }))

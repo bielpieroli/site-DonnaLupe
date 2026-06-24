@@ -10,12 +10,13 @@ import (
 var ErrProductNotFound = errors.New("produto não encontrado")
 
 type ProductRepository interface {
-	GetActive() ([]models.Product, error)
-	GetActiveByName(name string) (*models.Product, error)
-	GetByName(name string) (*models.Product, error)
+	GetAll(kind string) ([]models.Product, error)
+	GetActive(kind string) ([]models.Product, error)
+	GetByID(id uint) (*models.Product, error)
 	Create(product *models.Product) error
-	Update(currentName string, product *models.Product) error
-	Deactivate(name string) error
+	Update(product *models.Product) error
+	Delete(id uint) error
+	Count() (int64, error)
 }
 
 type productRepository struct{ db *gorm.DB }
@@ -24,52 +25,45 @@ func NewProductRepository(db *gorm.DB) ProductRepository {
 	return &productRepository{db: db}
 }
 
-func (r *productRepository) GetActive() ([]models.Product, error) {
+func (r *productRepository) GetAll(kind string) ([]models.Product, error) {
 	var products []models.Product
-	err := r.db.Where("status = ?", "active").Order("name asc").Find(&products).Error
-	return products, err
+	query := r.db.Order("id ASC")
+	if kind != "" {
+		query = query.Where("kind = ?", kind)
+	}
+	return products, query.Find(&products).Error
 }
 
-func (r *productRepository) GetActiveByName(name string) (*models.Product, error) {
-	var product models.Product
-	err := r.db.Where("name = ? AND status = ?", name, "active").First(&product).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, ErrProductNotFound
+func (r *productRepository) GetActive(kind string) ([]models.Product, error) {
+	var products []models.Product
+	query := r.db.Where("status <> ?", "Esgotado").Order("id ASC")
+	if kind != "" {
+		query = query.Where("kind = ?", kind)
 	}
-	return &product, err
+	return products, query.Find(&products).Error
 }
 
-func (r *productRepository) GetByName(name string) (*models.Product, error) {
+func (r *productRepository) GetByID(id uint) (*models.Product, error) {
 	var product models.Product
-	err := r.db.Where("name = ?", name).First(&product).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, ErrProductNotFound
+	if err := r.db.First(&product, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrProductNotFound
+		}
+		return nil, err
 	}
-	return &product, err
+	return &product, nil
 }
 
 func (r *productRepository) Create(product *models.Product) error {
 	return r.db.Create(product).Error
 }
 
-func (r *productRepository) Update(currentName string, product *models.Product) error {
-	res := r.db.Model(&models.Product{}).
-		Where("name = ?", currentName).
-		Updates(map[string]interface{}{
-			"name":             product.Name,
-			"subtitle":         product.Subtitle,
-			"category":         product.Category,
-			"description":      product.Description,
-			"img":              product.Img,
-			"image_file":       product.ImageFile,
-			"price":            product.Price,
-			"weight":           product.Weight,
-			"ingredients_json": product.IngredientsJSON,
-			"allergens":        product.Allergens,
-			"badge":            product.Badge,
-			"stock":            product.Stock,
-			"status":           product.Status,
-		})
+func (r *productRepository) Update(product *models.Product) error {
+	return r.db.Save(product).Error
+}
+
+func (r *productRepository) Delete(id uint) error {
+	res := r.db.Delete(&models.Product{}, id)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -79,15 +73,8 @@ func (r *productRepository) Update(currentName string, product *models.Product) 
 	return nil
 }
 
-func (r *productRepository) Deactivate(name string) error {
-	res := r.db.Model(&models.Product{}).
-		Where("name = ?", name).
-		Update("status", "inactive")
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return ErrProductNotFound
-	}
-	return nil
+func (r *productRepository) Count() (int64, error) {
+	var count int64
+	err := r.db.Model(&models.Product{}).Count(&count).Error
+	return count, err
 }

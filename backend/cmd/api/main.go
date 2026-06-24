@@ -33,7 +33,17 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
-	if err := database.AutoMigrate(&models.UserBackoffice{}, &models.Permission{}, &models.FreightRule{}, &models.Order{}, &models.Ingredient{}, &models.ProductIngredient{}, &models.Product{}); err != nil {
+	if err := database.AutoMigrate(
+		&models.UserBackoffice{},
+		&models.Permission{},
+		&models.FreightRule{},
+		&models.Order{},
+		&models.LandingContent{},
+		&models.Product{},
+		&models.PageContent{},
+		&models.Ingredient{},
+		&models.ProductIngredient{},
+	); err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
 
@@ -46,8 +56,10 @@ func main() {
 	permissionRepo := repository.NewPermissionRepository(database)
 	freightRepo := repository.NewFreightRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
-	ingredientRepo := repository.NewIngredientRepository(database)
+	landingRepo := repository.NewLandingRepository(database)
 	productRepo := repository.NewProductRepository(database)
+	pageContentRepo := repository.NewPageContentRepository(database)
+	ingredientRepo := repository.NewIngredientRepository(database)
 
 	// Services
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
@@ -55,8 +67,10 @@ func main() {
 	authBackofficeService := services.NewAuthBackofficeService(userBackofficeRepo, passwordProvider, jwtProvider)
 	freightService := services.NewFreightService(freightRepo)
 	orderService := services.NewOrderService(orderRepo)
-	ingredientService := services.NewIngredientService(ingredientRepo)
+	landingService := services.NewLandingService(landingRepo)
 	productService := services.NewProductService(productRepo)
+	pageContentService := services.NewPageContentService(pageContentRepo)
+	ingredientService := services.NewIngredientService(ingredientRepo)
 
 	checkoutService, err := services.NewCheckoutService(orderService)
 	if err != nil {
@@ -70,8 +84,10 @@ func main() {
 	freightHandler := handlers.NewFreightHandler(freightService)
 	checkoutHandler := handlers.NewCheckoutHandler(checkoutService)
 	orderHandler := handlers.NewOrderHandler(orderService, os.Getenv("MP_ACCESS_TOKEN"))
-	ingredientHandler := handlers.NewIngredientHandler(ingredientService)
+	landingHandler := handlers.NewLandingHandler(landingService)
 	productHandler := handlers.NewProductHandler(productService)
+	pageContentHandler := handlers.NewPageContentHandler(pageContentService)
+	ingredientHandler := handlers.NewIngredientHandler(ingredientService)
 
 	// Inicializa admin padrão e suas permissões
 	if _, err := userBackofficeService.InitializeAdmin(); err != nil {
@@ -79,6 +95,15 @@ func main() {
 	}
 	if err := permissionService.InitializeAdminPermissions(); err != nil {
 		panic("Failed to initialize admin permissions: " + err.Error())
+	}
+	if err := landingService.InitializeDefaults(); err != nil {
+		panic("Failed to initialize landing content: " + err.Error())
+	}
+	if err := productService.InitializeDefaults(); err != nil {
+		panic("Failed to initialize products: " + err.Error())
+	}
+	if err := pageContentService.InitializeDefaults(); err != nil {
+		panic("Failed to initialize page contents: " + err.Error())
 	}
 
 	r := gin.Default()
@@ -100,9 +125,6 @@ func main() {
 	auth := r.Group("/admin/auth")
 	auth.POST("/login", authBackofficeHandler.Login)
 
-	r.GET("/products", productHandler.GetAll)
-	r.GET("/products/:name", productHandler.GetByName)
-
 	// Registro: requer autenticação + permissão de escrita em "users"
 	auth.POST("/register", authMW, permMW("users", models.PermWrite), userBackofficeHandler.Register)
 
@@ -118,15 +140,20 @@ func main() {
 	admin.GET("/users/:email/permissions", permMW("permissions", models.PermRead), permissionHandler.GetPermissions)
 	admin.PUT("/users/:email/permissions", permMW("permissions", models.PermWrite), permissionHandler.SetPermissions)
 
-	admin.POST("/products", permMW("products", models.PermWrite), productHandler.Create)
-	admin.PUT("/products/:name", permMW("products", models.PermWrite), productHandler.Update)
-	admin.DELETE("/products/:name", permMW("products", models.PermWrite), productHandler.Delete)
-
 	// Checkout - rota pública de criação de preferência MP
 	r.POST("/checkout/preference", checkoutHandler.CreatePreference)
 
 	// Frete - rota pública de cotação
 	r.POST("/freight/quote", freightHandler.Quote)
+
+	// Landing page - conteúdo público
+	r.GET("/landing", landingHandler.GetPublic)
+
+	// Produtos - catálogo público
+	r.GET("/products", productHandler.GetPublic)
+
+	// Conteúdos das páginas públicas
+	r.GET("/page-contents/:page", pageContentHandler.GetPublic)
 
 	// Frete - gestão de preço de frete (backoffice)
 	freight := admin.Group("/freight")
@@ -140,6 +167,27 @@ func main() {
 	orders.GET("", permMW("orders", models.PermRead), orderHandler.GetAll)
 	orders.GET("/:id", permMW("orders", models.PermRead), orderHandler.GetByID)
 	orders.PUT("/:id/delivery-status", permMW("orders", models.PermWrite), orderHandler.UpdateDeliveryStatus)
+
+	// Landing page (backoffice)
+	landing := admin.Group("/landing")
+	landing.GET("", permMW("landing", models.PermRead), landingHandler.GetAll)
+	landing.POST("", permMW("landing", models.PermWrite), landingHandler.Create)
+	landing.PUT("/:id", permMW("landing", models.PermWrite), landingHandler.Update)
+	landing.DELETE("/:id", permMW("landing", models.PermWrite), landingHandler.Delete)
+
+	// Produtos (backoffice)
+	products := admin.Group("/products")
+	products.GET("", permMW("products", models.PermRead), productHandler.GetAll)
+	products.POST("", permMW("products", models.PermWrite), productHandler.Create)
+	products.PUT("/:id", permMW("products", models.PermWrite), productHandler.Update)
+	products.DELETE("/:id", permMW("products", models.PermWrite), productHandler.Delete)
+
+	// Conteúdos das páginas (backoffice)
+	pageContents := admin.Group("/page-contents")
+	pageContents.GET("", permMW("content", models.PermRead), pageContentHandler.GetAll)
+	pageContents.POST("", permMW("content", models.PermWrite), pageContentHandler.Create)
+	pageContents.PUT("/:id", permMW("content", models.PermWrite), pageContentHandler.Update)
+	pageContents.DELETE("/:id", permMW("content", models.PermWrite), pageContentHandler.Delete)
 
 	// Ingredientes (backoffice)
 	ingredients := admin.Group("/ingredients")

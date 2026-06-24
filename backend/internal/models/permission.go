@@ -24,8 +24,8 @@ func HasLevel(actual, required PermissionLevel) bool {
 var KnownResources = []string{
 	"users",
 	"products",
+	"content",
 	"permissions",
-	"landing",
 	"freight",
 	"orders",
 	"ingredients",

@@ -1,34 +1,54 @@
 import { useEffect, useState } from 'react'
 import ProductDetailCard, { type CookieDetail } from '@/components/ProductDetailCard'
+import { PRODUCTS } from '@/data/products'
 import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
-import { getProducts } from '@/services/products'
+import { api, type Product } from '@/api'
+import { resolveProductImage } from '@/lib/productImages'
+import { findSection, usePageContents } from '@/lib/pageContent'
+
+function productToCookie(product: Product): CookieDetail {
+  return {
+    id: String(product.id),
+    name: product.name,
+    subtitle: product.subtitle,
+    category: product.category,
+    description: product.description,
+    price: product.price,
+    priceValue: product.priceValue,
+    weight: product.weight,
+    stock: product.stock,
+    ingredients: product.ingredients,
+    allergens: product.allergens,
+    badge: product.badge,
+    img: resolveProductImage(product.image || product.img),
+  }
+}
 
 function Shopping() {
   const { addItem } = useCart()
-  const [products, setProducts] = useState<CookieDetail[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const contents = usePageContents('shopping')
+  const header = findSection(contents, 'Header')
+  const [products, setProducts] = useState<CookieDetail[]>(PRODUCTS)
   const [selectedProduct, setSelectedProduct] = useState<CookieDetail | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [addedId, setAddedId] = useState<string | null>(null)
 
   useEffect(() => {
-    let mounted = true
-    getProducts()
-      .then((items) => {
-        if (!mounted) return
-        setProducts(items)
-        setError(null)
+    let active = true
+
+    api.products.getAll('Shopping')
+      .then((res) => {
+        if (!active || !res.products?.length) return
+        setProducts(res.products.map(productToCookie))
       })
-      .catch((err) => {
-        if (!mounted) return
-        setError(err instanceof Error ? err.message : 'Erro ao carregar produtos.')
+      .catch(() => {
+        if (active) setProducts(PRODUCTS)
       })
-      .finally(() => {
-        if (mounted) setLoading(false)
-      })
-    return () => { mounted = false }
+
+    return () => {
+      active = false
+    }
   }, [])
 
   const openDetails = (product: CookieDetail) => {
@@ -56,27 +76,20 @@ function Shopping() {
           <header className="mb-16 ">
             <div className="max-w-7xl px-8 text-center sm:text-left">
               <p className="font-subtitle font-bold text-primary text-4xl text-lg sm:text-2xl">
-                Monte seu pedido!
+                {header?.subtitle || 'Monte seu pedido!'}
               </p>
 
               <h1 className="mb-2 font-display text-4xl font-extrabold leading-tight text-text-h sm:text-5xl lg:text-6xl">
-                Nosso <span className="text-primary">Catálogo</span>
+                {header?.title || 'Nosso Catálogo'}
               </h1>
 
               <p className="text-sm leading-relaxed text-text sm:text-base lg:text-lg">
-                Explore nossa seleção de produtos exclusivos.
+                {header?.description || 'Explore nossa seleção de produtos exclusivos.'}
               </p>
             </div>
           </header>
 
-          {loading ? (
-            <p className="py-16 text-center text-text">Carregando produtos...</p>
-          ) : error ? (
-            <p className="py-16 text-center text-primary">{error}</p>
-          ) : products.length === 0 ? (
-            <p className="py-16 text-center text-text">Nenhum produto disponível no momento.</p>
-          ) : (
-            <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+          <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
             {products.map((product) => (
               <article
                 key={product.id}
@@ -127,8 +140,7 @@ function Shopping() {
                 </div>
               </article>
             ))}
-            </div>
-          )}
+          </div>
         </div>
 
         {selectedProduct && (

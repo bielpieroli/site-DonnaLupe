@@ -90,6 +90,31 @@ definitions:
     required:
     - max_distance_km
     type: object
+  models.LandingContentInput:
+    properties:
+      botaoLink:
+        type: string
+      botaoTexto:
+        type: string
+      descricao:
+        type: string
+      imagem:
+        type: string
+      name:
+        type: string
+      secao:
+        type: string
+      status:
+        type: string
+      subtitulo:
+        type: string
+      titulo:
+        type: string
+    required:
+    - name
+    - secao
+    - titulo
+    type: object
   models.LoginUserBackofficeRequest:
     properties:
       email:
@@ -100,6 +125,34 @@ definitions:
     required:
     - email
     - password
+    type: object
+  models.PageContentInput:
+    properties:
+      buttonLink:
+        type: string
+      buttonText:
+        type: string
+      description:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      page:
+        type: string
+      section:
+        type: string
+      status:
+        type: string
+      subtitle:
+        type: string
+      title:
+        type: string
+    required:
+    - name
+    - page
+    - section
+    - title
     type: object
   models.PermissionInput:
     properties:
@@ -121,6 +174,45 @@ definitions:
     - PermNone
     - PermRead
     - PermWrite
+  models.ProductInput:
+    properties:
+      allergens:
+        type: string
+      badge:
+        type: string
+      category:
+        type: string
+      description:
+        type: string
+      flavor:
+        type: string
+      image:
+        type: string
+      ingredientsText:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+      priceValue:
+        type: number
+      sizeCountsText:
+        type: string
+      sizesText:
+        type: string
+      status:
+        type: string
+      stock:
+        type: integer
+      subtitle:
+        type: string
+      unit:
+        type: string
+      weight:
+        type: string
+    required:
+    - name
+    type: object
   models.SetPermissionsRequest:
     properties:
       permissions:
@@ -443,6 +535,91 @@ paths:
       summary: Atualiza ingrediente
       tags:
       - ingredients
+  /admin/landing:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista conteúdos da landing page
+      tags:
+      - landing
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conteúdo da landing
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LandingContentInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria conteúdo da landing page
+      tags:
+      - landing
+  /admin/landing/{id}:
+    delete:
+      parameters:
+      - description: ID do conteúdo
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove conteúdo da landing page
+      tags:
+      - landing
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do conteúdo
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Conteúdo atualizado
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LandingContentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza conteúdo da landing page
+      tags:
+      - landing
   /admin/orders:
     get:
       parameters:
@@ -521,6 +698,201 @@ paths:
       summary: Atualiza status de entrega de um pedido
       tags:
       - orders
+  /admin/page-contents:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista conteúdos das páginas
+      tags:
+      - page-contents
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conteúdo
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.PageContentInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria conteúdo de página
+      tags:
+      - page-contents
+  /admin/page-contents/{id}:
+    delete:
+      parameters:
+      - description: ID do conteúdo
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove conteúdo de página
+      tags:
+      - page-contents
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do conteúdo
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados atualizados
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.PageContentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza conteúdo de página
+      tags:
+      - page-contents
+  /admin/products:
+    get:
+      parameters:
+      - description: 'Tipo de produto: Shopping ou Coffee'
+        in: query
+        name: kind
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Lista produtos do backoffice
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dados do produto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cria produto
+      tags:
+      - products
+  /admin/products/{id}:
+    delete:
+      parameters:
+      - description: ID do produto
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove produto
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do produto
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados atualizados
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Atualiza produto
+      tags:
+      - products
   /admin/users:
     get:
       description: Retorna todos os usuários do backoffice com paginação e filtros
@@ -823,6 +1195,56 @@ paths:
       summary: Calcula frete para um endereço de entrega
       tags:
       - freight
+  /landing:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Lista conteúdos ativos da landing page
+      tags:
+      - landing
+  /page-contents/{page}:
+    get:
+      parameters:
+      - description: Página
+        in: path
+        name: page
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Lista conteúdos ativos de uma página
+      tags:
+      - page-contents
+  /products:
+    get:
+      parameters:
+      - description: 'Tipo de produto: Shopping ou Coffee'
+        in: query
+        name: kind
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Lista produtos disponíveis
+      tags:
+      - products
   /webhook/mp:
     post:
       responses: {}

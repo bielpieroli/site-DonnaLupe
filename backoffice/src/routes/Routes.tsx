@@ -7,7 +7,7 @@ import RequireAuth from "@/lib/RequireAuth";
 import RequirePermission from "@/lib/RequirePermission";
 import ProductsPage from "@/pages/Products";
 import PermissionsPage from "@/pages/PermissionsBackoffice";
-import LandingPage from "@/pages/LandingPageBackoffice";
+import PageContentsPage from "@/pages/PageContentsBackoffice";
 import FreightPage from "@/pages/FreightBackoffice";
 import OrdersPage from "@/pages/OrdersBackoffice";
 import DeliveriesPage from "@/pages/DeliveriesBackoffice";
@@ -46,8 +46,8 @@ export const router = createBrowserRouter([
             children: [{ path: "/backoffice-permissions", element: <PermissionsPage /> }],
           },
           {
-            element: <RequirePermission resource="landing" />,
-            children: [{ path: "/backoffice-landing", element: <LandingPage /> }],
+            element: <RequirePermission resource="content" />,
+            children: [{ path: "/backoffice-content", element: <PageContentsPage /> }],
           },
           {
             element: <RequirePermission resource="freight" />,

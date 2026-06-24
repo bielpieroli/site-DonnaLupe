@@ -23,12 +23,73 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 // Public API — no auth required (customer-facing endpoints)
+export type LandingContent = {
+  id: number
+  name: string
+  secao: string
+  titulo: string
+  subtitulo: string
+  descricao: string
+  imagem: string
+  botaoTexto: string
+  botaoLink: string
+  status: string
+}
+
+export type Product = {
+  id: number
+  name: string
+  subtitle: string
+  kind: 'Shopping' | 'Coffee'
+  category: string
+  description: string
+  priceValue: number
+  price: string
+  weight: string
+  ingredients: string[]
+  ingredientsText: string
+  allergens: string
+  badge: string
+  image: string
+  img: string
+  stock: number
+  flavor: string
+  unit: string
+  sizes: string[]
+  sizesText: string
+  sizeCounts: Record<string, number>
+  sizeCountsText: string
+  status: string
+}
+
+export type PageContent = {
+  id: number
+  page: string
+  name: string
+  section: string
+  title: string
+  subtitle: string
+  description: string
+  image: string
+  buttonText: string
+  buttonLink: string
+  status: string
+}
+
 export const api = {
-  // Products will be fetched here once the backend implements GET /products
-  // products: {
-  //   getAll: () => request<ProductsResponse>('/products'),
-  //   getById: (id: string) => request<ProductResponse>(`/products/${id}`),
-  // },
+  landing: {
+    getActive: () => request<{ contents: LandingContent[] }>('/landing'),
+  },
+  products: {
+    getAll: (kind?: 'Shopping' | 'Coffee') => {
+      const query = kind ? `?kind=${encodeURIComponent(kind)}` : ''
+      return request<{ products: Product[] }>(`/products${query}`)
+    },
+  },
+  pageContents: {
+    getActive: (page: string) =>
+      request<{ contents: PageContent[] }>(`/page-contents/${encodeURIComponent(page)}`),
+  },
 } as const
 
 export { request }
