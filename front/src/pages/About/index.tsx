@@ -48,7 +48,7 @@ function About() {
             <p className="w-full font-subtitle text-2xl mt-10 sm:text-3xl font-bold italic text-primary-contrast">
               {hero?.subtitle || 'Donna Lupe • Cookies & Sucos'}
             </p>
-            <h1 className="w-full font-display text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight">
+            <h1 className="w-full font-display text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight">
               {hero?.title || 'Sabor, cuidado e atendimento para tornar seu dia especial'}
             </h1>
 
