@@ -274,9 +274,3 @@ O banco provavelmente está usando um volume antigo. Em ambiente local, recrie o
 docker compose -p sitedonnalupe down -v
 make build
 ```
-
-## Integrantes
-
-- Gabriel de Andrade Abreu - 14571362
-- Isabela Beatriz Sousa Nunes Farias - 13823833
-- Joao Gabriel Pieroli da Silva - 15678578
