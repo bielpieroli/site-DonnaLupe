@@ -8,18 +8,19 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 var mpClient = &http.Client{Timeout: 10 * time.Second}
 
 type CheckoutService interface {
-	CreatePreference(req models.CheckoutPreferenceRequest) (*models.CheckoutPreferenceResponse, error)
+	CreatePixPayment(req models.CheckoutPixRequest) (*models.CheckoutPixResponse, error)
 }
 
 type checkoutService struct {
 	accessToken  string
-	frontURL     string
+	webhookURL   string
 	orderService OrderService
 }
 
@@ -28,79 +29,76 @@ func NewCheckoutService(orderService OrderService) (CheckoutService, error) {
 	if token == "" {
 		return nil, errors.New("MP_ACCESS_TOKEN não configurado")
 	}
-	frontURL := os.Getenv("FRONT_URL")
-	if frontURL == "" {
-		frontURL = "http://localhost:5173"
-	}
-	return &checkoutService{accessToken: token, frontURL: frontURL, orderService: orderService}, nil
+	return &checkoutService{
+		accessToken:  token,
+		webhookURL:   os.Getenv("MP_WEBHOOK_URL"),
+		orderService: orderService,
+	}, nil
 }
 
-type mpItem struct {
-	ID         string  `json:"id"`
-	Title      string  `json:"title"`
-	Quantity   int     `json:"quantity"`
-	UnitPrice  float64 `json:"unit_price"`
-	CurrencyID string  `json:"currency_id"`
+type mpPixPayload struct {
+	TransactionAmount float64 `json:"transaction_amount"`
+	Description       string  `json:"description"`
+	PaymentMethodID   string  `json:"payment_method_id"`
+	NotificationURL   string  `json:"notification_url,omitempty"`
+	DateOfExpiration  string  `json:"date_of_expiration,omitempty"`
+	Payer             struct {
+		Email     string `json:"email"`
+		FirstName string `json:"first_name"`
+	} `json:"payer"`
 }
 
-type mpBackURLs struct {
-	Success string `json:"success"`
-	Failure string `json:"failure"`
-	Pending string `json:"pending"`
+type mpPixPaymentResponse struct {
+	ID                 int64 `json:"id"`
+	PointOfInteraction struct {
+		TransactionData struct {
+			QRCode       string `json:"qr_code"`
+			QRCodeBase64 string `json:"qr_code_base64"`
+		} `json:"transaction_data"`
+	} `json:"point_of_interaction"`
 }
 
-type mpPreferencePayload struct {
-	Items    []mpItem   `json:"items"`
-	BackURLs mpBackURLs `json:"back_urls"`
-}
-
-type mpPreferenceResponse struct {
-	ID        string `json:"id"`
-	InitPoint string `json:"init_point"`
-}
-
-func (s *checkoutService) CreatePreference(req models.CheckoutPreferenceRequest) (*models.CheckoutPreferenceResponse, error) {
-	items := make([]mpItem, 0, len(req.Items)+1)
+func (s *checkoutService) CreatePixPayment(req models.CheckoutPixRequest) (*models.CheckoutPixResponse, error) {
+	var subtotal float64
+	names := make([]string, 0, len(req.Items))
 	for _, item := range req.Items {
-		items = append(items, mpItem{
-			ID:         item.ID,
-			Title:      item.Name,
-			Quantity:   item.Quantity,
-			UnitPrice:  item.PriceValue,
-			CurrencyID: "BRL",
-		})
+		subtotal += item.PriceValue * float64(item.Quantity)
+		names = append(names, item.Name)
+	}
+	total := subtotal
+	if !req.PickupMode {
+		total += req.FreightCost
 	}
 
-	if !req.PickupMode && req.FreightCost > 0 {
-		items = append(items, mpItem{
-			ID:         "freight",
-			Title:      "Frete",
-			Quantity:   1,
-			UnitPrice:  req.FreightCost,
-			CurrencyID: "BRL",
-		})
+	description := strings.Join(names, ", ")
+	if len(description) > 200 {
+		description = description[:200]
+	}
+	if description == "" {
+		description = "Pedido DonnaLupe"
 	}
 
-	payload := mpPreferencePayload{
-		Items: items,
-		BackURLs: mpBackURLs{
-			Success: s.frontURL + "/cart?status=success",
-			Failure: s.frontURL + "/cart?status=failure",
-			Pending: s.frontURL + "/cart?status=pending",
-		},
-	}
+	var payload mpPixPayload
+	payload.TransactionAmount = total
+	payload.Description = description
+	payload.PaymentMethodID = "pix"
+	payload.NotificationURL = s.webhookURL
+	payload.DateOfExpiration = time.Now().UTC().Add(6 * time.Minute).Format("2006-01-02T15:04:05.000-07:00")
+	payload.Payer.Email = req.CustomerEmail
+	payload.Payer.FirstName = req.CustomerName
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("erro ao serializar preferência: %w", err)
+		return nil, fmt.Errorf("erro ao serializar pagamento: %w", err)
 	}
 
-	httpReq, err := http.NewRequest(http.MethodPost, "https://api.mercadopago.com/checkout/preferences", bytes.NewReader(body))
+	httpReq, err := http.NewRequest(http.MethodPost, "https://api.mercadopago.com/v1/payments", bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("erro ao criar requisição MP: %w", err)
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Authorization", "Bearer "+s.accessToken)
+	httpReq.Header.Set("X-Idempotency-Key", fmt.Sprintf("donna-pix-%s-%d", req.CustomerEmail, time.Now().UnixNano()))
 
 	resp, err := mpClient.Do(httpReq)
 	if err != nil {
@@ -109,32 +107,50 @@ func (s *checkoutService) CreatePreference(req models.CheckoutPreferenceRequest)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		var errBody struct {
-			Message string `json:"message"`
-		}
-		json.NewDecoder(resp.Body).Decode(&errBody) //nolint:errcheck
-		if errBody.Message != "" {
-			return nil, fmt.Errorf("Mercado Pago: %s", errBody.Message)
-		}
-		return nil, fmt.Errorf("Mercado Pago retornou status %d", resp.StatusCode)
+		return nil, parseMPError(resp)
 	}
 
-	var mpResp mpPreferenceResponse
+	var mpResp mpPixPaymentResponse
 	if err := json.NewDecoder(resp.Body).Decode(&mpResp); err != nil {
 		return nil, errors.New("resposta inválida do Mercado Pago")
 	}
 
-	// Registra o pedido. Busca endereço via BrasilAPI quando é entrega.
 	city, state, street := "", "", ""
 	if !req.PickupMode && req.CEP != "" {
 		if cepData, err := fetchCEPData(req.CEP); err == nil {
 			city, state, street = cepData.City, cepData.State, cepData.Street
 		}
 	}
-	s.orderService.Create(req, mpResp.ID, city, state, street) //nolint:errcheck
 
-	return &models.CheckoutPreferenceResponse{
-		PreferenceID: mpResp.ID,
-		InitPoint:    mpResp.InitPoint,
+	paymentID := fmt.Sprintf("%d", mpResp.ID)
+	if _, err := s.orderService.Create(req, paymentID, city, state, street); err != nil {
+		return nil, fmt.Errorf("pagamento PIX criado (id=%s) mas falha ao registrar pedido: %w", paymentID, err)
+	}
+
+	return &models.CheckoutPixResponse{
+		PaymentID:   mpResp.ID,
+		PixQRCode:   mpResp.PointOfInteraction.TransactionData.QRCode,
+		PixQRBase64: mpResp.PointOfInteraction.TransactionData.QRCodeBase64,
 	}, nil
+}
+
+// parseMPError lê o corpo da resposta de erro do Mercado Pago e retorna um erro legível.
+// Trim de "null" ao final que a API do MP inclui em alguns contextos.
+func parseMPError(resp *http.Response) error {
+	var errBody struct {
+		Message string `json:"message"`
+		Cause   []struct {
+			Description string `json:"description"`
+		} `json:"cause"`
+	}
+	json.NewDecoder(resp.Body).Decode(&errBody) //nolint:errcheck
+
+	msg := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(errBody.Message), "null"))
+	if msg == "" && len(errBody.Cause) > 0 {
+		msg = errBody.Cause[0].Description
+	}
+	if msg == "" {
+		return fmt.Errorf("Mercado Pago retornou status %d", resp.StatusCode)
+	}
+	return fmt.Errorf("Mercado Pago: %s", msg)
 }

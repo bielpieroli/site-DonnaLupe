@@ -13,7 +13,6 @@ export type OrderItem = {
 
 export type Order = {
   id: number;
-  preference_id: string;
   payment_id: string;
   status: OrderStatus;
   delivery_mode: DeliveryMode;
@@ -22,12 +21,16 @@ export type Order = {
   subtotal: number;
   freight_cost: number;
   total: number;
+  customer_name: string;
+  customer_email: string;
+  pickup_time: string;
   cep: string;
   address_number: string;
   complement: string;
   city: string;
   state: string;
   street: string;
+  completed: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -55,6 +58,21 @@ export const ordersAPI = {
 
   updateDeliveryStatus: async (id: number, delivery_status: DeliveryStatus): Promise<{ order: Order }> => {
     const res = await client.put<{ order: Order }>(`/admin/orders/${id}/delivery-status`, { delivery_status });
+    return res.data;
+  },
+
+  confirmPayment: async (id: number): Promise<{ order: Order; message: string }> => {
+    const res = await client.put<{ order: Order; message: string }>(`/admin/orders/${id}/confirm-payment`, {});
+    return res.data;
+  },
+
+  refund: async (id: number): Promise<{ message: string }> => {
+    const res = await client.post<{ message: string }>(`/admin/orders/${id}/refund`, {});
+    return res.data;
+  },
+
+  setCompleted: async (id: number, completed: boolean): Promise<{ order: Order }> => {
+    const res = await client.put<{ order: Order }>(`/admin/orders/${id}/completed`, { completed });
     return res.data;
   },
 };

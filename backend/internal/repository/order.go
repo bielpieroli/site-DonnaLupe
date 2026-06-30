@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/models"
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -18,9 +19,10 @@ type OrderFilters struct {
 type OrderRepository interface {
 	Create(order *models.Order) error
 	GetByID(id uint) (*models.Order, error)
-	GetByPreferenceID(preferenceID string) (*models.Order, error)
+	GetByPaymentID(paymentID string) (*models.Order, error)
 	GetAll(filters OrderFilters) ([]models.Order, error)
 	Update(order *models.Order) error
+	CancelPendingOlderThan(cutoff time.Time) (int64, error)
 }
 
 type orderRepository struct{ db *gorm.DB }
@@ -44,9 +46,9 @@ func (r *orderRepository) GetByID(id uint) (*models.Order, error) {
 	return &o, nil
 }
 
-func (r *orderRepository) GetByPreferenceID(preferenceID string) (*models.Order, error) {
+func (r *orderRepository) GetByPaymentID(paymentID string) (*models.Order, error) {
 	var o models.Order
-	if err := r.db.Where("preference_id = ?", preferenceID).First(&o).Error; err != nil {
+	if err := r.db.Where("payment_id = ?", paymentID).First(&o).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrOrderNotFound
 		}
@@ -72,4 +74,11 @@ func (r *orderRepository) GetAll(filters OrderFilters) ([]models.Order, error) {
 
 func (r *orderRepository) Update(order *models.Order) error {
 	return r.db.Save(order).Error
+}
+
+func (r *orderRepository) CancelPendingOlderThan(cutoff time.Time) (int64, error) {
+	result := r.db.Model(&models.Order{}).
+		Where("status = ? AND created_at < ?", models.OrderPending, cutoff).
+		Update("status", models.OrderCancelled)
+	return result.RowsAffected, result.Error
 }

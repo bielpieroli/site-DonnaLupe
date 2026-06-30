@@ -38,6 +38,9 @@ export default function OrdersBackoffice() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<OrderStatus | "">("");
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [refundTarget, setRefundTarget] = useState<number | null>(null);
+  const [confirmPaymentTarget, setConfirmPaymentTarget] = useState<number | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" }>({
     message: "",
     type: "success",
@@ -70,9 +73,109 @@ export default function OrdersBackoffice() {
       { totalRevenue: 0, pendingCount: 0, paidCount: 0 },
     ), [orders]);
 
+  async function handleConfirmPayment(id: number) {
+    setConfirmPaymentTarget(null);
+    setActionLoading(id);
+    try {
+      await ordersAPI.confirmPayment(id);
+      notify(`Pagamento do pedido #${id} confirmado com sucesso.`);
+      fetchOrders();
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao confirmar pagamento."), "warning");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleSetCompleted(id: number, completed: boolean) {
+    try {
+      const res = await ordersAPI.setCompleted(id, completed);
+      setOrders((prev) => prev.map((o) => (o.id === id ? res.order : o)));
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao atualizar pedido."), "warning");
+    }
+  }
+
+  async function handleRefund(id: number) {
+    setRefundTarget(null);
+    setActionLoading(id);
+    try {
+      await ordersAPI.refund(id);
+      notify(`Pedido #${id} reembolsado e cancelado.`);
+      fetchOrders();
+    } catch (err) {
+      notify(apiMsg(err, "Erro ao reembolsar pedido."), "warning");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 p-6">
-      <Notification message={notification.message} type={notification.type} visible={notification.message !== ""} onClose={() => setNotification({ message: "", type: "success" })} />
+      {/* Modal de confirmação de pagamento */}
+      {confirmPaymentTarget !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-surface border border-border p-6 shadow-2xl">
+            <h2 className="text-lg font-bold text-text-h">Confirmar pagamento</h2>
+            <p className="mt-2 text-sm text-muted">
+              Confirmar manualmente o pagamento do pedido{" "}
+              <span className="font-semibold text-text">#{confirmPaymentTarget}</span>?
+              O status será alterado para <span className="font-semibold text-text">Pago</span> e o cliente receberá um e-mail de confirmação.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setConfirmPaymentTarget(null)}
+                className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text transition-colors hover:bg-white/5"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleConfirmPayment(confirmPaymentTarget)}
+                disabled={actionLoading === confirmPaymentTarget}
+                className="flex-1 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+              >
+                {actionLoading === confirmPaymentTarget ? "Processando..." : "Confirmar pagamento"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmação de reembolso */}
+      {refundTarget !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-surface border border-border p-6 shadow-2xl">
+            <h2 className="text-lg font-bold text-text-h">Confirmar reembolso</h2>
+            <p className="mt-2 text-sm text-muted">
+              Tem certeza que deseja reembolsar e cancelar o pedido{" "}
+              <span className="font-semibold text-text">#{refundTarget}</span>?
+              O valor será estornado via Mercado Pago e esta ação não pode ser desfeita.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setRefundTarget(null)}
+                className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text transition-colors hover:bg-white/5"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleRefund(refundTarget)}
+                disabled={actionLoading === refundTarget}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {actionLoading === refundTarget ? "Processando..." : "Confirmar reembolso"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        visible={notification.message !== ""}
+        onClose={() => setNotification({ message: "", type: "success" })}
+      />
 
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={() => navigate("/home")}>
@@ -142,11 +245,14 @@ export default function OrdersBackoffice() {
                 <tr>
                   <th className="px-4 py-3">#</th>
                   <th className="px-4 py-3">Data</th>
+                  <th className="px-4 py-3">Cliente</th>
                   <th className="px-4 py-3">Itens</th>
                   <th className="px-4 py-3">Modo</th>
                   <th className="px-4 py-3">Total</th>
                   <th className="px-4 py-3">Pagamento</th>
                   <th className="px-4 py-3">Entrega</th>
+                  <th className="px-4 py-3 text-center">Concluído</th>
+                  <th className="px-4 py-3">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-secondary/10">
@@ -154,6 +260,10 @@ export default function OrdersBackoffice() {
                   <tr key={order.id} className="hover:bg-secondary/5 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-text-secondary">#{order.id}</td>
                     <td className="px-4 py-3 text-text-primary">{formatDate(order.created_at)}</td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-text-primary text-xs">{order.customer_name || "—"}</p>
+                      <p className="text-text-secondary text-xs">{order.customer_email || "—"}</p>
+                    </td>
                     <td className="px-4 py-3 text-text-secondary">
                       {order.items?.length ?? 0} {(order.items?.length ?? 0) === 1 ? "item" : "itens"}
                     </td>
@@ -174,6 +284,40 @@ export default function OrdersBackoffice() {
                     </td>
                     <td className="px-4 py-3 text-text-secondary text-xs">
                       {DELIVERY_LABEL[order.delivery_status] ?? order.delivery_status}
+                      {order.delivery_mode === "pickup" && order.pickup_time && (
+                        <span className="ml-1 text-[#9a7b6e]">· {order.pickup_time}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={order.completed ?? false}
+                        onChange={(e) => handleSetCompleted(order.id, e.target.checked)}
+                        className="h-4 w-4 cursor-pointer accent-primary"
+                        title="Marcar como concluído"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        {order.status === "pending" && (
+                          <button
+                            onClick={() => setConfirmPaymentTarget(order.id)}
+                            disabled={actionLoading === order.id}
+                            className="rounded-lg bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800 transition-colors hover:bg-green-200 disabled:opacity-50"
+                          >
+                            {actionLoading === order.id ? "..." : "Confirmar pagamento"}
+                          </button>
+                        )}
+                        {order.status === "paid" && (
+                          <button
+                            onClick={() => setRefundTarget(order.id)}
+                            disabled={actionLoading === order.id}
+                            className="rounded-lg bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800 transition-colors hover:bg-red-200 disabled:opacity-50"
+                          >
+                            {actionLoading === order.id ? "..." : "Reembolsar"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

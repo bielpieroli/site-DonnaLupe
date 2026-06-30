@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"backend/internal/db"
 	"backend/internal/handlers"
@@ -33,6 +34,11 @@ func main() {
 		panic("Failed to connect to database: " + errDB.Error())
 	}
 
+	// Remove constraints legadas do campo preference_id (substituído por payment_id PIX).
+	// AutoMigrate não remove colunas nem constraints; fazemos manualmente antes de migrar.
+	database.Exec("DROP INDEX IF EXISTS idx_orders_preference_id")
+	database.Exec("ALTER TABLE orders ALTER COLUMN preference_id DROP NOT NULL")
+
 	if err := database.AutoMigrate(
 		&models.UserBackoffice{},
 		&models.Permission{},
@@ -62,11 +68,12 @@ func main() {
 	ingredientRepo := repository.NewIngredientRepository(database)
 
 	// Services
+	emailService := services.NewEmailService()
 	userBackofficeService := services.NewUserBackofficeService(userBackofficeRepo, passwordProvider)
 	permissionService := services.NewPermissionService(permissionRepo)
 	authBackofficeService := services.NewAuthBackofficeService(userBackofficeRepo, passwordProvider, jwtProvider)
 	freightService := services.NewFreightService(freightRepo)
-	orderService := services.NewOrderService(orderRepo)
+	orderService := services.NewOrderService(orderRepo, emailService)
 	landingService := services.NewLandingService(landingRepo)
 	productService := services.NewProductService(productRepo)
 	pageContentService := services.NewPageContentService(pageContentRepo)
@@ -106,6 +113,15 @@ func main() {
 		panic("Failed to initialize page contents: " + err.Error())
 	}
 
+	// Cancela automaticamente pedidos PIX não pagos após 6 minutos
+	go func() {
+		ticker := time.NewTicker(2 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			orderService.CancelStaleOrders(6 * time.Minute) //nolint:errcheck
+		}
+	}()
+
 	r := gin.Default()
 
 	r.Use(middleware.CORSMiddleware(
@@ -121,11 +137,9 @@ func main() {
 		return middleware.RequirePermission(permissionService, resource, level)
 	}
 
-	// Rotas públicas
+	// Rotas públicas de autenticação
 	auth := r.Group("/admin/auth")
 	auth.POST("/login", authBackofficeHandler.Login)
-
-	// Registro: requer autenticação + permissão de escrita em "users"
 	auth.POST("/register", authMW, permMW("users", models.PermWrite), userBackofficeHandler.Register)
 
 	// Rotas administrativas protegidas
@@ -140,22 +154,23 @@ func main() {
 	admin.GET("/users/:email/permissions", permMW("permissions", models.PermRead), permissionHandler.GetPermissions)
 	admin.PUT("/users/:email/permissions", permMW("permissions", models.PermWrite), permissionHandler.SetPermissions)
 
-	// Checkout - rota pública de criação de preferência MP
-	r.POST("/checkout/preference", checkoutHandler.CreatePreference)
+	// Checkout PIX — rota pública
+	r.POST("/checkout/pix", checkoutHandler.CreatePixPayment)
+	r.GET("/checkout/pix/:payment_id/status", orderHandler.GetPixStatus)
 
-	// Frete - rota pública de cotação
+	// Frete — rota pública de cotação
 	r.POST("/freight/quote", freightHandler.Quote)
 
-	// Landing page - conteúdo público
+	// Landing page — conteúdo público
 	r.GET("/landing", landingHandler.GetPublic)
 
-	// Produtos - catálogo público
+	// Produtos — catálogo público
 	r.GET("/products", productHandler.GetPublic)
 
 	// Conteúdos das páginas públicas
 	r.GET("/page-contents/:page", pageContentHandler.GetPublic)
 
-	// Frete - gestão de preço de frete (backoffice)
+	// Frete — gestão (backoffice)
 	freight := admin.Group("/freight")
 	freight.GET("/rules", permMW("freight", models.PermRead), freightHandler.GetRules)
 	freight.POST("/rules", permMW("freight", models.PermWrite), freightHandler.CreateRule)
@@ -167,6 +182,9 @@ func main() {
 	orders.GET("", permMW("orders", models.PermRead), orderHandler.GetAll)
 	orders.GET("/:id", permMW("orders", models.PermRead), orderHandler.GetByID)
 	orders.PUT("/:id/delivery-status", permMW("orders", models.PermWrite), orderHandler.UpdateDeliveryStatus)
+	orders.PUT("/:id/confirm-payment", permMW("orders", models.PermWrite), orderHandler.ConfirmPayment)
+	orders.POST("/:id/refund", permMW("orders", models.PermWrite), orderHandler.Refund)
+	orders.PUT("/:id/completed", permMW("orders", models.PermWrite), orderHandler.SetCompleted)
 
 	// Landing page (backoffice)
 	landing := admin.Group("/landing")

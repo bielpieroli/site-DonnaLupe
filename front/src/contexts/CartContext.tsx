@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { CookieDetail } from "@/components/ProductDetailCard";
+import { resolveProductImage } from "@/lib/productImages";
 
 export type CartItem = {
   id: string;
@@ -26,12 +27,30 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "donnalupe-cart";
 
+// Imagens base64 (data:image/...) podem ter centenas de KB cada.
+// Armazenamos apenas uma string vazia no storage e resolvemos o fallback ao carregar.
+function stripLargeImage(img: string): string {
+  return img.startsWith("data:image/") ? "" : img;
+}
+
 function loadFromStorage(): CartItem[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? (JSON.parse(stored) as CartItem[]) : [];
+    if (!stored) return [];
+    const items = JSON.parse(stored) as CartItem[];
+    // Resolve imagem: se estava vazia (era base64 e foi omitida), usa fallback do catálogo
+    return items.map((item) => ({ ...item, img: resolveProductImage(item.img) }));
   } catch {
     return [];
+  }
+}
+
+function saveToStorage(items: CartItem[]) {
+  try {
+    const lean = items.map(({ img, ...rest }) => ({ ...rest, img: stripLargeImage(img) }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lean));
+  } catch {
+    // QuotaExceededError — ignora; o carrinho continua funcional em memória
   }
 }
 
@@ -39,7 +58,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadFromStorage);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    saveToStorage(items);
   }, [items]);
 
   function addItem(product: CookieDetail, quantity: number) {
