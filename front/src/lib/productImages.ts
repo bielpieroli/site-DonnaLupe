@@ -15,6 +15,7 @@ const productImageMap: Record<string, string> = {
   'cookie-choco-chunk.png': cookieChocoChunk,
   'cookie-double-choc.png': cookieDoubleChoc,
   'cookie-red.png': cookieRed,
+  'cookie-travessa.png': cookieTravessa,
   'coffee-bolo.jpg': boloImg,
   'coffee-brownies.jpg': browniesImg,
   'coffee-cookies.jpg': cookiesImg,

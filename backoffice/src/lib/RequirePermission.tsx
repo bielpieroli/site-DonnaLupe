@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth, useHasPermission } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function RequirePermission({ resource }: { resource: string }) {
   const location = useLocation();
   const { ensurePermission } = useAuth();
-  const hasCurrentPermission = useHasPermission(resource, "read");
   const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -28,6 +27,6 @@ export default function RequirePermission({ resource }: { resource: string }) {
     return <p className="py-12 text-center text-muted">Verificando permissões...</p>;
   }
 
-  if (!allowed || !hasCurrentPermission) return <Navigate to="/home" replace />;
+  if (!allowed) return <Navigate to="/home" replace />;
   return <Outlet />;
 }

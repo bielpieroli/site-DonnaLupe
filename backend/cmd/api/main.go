@@ -136,6 +136,10 @@ func main() {
 	permMW := func(resource string, level models.PermissionLevel) gin.HandlerFunc {
 		return middleware.RequirePermission(permissionService, resource, level)
 	}
+	usersReadOrPermsReadMW := middleware.RequireAnyPermission(permissionService, map[string]models.PermissionLevel{
+		"users":       models.PermRead,
+		"permissions": models.PermRead,
+	})
 
 	// Rotas públicas de autenticação
 	auth := r.Group("/admin/auth")
@@ -147,7 +151,7 @@ func main() {
 	admin := r.Group("/admin")
 	admin.Use(authMW)
 
-	admin.GET("/users", permMW("users", models.PermRead), userBackofficeHandler.GetAllUsers)
+	admin.GET("/users", usersReadOrPermsReadMW, userBackofficeHandler.GetAllUsers)
 	admin.GET("/users/:email", permMW("users", models.PermRead), userBackofficeHandler.GetUserByEmail)
 	admin.PUT("/users/:email", permMW("users", models.PermWrite), userBackofficeHandler.UpdateUser)
 	admin.DELETE("/users/:email", permMW("users", models.PermWrite), userBackofficeHandler.DeleteUser)

@@ -31,3 +31,29 @@ func RequirePermission(permSvc services.PermissionService, resource string, requ
 		c.Next()
 	}
 }
+
+// RequireAnyPermission accepts the request when the user holds at least one of
+// the listed permissions. Must run after AuthBackofficeMiddleware.
+func RequireAnyPermission(permSvc services.PermissionService, requirements map[string]models.PermissionLevel) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		email, exists := c.Get("email")
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Não autenticado"})
+			return
+		}
+
+		for resource, required := range requirements {
+			ok, err := permSvc.CheckPermission(email.(string), resource, required)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Erro ao verificar permissões"})
+				return
+			}
+			if ok {
+				c.Next()
+				return
+			}
+		}
+
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Permissão insuficiente para listar usuários"})
+	}
+}
