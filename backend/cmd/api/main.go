@@ -154,6 +154,7 @@ func main() {
 
 	admin.GET("/users/:email/permissions", permMW("permissions", models.PermRead), permissionHandler.GetPermissions)
 	admin.PUT("/users/:email/permissions", permMW("permissions", models.PermWrite), permissionHandler.SetPermissions)
+	admin.GET("/permissions/users", permMW("permissions", models.PermRead), permissionHandler.GetUsersPermissions)
 
 	// Checkout PIX — rota pública
 	r.POST("/checkout/pix", checkoutHandler.CreatePixPayment)

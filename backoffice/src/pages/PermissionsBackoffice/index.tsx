@@ -7,7 +7,7 @@ import Select from "@/components/core/Select";
 import Badge from "@/components/core/Badge";
 import Notification from "@/components/Notification";
 import { ArrowLeft, ShieldCheck, Pencil } from "lucide-react";
-import { usersAPI, permissionsAPI } from "@/api";
+import { permissionsAPI } from "@/api";
 import { isAxiosError } from "axios";
 import type { Permission, PermissionLevel } from "@/types/APIResponseType";
 import { useAuth, useHasPermission } from "@/contexts/AuthContext";
@@ -58,18 +58,8 @@ export default function PermissionsCRUD() {
   const fetchAll = useCallback(async () => {
     try {
       setLoading(true);
-      const usersRes = await usersAPI.getAll({ limit: 100 });
-      const settled = await Promise.allSettled(
-        usersRes.users.map(async (u) => {
-          const permRes = await permissionsAPI.getByUser(u.email);
-          return { email: u.email, permissions: permRes.permissions };
-        }),
-      );
-      setRows(
-        settled
-          .filter((r): r is PromiseFulfilledResult<UserRow> => r.status === "fulfilled")
-          .map((r) => r.value),
-      );
+      const res = await permissionsAPI.getUsersPermissions();
+      setRows(res.users);
     } catch {
       notify("Erro ao carregar permissões.", "warning");
     } finally {
