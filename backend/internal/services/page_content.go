@@ -244,7 +244,7 @@ func defaultPageContents() []models.PageContent {
 			Page:        "about",
 			Name:        "Hero Sobre",
 			Section:     "Hero",
-			Title:       "Sabor, cuidado e atendimento para tornar seu dia especial",
+			Title:       "Sabor que faz você se sentir especial",
 			Subtitle:    "Donna Lupe • Cookies",
 			Description: "A Donna Lupe nasceu com o propósito de servir pessoas com produtos de qualidade, ambiente acolhedor e um atendimento que faz cada cliente se sentir único.",
 			Image:       "cookie-choco-chunk.jpg",

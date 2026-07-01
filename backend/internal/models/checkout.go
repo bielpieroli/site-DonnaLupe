@@ -7,16 +7,20 @@ type CheckoutItem struct {
 	PriceValue float64 `json:"price_value"`
 }
 
-type CheckoutPreferenceRequest struct {
-	Items       []CheckoutItem `json:"items"        binding:"required,min=1"`
-	FreightCost float64        `json:"freight_cost"`
-	PickupMode  bool           `json:"pickup_mode"`
-	CEP         string         `json:"cep"`
-	Number      string         `json:"number"`
-	Complement  string         `json:"complement"`
+type CheckoutPixRequest struct {
+	Items         []CheckoutItem `json:"items"          binding:"required,min=1"`
+	FreightCost   float64        `json:"freight_cost"`
+	PickupMode    bool           `json:"pickup_mode"`
+	CEP           string         `json:"cep"`
+	Number        string         `json:"number"`
+	Complement    string         `json:"complement"`
+	CustomerName  string         `json:"customer_name"  binding:"required"`
+	CustomerEmail string         `json:"customer_email" binding:"required,email"`
+	PickupTime    string         `json:"pickup_time"`
 }
 
-type CheckoutPreferenceResponse struct {
-	PreferenceID string `json:"preferenceId"`
-	InitPoint    string `json:"initPoint"`
+type CheckoutPixResponse struct {
+	PaymentID   int64  `json:"payment_id"`
+	PixQRCode   string `json:"pix_qr_code"`
+	PixQRBase64 string `json:"pix_qr_base64"`
 }

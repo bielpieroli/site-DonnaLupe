@@ -16,29 +16,29 @@ func NewCheckoutHandler(service services.CheckoutService) *CheckoutHandler {
 	return &CheckoutHandler{service: service}
 }
 
-// CreatePreference godoc
-// @Summary      Cria preferência de pagamento no Mercado Pago
-// @Description  Recebe os itens do carrinho e o custo de frete, cria uma preferência server-side no Mercado Pago e retorna o link de checkout.
+// CreatePixPayment godoc
+// @Summary      Cria pagamento PIX via Mercado Pago
+// @Description  Recebe os itens do carrinho e dados do cliente, cria um pagamento PIX e retorna o QR code.
 // @Tags         checkout
 // @Accept       json
 // @Produce      json
-// @Param        request body models.CheckoutPreferenceRequest true "Itens e frete"
-// @Success      201 {object} models.CheckoutPreferenceResponse
+// @Param        request body models.CheckoutPixRequest true "Itens, frete e dados do cliente"
+// @Success      201 {object} models.CheckoutPixResponse
 // @Failure      400 {object} map[string]interface{}
 // @Failure      502 {object} map[string]interface{}
-// @Router       /checkout/preference [post]
-func (h *CheckoutHandler) CreatePreference(c *gin.Context) {
-	var req models.CheckoutPreferenceRequest
+// @Router       /checkout/pix [post]
+func (h *CheckoutHandler) CreatePixPayment(c *gin.Context) {
+	var req models.CheckoutPixRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Requisição inválida: " + err.Error()})
 		return
 	}
 
-	pref, err := h.service.CreatePreference(req)
+	pix, err := h.service.CreatePixPayment(req)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, pref)
+	c.JSON(http.StatusCreated, pix)
 }
