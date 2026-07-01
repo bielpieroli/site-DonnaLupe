@@ -11,7 +11,7 @@ import {
   INGREDIENT_EDIT_FIELDS,
   INGREDIENT_FIELDS,
 } from "@/data/crudFields";
-import { useHasPermission } from "@/contexts/AuthContext";
+import { useAuth, useHasPermission } from "@/contexts/AuthContext";
 import { apiMsg } from "@/lib/formatting";
 import type { CrudItemType } from "@/types/CrudItem";
 
@@ -47,6 +47,7 @@ function toRow(ingredient: Ingredient): IngredientRow {
 export default function IngredientsBackoffice() {
   const navigate = useNavigate();
   const canWrite = useHasPermission("ingredients", "write");
+  const { ensurePermission } = useAuth();
   const [data, setData] = useState<IngredientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" }>({
@@ -81,6 +82,10 @@ export default function IngredientsBackoffice() {
   async function handleCreate(item: CrudItemType) {
     const row = item as IngredientRow;
     try {
+      if (!(await ensurePermission("ingredients", "write"))) {
+        notify("Você não tem permissão para criar ingredientes.", "warning");
+        return;
+      }
       const res = await ingredientsAPI.create({
         name: String(row.name ?? "").trim(),
         stock: toNumber(row.stock),
@@ -97,6 +102,10 @@ export default function IngredientsBackoffice() {
   async function handleEdit(item: CrudItemType) {
     const row = item as IngredientRow;
     try {
+      if (!(await ensurePermission("ingredients", "write"))) {
+        notify("Você não tem permissão para editar ingredientes.", "warning");
+        return;
+      }
       const res = await ingredientsAPI.update(row.id, {
         stock: toNumber(row.stock),
         unit: String(row.unit ?? "un").trim() || "un",
@@ -111,6 +120,10 @@ export default function IngredientsBackoffice() {
 
   async function handleDelete(id: string) {
     try {
+      if (!(await ensurePermission("ingredients", "write"))) {
+        notify("Você não tem permissão para remover ingredientes.", "warning");
+        return;
+      }
       await ingredientsAPI.delete(id);
       setData((prev) => prev.filter((entry) => entry.id !== id));
       notify("Ingrediente removido com sucesso!");

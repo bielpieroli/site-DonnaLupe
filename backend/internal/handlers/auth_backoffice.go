@@ -74,3 +74,28 @@ func (h *AuthBackofficeHandler) Login(c *gin.Context) {
 		"permissions": perms,
 	})
 }
+
+func (h *AuthBackofficeHandler) Me(c *gin.Context) {
+	email, ok := c.Get("email")
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Não autenticado"})
+		return
+	}
+
+	emailStr, ok := email.(string)
+	if !ok || emailStr == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Sessão inválida"})
+		return
+	}
+
+	perms, err := h.permService.GetFullPermissions(emailStr)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar permissões"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user":        gin.H{"email": emailStr},
+		"permissions": perms,
+	})
+}
