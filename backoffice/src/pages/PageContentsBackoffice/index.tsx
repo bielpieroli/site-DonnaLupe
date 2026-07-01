@@ -9,6 +9,7 @@ import Notification from "@/components/Notification";
 import { PAGE_CONTENT_FIELDS } from "@/data/crudFields";
 import { pageContentsAPI, type PageContent, type PageContentInput } from "@/api/pageContents";
 import { apiMsg } from "@/lib/formatting";
+import { useAuth, useHasPermission } from "@/contexts/AuthContext";
 
 type PageContentRow = CrudItemType & Omit<PageContent, "id">;
 
@@ -37,6 +38,8 @@ function toInput(item: CrudItemType): PageContentInput {
 
 export default function PageContentsBackoffice() {
   const navigate = useNavigate();
+  const canWrite = useHasPermission("content", "write");
+  const { ensurePermission } = useAuth();
   const [data, setData] = useState<PageContentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" }>({
@@ -65,6 +68,10 @@ export default function PageContentsBackoffice() {
 
   const handleEdit = async (item: CrudItemType) => {
     try {
+      if (!(await ensurePermission("content", "write"))) {
+        notify("Você não tem permissão para editar conteúdos.", "warning");
+        return;
+      }
       const res = await pageContentsAPI.update(Number(item.id), toInput(item));
       setData((prev) => prev.map((entry) => (entry.id === item.id ? toRow(res.content) : entry)));
       notify("Conteúdo atualizado com sucesso!");
@@ -75,6 +82,10 @@ export default function PageContentsBackoffice() {
 
   const handleDelete = async (id: string) => {
     try {
+      if (!(await ensurePermission("content", "write"))) {
+        notify("Você não tem permissão para remover conteúdos.", "warning");
+        return;
+      }
       await pageContentsAPI.delete(Number(id));
       setData((prev) => prev.filter((entry) => entry.id !== id));
       notify("Conteúdo removido com sucesso!");
@@ -85,6 +96,10 @@ export default function PageContentsBackoffice() {
 
   const handleCreate = async (item: CrudItemType) => {
     try {
+      if (!(await ensurePermission("content", "write"))) {
+        notify("Você não tem permissão para criar conteúdos.", "warning");
+        return;
+      }
       const res = await pageContentsAPI.create(toInput(item));
       setData((prev) => [...prev, toRow(res.content)]);
       notify("Conteúdo criado com sucesso!");
@@ -139,6 +154,7 @@ export default function PageContentsBackoffice() {
             onDelete={handleDelete}
             onCreate={handleCreate}
             entityLabel="conteúdo"
+            readOnly={!canWrite}
           />
         )}
       </div>

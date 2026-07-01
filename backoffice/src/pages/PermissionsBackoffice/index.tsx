@@ -10,7 +10,7 @@ import { ArrowLeft, ShieldCheck, Pencil } from "lucide-react";
 import { usersAPI, permissionsAPI } from "@/api";
 import { isAxiosError } from "axios";
 import type { Permission, PermissionLevel } from "@/types/APIResponseType";
-import { useHasPermission } from "@/contexts/AuthContext";
+import { useAuth, useHasPermission } from "@/contexts/AuthContext";
 
 // Keep in sync with backend/internal/models/permission.go (KnownResources)
 const RESOURCES: { key: string; label: string }[] = [
@@ -41,6 +41,7 @@ function levelOf(perms: Permission[], resource: string): PermissionLevel {
 export default function PermissionsCRUD() {
   const navigate = useNavigate();
   const canWrite = useHasPermission("permissions", "write");
+  const { ensurePermission, refreshPermissions, user } = useAuth();
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [editTarget, setEditTarget] = useState<UserRow | null>(null);
@@ -93,6 +94,10 @@ export default function PermissionsCRUD() {
     if (!editTarget) return;
     setSaving(true);
     try {
+      if (!(await ensurePermission("permissions", "write"))) {
+        notify("Você não tem permissão para editar permissões.", "warning");
+        return;
+      }
       const permissions: Permission[] = RESOURCES.map(({ key }) => ({
         backoffice_email: editTarget.email,
         resource: key,
@@ -104,6 +109,9 @@ export default function PermissionsCRUD() {
           r.email === editTarget.email ? { ...r, permissions: res.permissions } : r,
         ),
       );
+      if (editTarget.email === user?.email) {
+        await refreshPermissions();
+      }
       notify("Permissões atualizadas com sucesso!");
       setEditTarget(null);
     } catch (err) {

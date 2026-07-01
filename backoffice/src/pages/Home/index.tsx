@@ -11,7 +11,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const visibleTabs = Tabs.filter((tab) => {
-    const perm = permissions.find((p) => p.resource === tab.key);
+    const perm = permissions.find((p) => p.resource === (tab.permissionResource ?? tab.key));
     return (LEVEL_ORDER[perm?.level ?? "none"] ?? 0) >= LEVEL_ORDER["read"];
   });
 

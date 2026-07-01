@@ -5,7 +5,7 @@ import Button from "@/components/core/Button";
 import Card from "@/components/core/Card";
 import Notification from "@/components/Notification";
 import { ordersAPI, type Order, type DeliveryStatus } from "@/api/orders";
-import { useHasPermission } from "@/contexts/AuthContext";
+import { useAuth, useHasPermission } from "@/contexts/AuthContext";
 import { apiMsg, formatBRL, formatDate } from "@/lib/formatting";
 
 type StatusTab = { key: DeliveryStatus | "all"; label: string };
@@ -34,6 +34,7 @@ const STATUS_COLOR: Record<DeliveryStatus, string> = {
 export default function DeliveriesBackoffice() {
   const navigate = useNavigate();
   const canWrite = useHasPermission("orders", "write");
+  const { ensurePermission } = useAuth();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +69,10 @@ export default function DeliveriesBackoffice() {
   async function handleAdvanceStatus(order: Order) {
     const next = NEXT_STATUS[order.delivery_status];
     if (!next) return;
+    if (!(await ensurePermission("orders", "write"))) {
+      notify("Você não tem permissão para atualizar entregas.", "warning");
+      return;
+    }
     setUpdatingId(order.id);
     try {
       await ordersAPI.updateDeliveryStatus(order.id, next.status);

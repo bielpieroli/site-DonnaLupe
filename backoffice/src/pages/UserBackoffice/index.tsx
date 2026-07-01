@@ -8,7 +8,7 @@ import Notification from "@/components/Notification";
 import { ArrowLeft, UserCog } from "lucide-react";
 import { USER_FIELDS, USER_CREATE_FIELDS, USER_EDIT_FIELDS } from "@/data/crudFields";
 import { usersAPI, authAPI } from "@/api";
-import { useHasPermission } from "@/contexts/AuthContext";
+import { useAuth, useHasPermission } from "@/contexts/AuthContext";
 import { apiMsg } from "@/lib/formatting";
 
 interface UserItem extends CrudItemType {
@@ -18,6 +18,7 @@ interface UserItem extends CrudItemType {
 export default function UsersCRUD() {
   const navigate = useNavigate();
   const canWrite = useHasPermission("users", "write");
+  const { ensurePermission } = useAuth();
   const [data, setData] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" }>({
@@ -53,6 +54,10 @@ export default function UsersCRUD() {
   const handleCreate = async (item: CrudItemType) => {
     const user = item as UserItem & { password?: string };
     try {
+      if (!(await ensurePermission("users", "write"))) {
+        notify("Você não tem permissão para criar usuários.", "warning");
+        return;
+      }
       await authAPI.register(user.email, user.password ?? "");
       notify("Usuário criado com sucesso!");
       await fetchUsers();
@@ -64,6 +69,10 @@ export default function UsersCRUD() {
   const handleEdit = async (item: CrudItemType) => {
     const user = item as UserItem & { password?: string };
     try {
+      if (!(await ensurePermission("users", "write"))) {
+        notify("Você não tem permissão para editar usuários.", "warning");
+        return;
+      }
       await usersAPI.update(user.email, user.password ?? "");
       notify("Senha atualizada com sucesso!");
     } catch (err) {
@@ -73,6 +82,10 @@ export default function UsersCRUD() {
 
   const handleDelete = async (id: string) => {
     try {
+      if (!(await ensurePermission("users", "write"))) {
+        notify("Você não tem permissão para remover usuários.", "warning");
+        return;
+      }
       await usersAPI.delete(id);
       notify("Usuário removido com sucesso!");
       setData((prev) => prev.filter((u) => u.id !== id));

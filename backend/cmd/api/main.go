@@ -124,6 +124,7 @@ func main() {
 	// Rotas públicas
 	auth := r.Group("/admin/auth")
 	auth.POST("/login", authBackofficeHandler.Login)
+	auth.GET("/me", authMW, authBackofficeHandler.Me)
 
 	// Registro: requer autenticação + permissão de escrita em "users"
 	auth.POST("/register", authMW, permMW("users", models.PermWrite), userBackofficeHandler.Register)
