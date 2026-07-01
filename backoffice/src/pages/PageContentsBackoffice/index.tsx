@@ -22,17 +22,41 @@ function toRow(content: PageContent): PageContentRow {
 function toInput(item: CrudItemType): PageContentInput {
   const row = item as PageContentRow;
   return {
-    page: String(row.page ?? "").trim(),
+    page: String(row.page ?? "").trim().toLowerCase(),
     name: String(row.name ?? "").trim(),
     section: String(row.section ?? "").trim(),
     title: String(row.title ?? "").trim(),
-    subtitle: String(row.subtitle ?? ""),
-    description: String(row.description ?? ""),
-    image: String(row.image ?? ""),
-    buttonText: String(row.buttonText ?? ""),
-    buttonLink: String(row.buttonLink ?? ""),
+    subtitle: String(row.subtitle ?? "").trim(),
+    description: String(row.description ?? "").trim(),
+    image: String(row.image ?? "").trim(),
+    buttonText: String(row.buttonText ?? "").trim(),
+    buttonLink: String(row.buttonLink ?? "").trim(),
     status: String(row.status ?? "Ativo"),
   };
+}
+
+function validateInput(input: PageContentInput): string | null {
+  if (!input.page || !input.name || !input.section) {
+    return "Informe página, seção e nome interno.";
+  }
+
+  if (input.status !== "Ativo" && input.status !== "Inativo") {
+    return "Informe um status válido.";
+  }
+
+  const hasVisibleContent = [
+    input.title,
+    input.subtitle,
+    input.description,
+    input.image,
+    input.buttonText,
+  ].some((value) => value.trim() !== "");
+
+  if (!hasVisibleContent) {
+    return "Informe pelo menos um conteúdo visível.";
+  }
+
+  return null;
 }
 
 export default function PageContentsBackoffice() {
@@ -65,7 +89,13 @@ export default function PageContentsBackoffice() {
 
   const handleEdit = async (item: CrudItemType) => {
     try {
-      const res = await pageContentsAPI.update(Number(item.id), toInput(item));
+      const input = toInput(item);
+      const validation = validateInput(input);
+      if (validation) {
+        notify(validation, "warning");
+        return;
+      }
+      const res = await pageContentsAPI.update(Number(item.id), input);
       setData((prev) => prev.map((entry) => (entry.id === item.id ? toRow(res.content) : entry)));
       notify("Conteúdo atualizado com sucesso!");
     } catch (err) {
@@ -85,8 +115,16 @@ export default function PageContentsBackoffice() {
 
   const handleCreate = async (item: CrudItemType) => {
     try {
-      const res = await pageContentsAPI.create(toInput(item));
-      setData((prev) => [...prev, toRow(res.content)]);
+      const input = toInput(item);
+      const validation = validateInput(input);
+      if (validation) {
+        notify(validation, "warning");
+        return;
+      }
+      const res = await pageContentsAPI.create(input);
+      setData((prev) =>
+        [...prev, toRow(res.content)].sort((a, b) => a.page.localeCompare(b.page) || Number(a.id) - Number(b.id)),
+      );
       notify("Conteúdo criado com sucesso!");
     } catch (err) {
       notify(apiMsg(err, "Erro ao criar conteúdo."), "warning");

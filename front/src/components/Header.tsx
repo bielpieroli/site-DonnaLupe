@@ -11,10 +11,6 @@ export default function Header() {
   const activeTab = tabs.find((t) => t.path === location.pathname)?.key || "home";
   const { totalItems } = useCart();
 
-  // Lógica de distribuição para Desktop
-  const leftTabs = tabs.filter((_, i) => i < tabs.length +2);
-  //const rightTabs = tabs.filter((_, i) => i >= tabs.length - 2);
-
   return (
     <header className="sticky top-0 z-50 w-full bg-primary-contrast shadow-sm">
       <div className="relative h-20 flex items-center w-full">
@@ -32,7 +28,7 @@ export default function Header() {
         <div className="mx-auto w-[70%] h-full flex items-center justify-between relative">
           {/* Esquerdo */}
           <nav className="hidden 2xl:flex flex-1 justify-start pr-20 gap-8">
-            {leftTabs.map((tab) => (
+            {tabs.map((tab) => (
               <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
             ))}
           </nav>
@@ -60,12 +56,6 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Direito */}
-          {/* <nav className="hidden 2xl:flex flex-1 justify-end pl-20 gap-8">
-            {rightTabs.map((tab) => (
-              <NavLink key={tab.key} tab={tab} isActive={activeTab === tab.key} />
-            ))}
-          </nav> */}
         </div>
 
         {/* MENU MOBILE DROP DOWN */}

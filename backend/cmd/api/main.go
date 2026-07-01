@@ -188,10 +188,10 @@ func main() {
 
 	// Landing page (backoffice)
 	landing := admin.Group("/landing")
-	landing.GET("", permMW("landing", models.PermRead), landingHandler.GetAll)
-	landing.POST("", permMW("landing", models.PermWrite), landingHandler.Create)
-	landing.PUT("/:id", permMW("landing", models.PermWrite), landingHandler.Update)
-	landing.DELETE("/:id", permMW("landing", models.PermWrite), landingHandler.Delete)
+	landing.GET("", permMW("content", models.PermRead), landingHandler.GetAll)
+	landing.POST("", permMW("content", models.PermWrite), landingHandler.Create)
+	landing.PUT("/:id", permMW("content", models.PermWrite), landingHandler.Update)
+	landing.DELETE("/:id", permMW("content", models.PermWrite), landingHandler.Delete)
 
 	// Produtos (backoffice)
 	products := admin.Group("/products")
