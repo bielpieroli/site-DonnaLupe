@@ -12,6 +12,11 @@ export const authAPI = {
     return response.data;
   },
 
+  me: async (): Promise<Omit<LoginResponse, "message" | "token">> => {
+    const response = await client.get<Omit<LoginResponse, "message" | "token">>("/admin/auth/me");
+    return response.data;
+  },
+
   register: async (
     email: string,
     password: string,

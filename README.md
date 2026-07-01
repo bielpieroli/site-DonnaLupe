@@ -251,26 +251,3 @@ npm run dev
 ```
 
 Sem Docker, use `DB_HOST=localhost` no `backend/.env` e tenha um PostgreSQL local rodando.
-
-## Problemas Comuns
-
-Se o Docker no WSL não encontrar o daemon:
-
-```text
-Cannot connect to the Docker daemon at unix:///var/run/docker.sock
-```
-
-Abra o Docker Desktop e habilite a integração com WSL em `Settings > Resources > WSL Integration`, ou inicie o Docker Engine dentro do WSL.
-
-Se o backend falhar com erro de coluna antiga, por exemplo:
-
-```text
-null value in column "price" of relation "products" violates not-null constraint
-```
-
-O banco provavelmente está usando um volume antigo. Em ambiente local, recrie o banco:
-
-```bash
-docker compose -p sitedonnalupe down -v
-make build
-```
