@@ -60,13 +60,12 @@ function groupExtraSections(contents: PageContent[]) {
     const sectionKey = normalizeSection(item.section)
     if (!sectionKey || RESERVED_LANDING_SECTIONS.has(sectionKey)) return
 
-    const existing = groups.get(item.section) ?? []
+    const existing = groups.get(sectionKey) ?? []
     existing.push(item)
-    groups.set(item.section, existing)
+    groups.set(sectionKey, existing)
   })
 
-  return Array.from(groups.entries()).map(([section, items]) => ({ section, items }))
-}
+  return Array.from(groups.values()).map((items) => ({ section: items[0]?.section ?? '', items }))
 
 const fallbackFavorites: Favorite[] = [
   {
