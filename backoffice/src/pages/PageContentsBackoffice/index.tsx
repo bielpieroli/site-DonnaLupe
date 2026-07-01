@@ -192,7 +192,6 @@ export default function PageContentsBackoffice() {
             onDelete={handleDelete}
             onCreate={handleCreate}
             entityLabel="conteúdo"
-            readOnly={!canWrite}
           />
         )}
       </div>
@@ -206,3 +205,4 @@ export default function PageContentsBackoffice() {
     </section>
   );
 }
+

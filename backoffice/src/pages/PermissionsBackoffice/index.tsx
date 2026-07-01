@@ -7,10 +7,10 @@ import Select from "@/components/core/Select";
 import Badge from "@/components/core/Badge";
 import Notification from "@/components/Notification";
 import { ArrowLeft, ShieldCheck, Pencil } from "lucide-react";
-import { permissionsAPI } from "@/api";
+import { usersAPI, permissionsAPI } from "@/api";
 import { isAxiosError } from "axios";
 import type { Permission, PermissionLevel } from "@/types/APIResponseType";
-import { useAuth, useHasPermission } from "@/contexts/AuthContext";
+import { useHasPermission } from "@/contexts/AuthContext";
 
 // Keep in sync with backend/internal/models/permission.go (KnownResources)
 const RESOURCES: { key: string; label: string }[] = [
@@ -41,7 +41,6 @@ function levelOf(perms: Permission[], resource: string): PermissionLevel {
 export default function PermissionsCRUD() {
   const navigate = useNavigate();
   const canWrite = useHasPermission("permissions", "write");
-  const { ensurePermission, refreshPermissions, user } = useAuth();
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [editTarget, setEditTarget] = useState<UserRow | null>(null);
@@ -58,8 +57,18 @@ export default function PermissionsCRUD() {
   const fetchAll = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await permissionsAPI.getUsersPermissions();
-      setRows(res.users);
+      const usersRes = await usersAPI.getAll({ limit: 100 });
+      const settled = await Promise.allSettled(
+        usersRes.users.map(async (u) => {
+          const permRes = await permissionsAPI.getByUser(u.email);
+          return { email: u.email, permissions: permRes.permissions };
+        }),
+      );
+      setRows(
+        settled
+          .filter((r): r is PromiseFulfilledResult<UserRow> => r.status === "fulfilled")
+          .map((r) => r.value),
+      );
     } catch {
       notify("Erro ao carregar permissões.", "warning");
     } finally {
@@ -84,10 +93,6 @@ export default function PermissionsCRUD() {
     if (!editTarget) return;
     setSaving(true);
     try {
-      if (!(await ensurePermission("permissions", "write"))) {
-        notify("Você não tem permissão para editar permissões.", "warning");
-        return;
-      }
       const permissions: Permission[] = RESOURCES.map(({ key }) => ({
         backoffice_email: editTarget.email,
         resource: key,
@@ -99,9 +104,6 @@ export default function PermissionsCRUD() {
           r.email === editTarget.email ? { ...r, permissions: res.permissions } : r,
         ),
       );
-      if (editTarget.email === user?.email) {
-        await refreshPermissions();
-      }
       notify("Permissões atualizadas com sucesso!");
       setEditTarget(null);
     } catch (err) {

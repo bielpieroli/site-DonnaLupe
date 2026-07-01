@@ -6,7 +6,6 @@ export const Tabs: {
   description: string;
   icon: React.ReactNode;
   pageNavigate: string;
-  permissionResource?: string;
   bg: string;
   hoverBg: string;
 } [] = [
@@ -78,7 +77,6 @@ export const Tabs: {
     label: "Entregas",
     description: "Acompanhe e atualize o status de cada entrega em andamento.",
     pageNavigate: "/backoffice-deliveries",
-    permissionResource: "orders",
     icon: <Package className="w-5 h-5" />,
     bg: "bg-primary/10",
     hoverBg: "group-hover:bg-primary/20",
