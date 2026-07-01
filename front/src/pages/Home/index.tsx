@@ -22,6 +22,17 @@ type EssenceCard = {
   description: string
 }
 
+const RESERVED_LANDING_SECTIONS = new Set([
+  'hero',
+  'favoritos header',
+  'favoritos',
+  'catalogheader',
+  'catalogfooter',
+  'essenceheader',
+  'essencecard',
+  'cta final',
+])
+
 const landingImageMap: Record<string, string> = {
   'cookie-home.png': HomeCookieImg,
   'cookie-morango.jpg': cookieMorangoIMG,
@@ -31,9 +42,30 @@ const landingImageMap: Record<string, string> = {
 
 const resolveLandingImage = (image: string, fallback: string) => {
   if (!image) return fallback
-  if (image.startsWith('data:image/') || image.startsWith('http://') || image.startsWith('https://')) return image
+  if (
+    image.startsWith('data:image/') ||
+    image.startsWith('http://') ||
+    image.startsWith('https://') ||
+    image.startsWith('/')
+  ) return image
   return landingImageMap[image] ?? fallback
 }
+
+const normalizeSection = (section: string) => section.trim().toLowerCase()
+
+function groupExtraSections(contents: PageContent[]) {
+  const groups = new Map<string, PageContent[]>()
+
+  contents.forEach((item) => {
+    const sectionKey = normalizeSection(item.section)
+    if (!sectionKey || RESERVED_LANDING_SECTIONS.has(sectionKey)) return
+
+    const existing = groups.get(sectionKey) ?? []
+    existing.push(item)
+    groups.set(sectionKey, existing)
+  })
+
+  return Array.from(groups.values()).map((items) => ({ section: items[0]?.section ?? '', items }))
 
 const fallbackFavorites: Favorite[] = [
   {
@@ -86,7 +118,7 @@ export default function Home() {
   }, [])
 
   const bySection = (section: string) =>
-    landingContent.filter((item) => item.section === section && item.status !== 'Inativo')
+    landingContent.filter((item) => normalizeSection(item.section) === normalizeSection(section) && item.status !== 'Inativo')
   const firstSection = (section: string) => bySection(section)[0]
 
   const heroContent = firstSection('Hero')
@@ -137,6 +169,8 @@ export default function Home() {
     secondaryText: ctaSecondary?.buttonText || 'Ver cardápio',
     secondaryLink: ctaSecondary?.buttonLink || '/shopping',
   }
+
+  const extraSections = groupExtraSections(landingContent.filter((item) => item.status !== 'Inativo'))
 
   const scroll = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
@@ -314,6 +348,70 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {extraSections.map(({ section, items }) => {
+        const [lead, ...cards] = items
+        const visibleCards = cards.length > 0 ? cards : lead?.image ? [lead] : []
+
+        return (
+          <section key={section} className="mx-auto max-w-7xl px-6 py-20">
+            <div className={`grid gap-10 md:items-center ${visibleCards.length > 0 ? 'md:grid-cols-[0.9fr_1.1fr]' : ''}`}>
+              <div>
+                {lead?.subtitle && (
+                  <p className="font-subtitle text-2xl font-bold italic text-primary">{lead.subtitle}</p>
+                )}
+                <h2 className="mt-2 font-serif text-4xl font-bold leading-tight md:text-6xl">
+                  {lead?.title || section}
+                </h2>
+                {lead?.description && (
+                  <p className="mt-5 text-lg leading-8 text-[#5a4a49]">{lead.description}</p>
+                )}
+                {lead?.buttonText && lead?.buttonLink && (
+                  <Link
+                    to={lead.buttonLink}
+                    className="mt-8 inline-block rounded-full bg-primary px-7 py-3 font-semibold text-white transition hover:scale-105"
+                  >
+                    {lead.buttonText}
+                  </Link>
+                )}
+              </div>
+
+              {visibleCards.length > 0 && (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  {visibleCards.map((item) => {
+                    const image = resolveLandingImage(item.image, '')
+
+                    return (
+                      <article key={item.id} className="overflow-hidden rounded-[28px] bg-white shadow-sm">
+                        {image && <img src={image} alt={item.title || item.name} className="h-52 w-full object-cover" />}
+                        <div className="p-6">
+                          {item.subtitle && (
+                            <p className="font-subtitle text-lg font-bold italic text-primary">{item.subtitle}</p>
+                          )}
+                          <h3 className="font-display text-2xl font-extrabold text-[#54202a]">
+                            {item.title || item.name}
+                          </h3>
+                          {item.description && (
+                            <p className="mt-3 text-sm leading-6 text-[#6d5b59]">{item.description}</p>
+                          )}
+                          {item.buttonText && item.buttonLink && (
+                            <Link
+                              to={item.buttonLink}
+                              className="mt-5 inline-block rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white"
+                            >
+                              {item.buttonText}
+                            </Link>
+                          )}
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
+        )
+      })}
 
       <section className=" bg-[radial-gradient(circle_at_center,rgba(215,38,77,0.06),transparent_60%)]">
         <div className="mx-auto max-w-6xl px-6 py-24 text-center">

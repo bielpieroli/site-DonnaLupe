@@ -3,8 +3,11 @@ package services
 import (
 	"backend/internal/models"
 	"backend/internal/repository"
+	"errors"
 	"strings"
 )
+
+var ErrInvalidPageContent = errors.New("conteúdo de página inválido")
 
 type PageContentService interface {
 	GetAll() ([]models.PageContent, error)
@@ -28,10 +31,13 @@ func (s *pageContentService) GetAll() ([]models.PageContent, error) {
 }
 
 func (s *pageContentService) GetActive(page string) ([]models.PageContent, error) {
-	return s.repo.GetActive(strings.TrimSpace(page))
+	return s.repo.GetActive(normalizePageContentPage(page))
 }
 
 func (s *pageContentService) Create(input models.PageContentInput) (*models.PageContent, error) {
+	if err := validatePageContentInput(input); err != nil {
+		return nil, err
+	}
 	content := pageContentFromInput(input)
 	if err := s.repo.Create(content); err != nil {
 		return nil, err
@@ -40,12 +46,15 @@ func (s *pageContentService) Create(input models.PageContentInput) (*models.Page
 }
 
 func (s *pageContentService) Update(id uint, input models.PageContentInput) (*models.PageContent, error) {
+	if err := validatePageContentInput(input); err != nil {
+		return nil, err
+	}
 	content, err := s.repo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	content.Page = strings.TrimSpace(input.Page)
+	content.Page = normalizePageContentPage(input.Page)
 	content.Name = strings.TrimSpace(input.Name)
 	content.Section = strings.TrimSpace(input.Section)
 	content.Title = strings.TrimSpace(input.Title)
@@ -95,7 +104,7 @@ func pageContentKey(content models.PageContent) string {
 
 func pageContentFromInput(input models.PageContentInput) *models.PageContent {
 	return &models.PageContent{
-		Page:        strings.TrimSpace(input.Page),
+		Page:        normalizePageContentPage(input.Page),
 		Name:        strings.TrimSpace(input.Name),
 		Section:     strings.TrimSpace(input.Section),
 		Title:       strings.TrimSpace(input.Title),
@@ -113,7 +122,40 @@ func pageContentStatus(status string) string {
 	if status == "" {
 		return "Ativo"
 	}
+	if strings.EqualFold(status, "ativo") {
+		return "Ativo"
+	}
+	if strings.EqualFold(status, "inativo") {
+		return "Inativo"
+	}
 	return status
+}
+
+func normalizePageContentPage(page string) string {
+	return strings.ToLower(strings.TrimSpace(page))
+}
+
+func validatePageContentInput(input models.PageContentInput) error {
+	if normalizePageContentPage(input.Page) == "" ||
+		strings.TrimSpace(input.Name) == "" ||
+		strings.TrimSpace(input.Section) == "" {
+		return ErrInvalidPageContent
+	}
+
+	status := pageContentStatus(input.Status)
+	if status != "Ativo" && status != "Inativo" {
+		return ErrInvalidPageContent
+	}
+
+	if strings.TrimSpace(input.Title) == "" &&
+		strings.TrimSpace(input.Subtitle) == "" &&
+		strings.TrimSpace(input.Description) == "" &&
+		strings.TrimSpace(input.Image) == "" &&
+		strings.TrimSpace(input.ButtonText) == "" {
+		return ErrInvalidPageContent
+	}
+
+	return nil
 }
 
 func defaultPageContents() []models.PageContent {
