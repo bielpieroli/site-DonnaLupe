@@ -300,89 +300,93 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl bg-primary-contrast px-6 py-20">
-        <div className="grid items-end gap-6 md:grid-cols-2">
-          <div>
-            <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
-              {catalogHeader?.title || 'Nosso cardápio'}
-            </h2>
+      <section className="bg-primary-contrast py-20">
+        <div className="mx-auto w-full max-w-7xl px-6">
+          <div className="grid items-end gap-6 md:grid-cols-2">
+            <div>
+              <h2 className="font-serif text-5xl font-bold leading-tight md:text-7xl">
+                {catalogHeader?.title || 'Nosso cardápio'}
+              </h2>
+            </div>
+
+            <p className="max-w-xl text-lg text-[#5a4a49]">
+              {catalogHeader?.description ||
+                'Escolha seus sabores favoritos e aproveite produtos feitos para entregar qualidade, carinho e uma experiência especial.'}
+            </p>
           </div>
 
-          <p className="max-w-xl text-lg text-[#5a4a49]">
-            {catalogHeader?.description ||
-              'Escolha seus sabores favoritos e aproveite produtos feitos para entregar qualidade, carinho e uma experiência especial.'}
+          <div
+            ref={sliderRef}
+            className="mt-12 w-full overflow-x-auto px-1 pb-2 scrollbar-hide"
+          >
+            <div className="flex min-w-max gap-6 pr-6 scroll-smooth">
+              {PRODUCTS.map((item) => (
+                <article
+                  key={item.id}
+                  className="group relative min-h-125 w-72.5 shrink-0 overflow-hidden rounded-4xl border border-black/5 bg-black shadow-sm"
+                >
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                  />
+
+                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-black/10" />
+
+                  <div className="absolute right-5 top-5 rounded-full bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg">
+                    {item.price}
+                  </div>
+
+                  <div className="absolute bottom-0 w-full p-6 text-white">
+                    <h3 className="font-serif text-4xl font-bold">
+                      {item.name}
+                    </h3>
+
+                    <p className="mt-1 font-subtitle text-lg font-bold italic text-primary-contrast">
+                      {item.category}
+                    </p>
+
+                    <p className="mt-4 max-w-sm text-sm leading-6 text-white/90">
+                      {item.description}
+                    </p>
+
+                    <Link
+                      to="/shopping"
+                      className="mt-6 block w-full rounded-full border border-white/50 bg-white/10 px-5 py-3 text-center font-semibold backdrop-blur-sm transition hover:bg-white hover:text-[#7a0013]"
+                    >
+                      Quero esse!
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 flex justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => scroll('left')}
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary transition hover:bg-primary hover:text-white"
+              aria-label="Scroll left"
+            >
+              ←
+            </button>
+
+            <button
+              type="button"
+              onClick={() => scroll('right')}
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary transition hover:bg-primary hover:text-white"
+              aria-label="Scroll right"
+            >
+              →
+            </button>
+          </div>
+
+          <p className="mt-10 text-center font-subtitle text-2xl font-bold text-primary">
+            {catalogFooter?.title ||
+              'Monte sua caixinha com os sabores que quiser!'}
           </p>
         </div>
-
-        <div
-          ref={sliderRef}
-          className="mt-12 overflow-x-auto px-4 scrollbar-hide"
-        >
-          <div className="flex w-max gap-6 scroll-smooth">
-            {PRODUCTS.map((item) => (
-              <article
-                key={item.id}
-                className="group relative min-h-125 w-72.5 shrink-0 overflow-hidden rounded-4xl"
-              >
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110"
-                />
-
-                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-black/10" />
-
-                <div className="absolute right-5 top-5 rounded-full bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg">
-                  {item.price}
-                </div>
-
-                <div className="absolute bottom-0 p-6 text-white">
-                  <h3 className="font-serif text-4xl font-bold">{item.name}</h3>
-
-                  <p className="mt-1 font-subtitle text-lg font-bold italic text-primary-contrast">
-                    {item.category}
-                  </p>
-
-                  <p className="mt-4 max-w-sm text-sm leading-6 text-white/90">
-                    {item.description}
-                  </p>
-
-                  <Link
-                    to="/shopping"
-                    className="mt-6 block w-full rounded-full border border-white/50 bg-white/10 px-5 py-3 text-center font-semibold backdrop-blur-sm transition hover:bg-white hover:text-[#7a0013]"
-                  >
-                    Quero esse!
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-8 flex justify-center gap-4">
-          <button
-            type="button"
-            onClick={() => scroll('left')}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary hover:text-white"
-            aria-label="Scroll left"
-          >
-            ←
-          </button>
-
-          <button
-            type="button"
-            onClick={() => scroll('right')}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary hover:text-white"
-            aria-label="Scroll right"
-          >
-            →
-          </button>
-        </div>
-
-        <p className="mt-10 text-center font-subtitle text-2xl font-bold text-primary">
-          {catalogFooter?.title ||
-            'Monte sua caixinha com os sabores que quiser!'}
-        </p>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 text-center">
@@ -543,4 +547,3 @@ export default function Home() {
     </main>
   )
 }
-S
