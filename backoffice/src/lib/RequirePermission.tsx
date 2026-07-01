@@ -1,8 +1,33 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useHasPermission } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth, useHasPermission } from "@/contexts/AuthContext";
 
 export default function RequirePermission({ resource }: { resource: string }) {
-  const allowed = useHasPermission(resource, "read");
-  if (!allowed) return <Navigate to="/home" replace />;
+  const location = useLocation();
+  const { ensurePermission } = useAuth();
+  const hasCurrentPermission = useHasPermission(resource, "read");
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setAllowed(null);
+    ensurePermission(resource, "read")
+      .then((ok) => {
+        if (active) setAllowed(ok);
+      })
+      .catch(() => {
+        if (active) setAllowed(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [ensurePermission, resource, location.pathname]);
+
+  if (allowed === null) {
+    return <p className="py-12 text-center text-muted">Verificando permissões...</p>;
+  }
+
+  if (!allowed || !hasCurrentPermission) return <Navigate to="/home" replace />;
   return <Outlet />;
 }

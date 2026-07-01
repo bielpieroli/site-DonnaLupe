@@ -1,12 +1,14 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { authAPI, permissionsAPI } from '@/api'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { authAPI } from '@/api'
 import { TOKEN_KEY, SESSION_KEY } from '@/api/client'
-import type { AuthUser, Permission, StoredSession } from '@/types/APIResponseType'
+import type { AuthUser, Permission, PermissionLevel, StoredSession } from '@/types/APIResponseType'
 
 type AuthContextValue = {
   isAuthenticated: boolean
   user: AuthUser | null
   permissions: Permission[]
+  refreshPermissions: () => Promise<Permission[]>
+  ensurePermission: (resource: string, level: Exclude<PermissionLevel, 'none'>) => Promise<boolean>
   login: (email: string, password: string) => Promise<string | null>
   logout: () => void
 }
@@ -62,21 +64,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(SESSION_KEY, JSON.stringify(session))
   }, [user, permissions])
 
-  // Refresh permissions from the API on every mount so new resources added
-  // to the backend are reflected without requiring the user to re-login.
+  const logout = useCallback(() => {
+    setUser(null)
+    setPermissions([])
+    window.localStorage.removeItem(SESSION_KEY)
+    window.localStorage.removeItem(TOKEN_KEY)
+  }, [])
+
+  const refreshPermissions = useCallback(async (): Promise<Permission[]> => {
+    if (!user) return []
+    const res = await authAPI.me()
+    const name = deriveDisplayName(res.user.email)
+    setUser({ email: res.user.email, name })
+    setPermissions(res.permissions)
+    return res.permissions
+  }, [user?.email])
+
+  const ensurePermission = useCallback(
+    async (resource: string, level: Exclude<PermissionLevel, 'none'>): Promise<boolean> => {
+      const latest = await refreshPermissions()
+      return hasPermission(latest, resource, level)
+    },
+    [refreshPermissions],
+  )
+
+  // Refresh permissions from the API when the authenticated user changes so
+  // permission edits made elsewhere are reflected without a new login.
   useEffect(() => {
     if (!user) return
-    permissionsAPI.getByUser(user.email)
-      .then((res) => setPermissions(res.permissions))
-      .catch(() => { /* keep cached permissions on error */ })
+    refreshPermissions().catch(() => { /* keep cached permissions on transient errors */ })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [user?.email])
 
   const value = useMemo<AuthContextValue>(
     () => ({
       isAuthenticated: user !== null,
       user,
       permissions,
+      refreshPermissions,
+      ensurePermission,
 
       login: async (email: string, password: string): Promise<string | null> => {
         try {
@@ -92,14 +118,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       },
 
-      logout: () => {
-        setUser(null)
-        setPermissions([])
-        window.localStorage.removeItem(SESSION_KEY)
-        window.localStorage.removeItem(TOKEN_KEY)
-      },
+      logout,
     }),
-    [user, permissions],
+    [ensurePermission, logout, permissions, refreshPermissions, user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -113,6 +134,10 @@ export function useAuth() {
 
 export function useHasPermission(resource: string, level: 'read' | 'write'): boolean {
   const { permissions } = useAuth()
+  return hasPermission(permissions, resource, level)
+}
+
+function hasPermission(permissions: Permission[], resource: string, level: Exclude<PermissionLevel, 'none'>): boolean {
   const order = { none: 0, read: 1, write: 2 } as const
   const perm = permissions.find((p) => p.resource === resource)
   return (order[perm?.level ?? 'none'] ?? 0) >= order[level]

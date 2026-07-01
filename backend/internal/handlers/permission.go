@@ -17,6 +17,29 @@ func NewPermissionHandler(permService services.PermissionService, userService se
 	return &PermissionHandler{permService: permService, userService: userService}
 }
 
+func (h *PermissionHandler) GetUsersPermissions(c *gin.Context) {
+	users, err := h.userService.GetAllUsers(1, 1000, "email", "asc", "", "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar usuários"})
+		return
+	}
+
+	rows := make([]gin.H, 0, len(users.Users))
+	for _, user := range users.Users {
+		perms, err := h.permService.GetFullPermissions(user.Email)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar permissões"})
+			return
+		}
+		rows = append(rows, gin.H{
+			"email":       user.Email,
+			"permissions": perms,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": rows})
+}
+
 // GetPermissions godoc
 // @Summary      Lista permissões de um usuário
 // @Description  Retorna todas as permissões do usuário por recurso (inclui "none" para recursos sem entrada)

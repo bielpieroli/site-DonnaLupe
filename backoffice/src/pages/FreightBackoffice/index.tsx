@@ -7,7 +7,7 @@ import Input from "@/components/core/Input";
 import Notification from "@/components/Notification";
 import { ArrowLeft, Truck, Pencil, Trash2, Plus } from "lucide-react";
 import { freightAPI, type FreightRule } from "@/api/freight";
-import { useHasPermission } from "@/contexts/AuthContext";
+import { useAuth, useHasPermission } from "@/contexts/AuthContext";
 import { apiMsg, formatBRL } from "@/lib/formatting";
 
 function formatKm(km: number): string {
@@ -17,6 +17,7 @@ function formatKm(km: number): string {
 export default function FreightBackoffice() {
   const navigate = useNavigate();
   const canWrite = useHasPermission("freight", "write");
+  const { ensurePermission } = useAuth();
 
   const [rules, setRules] = useState<FreightRule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +64,10 @@ export default function FreightBackoffice() {
   }
 
   async function handleCreate() {
+    if (!(await ensurePermission("freight", "write"))) {
+      notify("Você não tem permissão para criar faixas de frete.", "warning");
+      return;
+    }
     const km = parseFloat(formKm);
     const price = parseFloat(formPrice.replace(",", "."));
     if (isNaN(km) || km <= 0 || isNaN(price) || price < 0) {
@@ -84,6 +89,10 @@ export default function FreightBackoffice() {
 
   async function handleEdit() {
     if (!editTarget) return;
+    if (!(await ensurePermission("freight", "write"))) {
+      notify("Você não tem permissão para editar faixas de frete.", "warning");
+      return;
+    }
     const km = parseFloat(formKm);
     const price = parseFloat(formPrice.replace(",", "."));
     if (isNaN(km) || km <= 0 || isNaN(price) || price < 0) {
@@ -108,6 +117,10 @@ export default function FreightBackoffice() {
 
   async function handleDelete() {
     if (!deleteTarget) return;
+    if (!(await ensurePermission("freight", "write"))) {
+      notify("Você não tem permissão para remover faixas de frete.", "warning");
+      return;
+    }
     setSaving(true);
     try {
       await freightAPI.deleteRule(deleteTarget.id);
