@@ -69,6 +69,10 @@ func (h *PageContentHandler) Create(c *gin.Context) {
 
 	content, err := h.service.Create(input)
 	if err != nil {
+		if errors.Is(err, services.ErrInvalidPageContent) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Informe página, seção, nome, status válido e pelo menos um conteúdo visível"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar conteúdo"})
 		return
 	}
@@ -101,6 +105,10 @@ func (h *PageContentHandler) Update(c *gin.Context) {
 
 	content, err := h.service.Update(uint(id), input)
 	if err != nil {
+		if errors.Is(err, services.ErrInvalidPageContent) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Informe página, seção, nome, status válido e pelo menos um conteúdo visível"})
+			return
+		}
 		if errors.Is(err, repository.ErrPageContentNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Conteúdo não encontrado"})
 			return

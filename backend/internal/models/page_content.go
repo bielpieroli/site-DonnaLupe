@@ -22,7 +22,7 @@ type PageContentInput struct {
 	Page        string `json:"page" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Section     string `json:"section" binding:"required"`
-	Title       string `json:"title" binding:"required"`
+	Title       string `json:"title"`
 	Subtitle    string `json:"subtitle"`
 	Description string `json:"description"`
 	Image       string `json:"image"`

@@ -140,6 +140,7 @@ func main() {
 	// Rotas públicas de autenticação
 	auth := r.Group("/admin/auth")
 	auth.POST("/login", authBackofficeHandler.Login)
+	auth.GET("/me", authMW, authBackofficeHandler.Me)
 	auth.POST("/register", authMW, permMW("users", models.PermWrite), userBackofficeHandler.Register)
 
 	// Rotas administrativas protegidas
@@ -153,6 +154,7 @@ func main() {
 
 	admin.GET("/users/:email/permissions", permMW("permissions", models.PermRead), permissionHandler.GetPermissions)
 	admin.PUT("/users/:email/permissions", permMW("permissions", models.PermWrite), permissionHandler.SetPermissions)
+	admin.GET("/permissions/users", permMW("permissions", models.PermRead), permissionHandler.GetUsersPermissions)
 
 	// Checkout PIX — rota pública
 	r.POST("/checkout/pix", checkoutHandler.CreatePixPayment)
@@ -188,10 +190,10 @@ func main() {
 
 	// Landing page (backoffice)
 	landing := admin.Group("/landing")
-	landing.GET("", permMW("landing", models.PermRead), landingHandler.GetAll)
-	landing.POST("", permMW("landing", models.PermWrite), landingHandler.Create)
-	landing.PUT("/:id", permMW("landing", models.PermWrite), landingHandler.Update)
-	landing.DELETE("/:id", permMW("landing", models.PermWrite), landingHandler.Delete)
+	landing.GET("", permMW("content", models.PermRead), landingHandler.GetAll)
+	landing.POST("", permMW("content", models.PermWrite), landingHandler.Create)
+	landing.PUT("/:id", permMW("content", models.PermWrite), landingHandler.Update)
+	landing.DELETE("/:id", permMW("content", models.PermWrite), landingHandler.Delete)
 
 	// Produtos (backoffice)
 	products := admin.Group("/products")
